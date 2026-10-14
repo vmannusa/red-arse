@@ -374,7 +374,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
       <li><b>Aggravate:</b> land exactly on an opponent to send it back to their base.</li>
       <li><b>Home:</b> after a full lap, turn into your home column. You need the exact count and can't jump your own marbles there.</li>
       <li><b>Stars:</b> if a marble starts its turn on a star hole, it can hop star-to-star clockwise (1 step per hop), but not past your own color's star.</li>
-      <li><b>Center:</b> enter the center hole with the last step of a move from a star. Leave it only on a roll of 1, to any star.</li>
+      <li><b>Center:</b> any roll that passes over a star with exactly one step left can finish in the center hole. For example, a marble on its start hole that rolls a 6 can go straight in. Leave the center only on a roll of 1, to any star.</li>
       <li><b>Backward 4 (house rule):</b> 4 is the only roll that can move backward. On a 4 you may move a marble on the track 4 holes backward instead of forward, and you must if no forward move is possible. Backward moves can hop stars and drop into the center, but can't go straight into home. Backing up behind your own start hole puts that marble right next to your home.</li>
       <li><b>Inside corners (house rule):</b> end any move, forward or backward, on an edge corner hole on either side of a home column and you roll again. Your own start hole counts when you back onto it with a 4, but not when a marble comes out of base onto it.</li>
       <li><b>No move:</b> on any other roll with no legal move, your turn ends. A 6 still gets you another roll.</li>
@@ -777,7 +777,7 @@ const RULE_DEFS=[
   {k:'oneOrSix',label:'Leave base on 1 or 6',sub:'Off: only a 6 brings a marble out.',def:true},
   {k:'rollAgain',label:'Roll again on 6',sub:'A 6 gives the same player another roll.',def:true},
   {k:'stars',label:'Star shortcuts',sub:'Hop star-to-star from a star hole.',def:true},
-  {k:'center',label:'Center hole',sub:'Enter from a star; leave on a 1.',def:true},
+  {k:'center',label:'Center hole',sub:'Finish a roll one step past a star to drop in (a 6 from your start hole works). Leave on a 1.',def:true},
   {k:'back',label:'Backward on 4',sub:'Only a 4 moves back, stars and center included. Forced if no forward move.',def:true,house:true},
   {k:'backShortcut',label:'Back-past-start shortcut',sub:'Backing up behind your start sets you up to enter home.',def:true,house:true},
   {k:'corners',label:'Inside corners: roll again',sub:'End a move on an edge corner hole to roll again, backward moves included. Coming out of base onto your start doesn\'t count.',def:true,house:true},
