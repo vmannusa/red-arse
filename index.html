@@ -128,6 +128,10 @@ button,input,select{font:inherit;color:inherit}
 @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
 .burst{transform-box:fill-box;transform-origin:center;animation:burst .6s ease-out forwards}
 @keyframes burst{0%{transform:scale(.4);opacity:1}100%{transform:scale(2.6);opacity:0}}
+#boardLive .ghost{transition:opacity .15s}
+#boardLive.hovering .ghost{opacity:.14}
+#boardLive.hovering .ghost.hot{opacity:1}
+.ghost-dest[data-move]:hover circle:first-child{fill:rgba(255,255,255,.32)}
 @media (prefers-reduced-motion: reduce){.pulse,.glow,.target .ring,.burst{animation:none}.die{transition-duration:.15s}}
 
 /* ---------- Lobby ---------- */
@@ -713,6 +717,25 @@ function defsCommon(svg,prefix,bd){
   el('path',{d:outline(bd)},el('clipPath',{id:prefix+'clip'},defs));
   return defs;
 }
+// "RED ARSE" wordmark burned into the wood around the center hole: RED arcs over the top, ARSE under the bottom.
+function drawLogo(svg,prefix,bd){
+  const sq=bd.kind==='square',r=sq?.88:1.6,fs=sq?.38:.68,defs=svg.querySelector('defs');
+  const top=el('path',{id:prefix+'logoTop',d:`M ${-r} 0 A ${r} ${r} 0 0 1 ${r} 0`},defs);
+  const bot=el('path',{id:prefix+'logoBot',d:`M ${-r-fs*.72} 0 A ${r+fs*.72} ${r+fs*.72} 0 0 0 ${r+fs*.72} 0`},defs);
+  const g=el('g',{'aria-hidden':'true'},svg);
+  const ink='#A3121B',font='Archivo, Arial Black, sans-serif';
+  el('circle',{r:f(r+fs*1.02),fill:'none',stroke:ink,'stroke-width':.05,opacity:.75},g);
+  el('circle',{r:f(r-fs*.42),fill:'none',stroke:ink,'stroke-width':.05,opacity:.75},g);
+  [-1,1].forEach(side=>el('polygon',{points:starPts(side*(r+fs*.3),0,fs*.32,fs*.13),fill:ink,opacity:.9},g));
+  const word=(href,txt,dy)=>{
+    // light offset copy under the ink gives a branded-into-wood edge
+    [['rgba(255,240,215,.55)',.03],[ink,0]].forEach(([fill,off])=>{
+      const t=el('text',{'font-family':font,'font-weight':900,'font-size':fs,'letter-spacing':fs*.14,fill,transform:`translate(${off} ${off})`},g);
+      const tp=el('textPath',{href:'#'+href,startOffset:'50%','text-anchor':'middle'},t);tp.textContent=txt;
+    });
+  };
+  word(prefix+'logoTop','RED');word(prefix+'logoBot','ARSE');
+}
 function setViewBox(svg,bd){const v=bd.vb;svg.setAttribute('viewBox',`${-v} ${-v} ${2*v} ${2*v}`);}
 function buildBoard(svg,prefix,bd,opts={}){
   svg.innerHTML='';setViewBox(svg,bd);
@@ -743,6 +766,7 @@ function buildBoard(svg,prefix,bd,opts={}){
     el('text',Object.assign({transform:`translate(${BL.x} ${f(BL.y-1.67)}) rotate(180)`},lb),g).textContent='BASE';
     el('text',Object.assign({transform:`translate(0.86 ${f(-(A+2.5)-.16)}) rotate(90)`},lb,{'font-size':.52,'letter-spacing':.09}),g).textContent='HOME';
   }
+  drawLogo(svg,prefix,bd);
   const holes=el('g',null,svg);
   const hole=(p,r=.36)=>{el('circle',{cx:f(p.x),cy:f(p.y),r,fill:`url(#${prefix}hole)`},holes);
     el('circle',{cx:f(p.x),cy:f(p.y),r,fill:'none',stroke:'rgba(255,238,210,.55)','stroke-width':.035},holes);};
@@ -963,9 +987,9 @@ async function doRoll(){
     setStatus(`Rolled <b>${n}</b>. Only one move${mv.dir==='back'?' (backward)':''}, playing it.`);renderPanel();renderLive();
     await wait(reduced?200:650);if(tok!==G?.token)return;await localExecute(mv);return;
   }
-  let msg=`Rolled <b>${n}</b>. Tap a glowing marble.`;
+  let msg=`Rolled <b>${n}</b>. Dotted arrows show each marble's moves. Tap a marble or a landing spot.`;
   if(n===4&&hasB&&!hasF)msg=`Rolled <b>4</b>. No forward moves, so you must move a marble <b>backward</b>.`;
-  else if(n===4&&hasB)msg=`Rolled <b>4</b>. Tap a marble, then pick ▶ forward or ◀ backward.`;
+  else if(n===4&&hasB)msg=`Rolled <b>4</b>. Green arrows go forward, amber go back 4. Tap a marble or a landing spot.`;
   const mis=[...new Set(moves.map(m=>m.mi))];
   const baseMis=mis.filter(mi=>P.marbles[mi].d===null);
   if(mis.length===1||(mis.length===baseMis.length))G.sel=mis[0];
@@ -1018,7 +1042,11 @@ function stepPos(s){if(s.k==='t')return {x:B.TRACK[s.g].x,y:B.TRACK[s.g].y};if(s
 function destPos(pi,mv){const sc=G.players[pi].s;if(mv.to==='C')return CENTER;if(mv.to>=B.H0)return B.HOMEPOS[sc][mv.to-B.H0];return B.TRACK[gOf(sc,mv.to)];}
 function buildLive(){
   const svg=$('boardLive');svg.innerHTML='';setViewBox(svg,B);defsCommon(svg,'L',B);
-  LAYERS.glow=el('g',null,svg);LAYERS.marbles=el('g',null,svg);LAYERS.targets=el('g',null,svg);LAYERS.fx=el('g',{'pointer-events':'none'},svg);
+  LAYERS.glow=el('g',null,svg);LAYERS.ghostLines=el('g',{'pointer-events':'none'},svg);LAYERS.marbles=el('g',null,svg);LAYERS.ghostDest=el('g',null,svg);LAYERS.targets=el('g',null,svg);LAYERS.fx=el('g',{'pointer-events':'none'},svg);
+  const defs=svg.querySelector('defs');
+  [['fwd','#3FB37A'],['back','#F0A020'],['cap','#E5262E']].forEach(([k,c])=>{
+    const m=el('marker',{id:'arr-'+k,viewBox:'0 0 10 10',refX:'7',refY:'5',markerWidth:'.46',markerHeight:'.46',markerUnits:'userSpaceOnUse',orient:'auto'},defs);
+    el('path',{d:'M0 0 L10 5 L0 10 z',fill:c},m);});
   MARBLE_NODES=G.players.map((P,pi)=>P.marbles.map((m,mi)=>{
     const g=el('g',{class:'marble','data-pi':pi,'data-mi':mi},LAYERS.marbles);
     el('circle',{class:'pulse',r:.5,fill:'none',stroke:'#FFFFFF','stroke-width':.12,visibility:'hidden','pointer-events':'none'},g);
@@ -1033,7 +1061,7 @@ function buildLive(){
 function renderLive(){
   if(!G)return;
   const svg=$('boardLive');
-  LAYERS.glow.innerHTML='';LAYERS.targets.innerHTML='';
+  LAYERS.glow.innerHTML='';LAYERS.targets.innerHTML='';LAYERS.ghostLines.innerHTML='';LAYERS.ghostDest.innerHTML='';
   const P=cur(),pi=G.turn,human=canAct()&&G.phase==='move';
   // active base glow
   const bc=B.BASECENTER[P.s];
@@ -1052,6 +1080,30 @@ function renderLive(){
     const isSel=qi===pi&&human&&(G.sel===mi||(G.sel!==null&&m.d===null&&P.marbles[G.sel]?.d===null));
     selr.setAttribute('opacity',isSel?1:0);
   }));
+  // Move previews: a dotted path with an arrow from each playable marble to where it would land.
+  // With nothing selected, every option shows faintly (hover a marble to single it out) and an
+  // unambiguous landing spot can be tapped directly. With a marble selected, only its paths show.
+  if(human&&(G.moves.length>1||G.sel!==null)){
+    const selBase=G.sel!==null&&P.marbles[G.sel].d===null;
+    const count={};G.moves.forEach(mv=>{const d=destPos(pi,mv),k=f(d.x)+','+f(d.y);count[k]=(count[k]||0)+1;});
+    G.moves.forEach((mv,idx)=>{
+      const mine=G.sel!==null&&(mv.mi===G.sel||(selBase&&mv.kind==='leave'));
+      if(G.sel!==null&&!mine)return;
+      const col=mv.victim?'#E5262E':mv.dir==='back'?'#F0A020':'#3FB37A';
+      const pts=[posOf(pi,mv.mi)].concat(mv.path.map(stepPos));
+      const end=pts[pts.length-1],prev=pts[pts.length-2]||end,len=Math.hypot(end.x-prev.x,end.y-prev.y)||1,cut=G.sel===null?.5:.62;
+      const tip={x:end.x-(end.x-prev.x)/len*cut,y:end.y-(end.y-prev.y)/len*cut};
+      const line=pts.slice(0,-1).concat([tip]).map(p=>f(p.x)+','+f(p.y)).join(' ');
+      const cls='ghost'+(mine?' hot':'');
+      el('polyline',{class:cls,'data-gmi':mv.mi,points:line,fill:'none',stroke:col,'stroke-width':mine?.12:.1,'stroke-linecap':'round','stroke-linejoin':'round','stroke-dasharray':'.04 .2','marker-end':`url(#arr-${mv.victim?'cap':mv.dir})`,opacity:mine?1:.9},LAYERS.ghostLines);
+      if(G.sel===null){
+        const k=f(end.x)+','+f(end.y),g=el('g',{class:cls+' ghost-dest','data-gmi':mv.mi,transform:`translate(${f(end.x)} ${f(end.y)})`},LAYERS.ghostDest);
+        el('circle',{r:.5,fill:'rgba(255,255,255,.16)',stroke:col,'stroke-width':.08,'stroke-dasharray':'.14 .1'},g);
+        if(count[k]===1){g.setAttribute('data-move',idx);g.style.cursor='pointer';el('circle',{r:.62,fill:'transparent'},g);}
+        else g.setAttribute('pointer-events','none');
+      }
+    });
+  }
   if(human&&G.sel!==null){
     const selIsBase=P.marbles[G.sel].d===null;
     G.moves.forEach((mv,idx)=>{
@@ -1087,6 +1139,17 @@ function animPath(node,pts,o={}){
 }
 function burst(p,col){if(!LAYERS.fx)return;const c=el('circle',{class:'burst',cx:f(p.x),cy:f(p.y),r:.5,fill:'none',stroke:col,'stroke-width':.14},LAYERS.fx);setTimeout(()=>c.remove(),700);}
 
+// hovering a playable marble singles out its move previews
+$('boardLive').addEventListener('pointerover',e=>{
+  const svg=$('boardLive');if(!G||G.sel!==null){svg.classList.remove('hovering');return;}
+  const mn=e.target.closest('.marble.can');
+  svg.querySelectorAll('.ghost.hot').forEach(x=>x.classList.remove('hot'));
+  if(!mn){svg.classList.remove('hovering');return;}
+  let mi=+mn.getAttribute('data-mi');const P=cur();
+  if(P.marbles[mi]&&P.marbles[mi].d===null){const lv=G.moves.find(m=>m.kind==='leave');if(lv)mi=lv.mi;}
+  svg.classList.add('hovering');svg.querySelectorAll(`.ghost[data-gmi="${mi}"]`).forEach(x=>x.classList.add('hot'));
+});
+$('boardLive').addEventListener('pointerleave',()=>{$('boardLive').classList.remove('hovering');});
 $('boardLive').addEventListener('click',e=>{
   if(!G||G.phase!=='move'||!canAct())return;
   const execute=mv=>G.online?onlineMove(mv):localExecute(mv);
@@ -1520,10 +1583,10 @@ function onlineStatus(){
   else if(mine){
     if(G.phase==='roll')msg=G.again?`${G.again} Roll the die.`:'Your turn. Roll the die.';
     else{const hasF=G.moves.some(m=>m.dir==='fwd'),hasB=G.moves.some(m=>m.dir==='back'),n=G.roll;
-      msg=`Rolled <b>${n}</b>. Tap a glowing marble.`;
+      msg=`Rolled <b>${n}</b>. Dotted arrows show each marble's moves. Tap a marble or a landing spot.`;
       if(G.moves.length===1&&G.rules.autoSingle)msg=`Rolled <b>${n}</b>. Only one move, playing it.`;
       else if(n===4&&hasB&&!hasF)msg='Rolled <b>4</b>. No forward moves, so you must move a marble <b>backward</b>.';
-      else if(n===4&&hasB)msg='Rolled <b>4</b>. Tap a marble, then pick ▶ forward or ◀ backward.';}
+      else if(n===4&&hasB)msg='Rolled <b>4</b>. Green arrows go forward, amber go back 4. Tap a marble or a landing spot.';}
   }else{
     const who=`<b>${esc(P.name)}</b>`;
     const last=G.ev&&G.ev.t==='roll'&&G.ev.pass?`${esc(G.players[G.ev.pi].name)} rolled ${G.ev.n} with no move. `:'';
