@@ -1,6 +1,11 @@
 # Red Arse – Change log
 
 ## 2026-10-15
+- **Turn timer:** human players get 30 seconds (setup screen: Off, 15–90 seconds) to roll and again to move; when it runs out the game plays for them.
+- **Game clock** in the turn panel and on the winner screen.
+- **Bot speed:** Normal (a bit quicker than before), Fast or Turbo, on the setup screen and under the die during a game.
+- **Official rules:** highest roll goes first (ties roll again); leave the center on a 1 or a 6; "outside corner" (edge hole, roll again) and "inside corner" (star, hop) now match the written rules.
+- **Usage stats:** Google Analytics for Firebase (free) counts games started and finished, online rooms, players, bots and game length. No names are sent.
 - **Online play is live:** Firebase project `red-arse` set up (anonymous sign-in, Realtime Database with room-only rules, vmannusa.github.io authorized) and connected in `config.js`. Choose **Play online** on the setup screen to create a room and share the invite link.
 - **Move review:** every real choice a human player makes is graded Best, Good, Inaccuracy, Mistake or Blunder by how much chance to win it gave up versus the best move. New stats: accuracy, blunders, mistakes, missed kills and points lost to moves (Acc also shows in the side panel; Corners moved to the full Stats window to make room).
 - **End-of-game review:** a chance-to-win chart for the whole game, plus a card for each human player with their grades, whether the moves or the dice cost them, and their 3 costliest moves with the better play and a **Show on board** button.
