@@ -425,7 +425,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <ul>
           <li>4 is the only roll that can move backward: 4 holes counter-clockwise instead of forward.</li>
           <li>If no forward move is possible on a 4, you must move backward.</li>
-          <li>Backward moves can hop stars, drop into the center and kill, but can't go straight into home.</li>
+          <li>Backward moves follow the track only. They can't hop stars or go straight into home, but they can drop into the center and kill.</li>
           <li>Backing up behind your own start hole parks that marble right outside your home.</li>
         </ul>
       </section>
@@ -571,7 +571,7 @@ function legalMoves(S,pi,n){
         else walk(nd,r,p,true);
       }
     }
-    // Backward 4: counter-clockwise along the track, may hop stars and drop into the center, never into home.
+    // Backward 4: counter-clockwise along the track only (no star hops), may drop into the center, never into home.
     if(n===4&&R.back&&onTrack(d0)){
       const land=(cur,p,viaStars)=>{
         const g=gOf(c,cur);if(ownAt(g))return;
@@ -589,15 +589,7 @@ function legalMoves(S,pi,n){
         }
         land(cur,p,viaStars);
       };
-      backWalk(d0,4,[],false);
-      if(R.stars&&isStar(gOf(c,d0))){
-        const p=[];
-        for(let h=1;h<=4;h++){
-          const nd=d0-14*h;p.push({k:'t',g:gOf(c,nd),hop:true});
-          const r=4-h;
-          if(r===0)land(nd,p.slice(),true);else backWalk(nd,r,p,true);
-        }
-      }
+      backWalk(d0,4,[],false); // no star hops backward: stars only shortcut clockwise
     }
   });
   const seen=new Set();const uniq=a=>a.filter(mv=>{const k=mv.mi+'|'+mv.to+'|'+mv.dir;if(seen.has(k))return false;seen.add(k);return true;});
@@ -855,7 +847,7 @@ const RULE_DEFS=[
   {k:'rollAgain',label:'Roll again on 6',sub:'A 6 gives the same player another roll.',def:true},
   {k:'stars',label:'Star shortcuts',sub:'Hop star-to-star from a star hole.',def:true},
   {k:'center',label:'Center hole',sub:'Finish a roll one step past a star to drop in (a 6 from your start hole works). Leave on a 1.',def:true},
-  {k:'back',label:'Backward on 4',sub:'Only a 4 moves back, stars and center included. Forced if no forward move.',def:true,house:true},
+  {k:'back',label:'Backward on 4',sub:'Only a 4 moves back, along the track (no star hops). Forced if no forward move.',def:true,house:true},
   {k:'backShortcut',label:'Back-past-start shortcut',sub:'Backing up behind your start sets you up to enter home.',def:true,house:true},
   {k:'corners',label:'Inside corners: roll again',sub:'End a move on an edge corner hole to roll again, backward moves included. Coming out of base onto your start doesn\'t count.',def:true,house:true},
   {k:'killAgain',label:'Kill: roll again',sub:'Aggravate an opponent (send them back to base) and you roll again.',def:true,house:true},
