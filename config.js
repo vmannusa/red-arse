@@ -10,5 +10,6 @@ window.RED_ARSE_FIREBASE = {
   projectId: "red-arse",
   storageBucket: "red-arse.firebasestorage.app",
   messagingSenderId: "395320591512",
-  appId: "1:395320591512:web:d799f5f8ff342b25bb7ced"
+  appId: "1:395320591512:web:d799f5f8ff342b25bb7ced",
+  measurementId: "G-0QH1E08MN7"
 };
