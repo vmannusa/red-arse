@@ -1,6 +1,7 @@
 # Red Arse – Change log
 
 ## 2026-10-15
+- **Game feed with chat:** the move log is now the game feed. In online games it has a chat bar and quick-chat buttons ("Back it up Terry" after a 4, "Nice 1" after a 1, COCKED, Nice roll, GG), an unread badge when it's collapsed, and it posts when a player goes away or comes back.
 - **Backward inside-corner hop:** on a 4, a marble on an inside corner can hop exactly 4 inside corners counter-clockwise (6-player board), and going backward it can pass your own home corner.
 - **Turn timer:** human players get 30 seconds (setup screen: Off, 15–90 seconds) to roll and again to move; when it runs out the game plays for them.
 - **Game clock** in the turn panel and on the winner screen.
