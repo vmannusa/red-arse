@@ -115,6 +115,18 @@ button,input,select{font:inherit;color:inherit}
 .log li{display:flex;gap:8px;align-items:baseline;color:var(--fg)}
 .log li i{width:8px;height:8px;border-radius:50%;flex:none;transform:translateY(-1px)}
 .log li.cap{font-weight:700}
+.log li.note span{color:var(--muted);font-style:italic}
+.log li.chat span{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px 8px;overflow-wrap:anywhere}
+.log li.chat b{margin-right:5px}
+.log li.chat.mine span{border-color:var(--accent)}
+.unread{display:inline-block;min-width:18px;padding:0 5px;border-radius:999px;background:var(--danger);color:#fff;font-size:11px;letter-spacing:0;text-align:center;margin-left:6px}
+.chat-box{margin-top:10px}
+.chat-presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chat-presets button{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:4px 10px;font:700 12px var(--font-body);cursor:pointer}
+.chat-presets button.hot{border-color:var(--warn);color:var(--warn)}
+.chat-row{display:flex;gap:6px}
+.chat-row input{flex:1;min-width:0;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);padding:0 10px;font:14px var(--font-body)}
+.chat-row .btn{height:36px}
 
 /* board interactive bits */
 #boardLive .marble{cursor:default}
@@ -440,9 +452,16 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <h3>Stats</h3>
         <div id="railStats"></div>
       </section>
-      <details class="card log" open>
-        <summary>Move log</summary>
+      <details class="card log" id="feed" open>
+        <summary>Game feed <span class="unread" id="feedUnread" hidden></span></summary>
         <ol id="log"></ol>
+        <div class="chat-box" id="chatBox" hidden>
+          <div class="chat-presets" id="chatPresets"></div>
+          <form class="chat-row" id="chatForm" autocomplete="off">
+            <input id="chatIn" maxlength="200" placeholder="Say something…" aria-label="Chat message">
+            <button class="btn" type="submit">Send</button>
+          </form>
+        </div>
       </details>
     </aside>
   </main>
@@ -839,7 +858,7 @@ function rollOff(names,rnd){
   lines.push(names[alive[0]]+' rolled highest and goes first');
   return {first:alive[0],lines};
 }
-function logPure(S,pi,text,cls){S.log=S.log||[];S.log.unshift({c:pi===null?null:S.players[pi].c,text,cls:cls||''});if(S.log.length>40)S.log.length=40;}
+function logPure(S,pi,text,cls){S.log=S.log||[];S.log.unshift({c:pi===null?null:S.players[pi].c,text,cls:cls||'',t:(typeof globalThis!=='undefined'&&globalThis.RA_CLOCK)?globalThis.RA_CLOCK():Date.now()});if(S.log.length>40)S.log.length=40;}
 // Bonus rolls: a 6, landing on an inside corner, or aggravating (killing) an opponent each earn another roll.
 function bonusRoll(rules,n,corner,kill){
   const why=[];if(n===6&&rules.rollAgain)why.push('rolled a 6');if(corner)why.push('landed on an outside corner');if(kill&&rules.killAgain)why.push('got a kill');
@@ -858,7 +877,7 @@ function reduceRoll(S0,n,o={}){
   const S=cleanState(S0),pi=S.turn,P=S.players[pi],st=S.stats[pi];
   st.rolls++;st.run++;st.streak=Math.max(st.streak,st.run);if(n===6)st.sixes++;if(n===4)st.fours++;if(n===1)st.ones++;
   if(o.manual){P.missed=0;P.away=false;}
-  if(o.timeout){P.missed=(P.missed||0)+1;if(P.missed>=2)P.away=true;}
+  if(o.timeout){P.missed=(P.missed||0)+1;if(P.missed>=2&&!P.away){P.away=true;logPure(S,pi,`${P.name} is away, so their turns are auto-played until they tap I'm back`,'note');}}
   S.ev={t:'roll',n,pi};
   const moves=legalMoves(S,pi,n);
   if(!moves.length){st.passes++;S.ev.pass=true;logPure(S,pi,`${P.name} rolled ${n}, no move`);endTurnPure(S,n,false);}
@@ -1227,8 +1246,18 @@ function startGame(){
 const cur=()=>G.players[G.turn];
 const isHuman=p=>p.type==='human';
 
-function addLog(pi,text,cls){G.log.unshift({c:pi===null?null:G.players[pi].c,text,cls});if(G.log.length>60)G.log.length=60;renderLog();}
-function renderLog(){const ol=$('log');ol.innerHTML='';G.log.forEach(e=>{const li=document.createElement('li');if(e.cls)li.className=e.cls;const i=document.createElement('i');i.style.background=e.c===null?'var(--muted)':COLORS[e.c].hex;li.appendChild(i);const s=document.createElement('span');s.textContent=e.text;li.appendChild(s);ol.appendChild(li);});}
+function addLog(pi,text,cls){G.log.unshift({c:pi===null?null:G.players[pi].c,text,cls,t:Date.now()});if(G.log.length>60)G.log.length=60;renderLog();}
+// The game feed: moves, notable moments and (online) chat, newest first.
+function renderLog(){
+  const ol=$('log');ol.innerHTML='';if(!G)return;
+  const n=G.log.length;let items=G.log.map((e,k)=>({k:'log',e,t:typeof e.t==='number'?e.t:-1e15+(n-k)}));
+  if(G.online&&CHAT.msgs.length)items=items.concat(CHAT.msgs.map(m=>({k:'chat',e:m,t:m.t||0}))).sort((a,b)=>b.t-a.t);
+  items.slice(0,90).forEach(x=>{const e=x.e,li=document.createElement('li'),i=document.createElement('i');
+    i.style.background=e.c===null||e.c===undefined||!COLORS[e.c]?'var(--muted)':COLORS[e.c].hex;li.appendChild(i);const sp=document.createElement('span');
+    if(x.k==='chat'){li.className='chat'+(ON.net&&e.uid===ON.net.uid?' mine':'');const b=document.createElement('b');b.textContent=e.name||'Player';sp.append(b,document.createTextNode(e.text||''));}
+    else{if(e.cls)li.className=e.cls;sp.textContent=e.text;}
+    li.appendChild(sp);ol.appendChild(li);});
+}
 
 function setStatus(html){G.msg=html;$('status').innerHTML=html;}
 function esc(s){return String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));}
@@ -1503,7 +1532,7 @@ function renderPanel(){
     const od=document.createElement('span');od.className='odds';od.id='odds-'+qi;od.title='Chance to win';od.textContent=oddsText(qi);
     li.append(d,nm,hm,od);ul.appendChild(li);});
   scheduleOdds();boardOdds();
-  renderStats();
+  renderStats();renderPresets();
 }
 // compact table in the rail; full table in the Stats window and the end-of-game window
 function statsTable(cols,withRecords){
@@ -1807,6 +1836,43 @@ function closeDecision(){
   $('winModal').hidden=false;
 }
 
+// ================= CHAT (online games) =================
+const CHAT={msgs:[],unread:0,lastSend:[],seenKeys:new Set(),primed:false};
+globalThis.RA_CLOCK=()=>ON.net?ON.net.now():Date.now();
+function resetChat(){CHAT.msgs=[];CHAT.unread=0;CHAT.seenKeys=new Set();CHAT.primed=false;renderUnread();}
+function chatIncoming(v){
+  const list=Object.entries(v||{}).map(([k,m])=>Object.assign({key:k},m)).filter(m=>m&&typeof m.text==='string').sort((a,b)=>(a.t||0)-(b.t||0));
+  let fresh=0;list.forEach(m=>{if(!CHAT.seenKeys.has(m.key)){CHAT.seenKeys.add(m.key);if(CHAT.primed&&m.uid!==(ON.net&&ON.net.uid))fresh++;}});
+  CHAT.msgs=list;CHAT.primed=true;
+  if(fresh){if(!$('feed').open)CHAT.unread+=fresh;renderUnread();tone(880,.07,'sine',.05);tone(1320,.09,'sine',.04,.08);}
+  if(G&&G.online)renderLog();
+}
+function renderUnread(){const u=$('feedUnread');if(!u)return;u.hidden=!CHAT.unread;u.textContent=CHAT.unread>9?'9+':String(CHAT.unread);}
+$('feed').addEventListener('toggle',()=>{if($('feed').open){CHAT.unread=0;renderUnread();}});
+async function sendChat(text){
+  text=String(text||'').replace(/\s+/g,' ').trim().slice(0,200);if(!text||!ON.net||!ON.code||!G||!G.online)return false;
+  const now=Date.now();CHAT.lastSend=CHAT.lastSend.filter(t=>now-t<10000);
+  if(CHAT.lastSend.length>=5||(CHAT.lastSend.length&&now-CHAT.lastSend[CHAT.lastSend.length-1]<800)){setStatusFlash('Slow down a little on the chat.');return false;}
+  CHAT.lastSend.push(now);
+  const me=G.players.find(p=>p.type==='human'&&p.uid===ON.net.uid);
+  const name=me?me.name:(safeGet('ra-online-name')||'Spectator'),c=me?me.c:null;
+  try{await ON.net.push(`rooms/${ON.code}/chat`,{uid:ON.net.uid,name:String(name).slice(0,24),c,text,t:ON.net.now()});return true;}
+  catch(e){console.warn(e);setStatusFlash('Message not sent. Check your connection.');return false;}
+}
+function setStatusFlash(t){const el=$('turnTimer');if(!el)return;el.textContent=t;el.className='timer warn';}
+// quick-chat buttons; a few only show up after the matching roll
+function renderPresets(){
+  const box=$('chatBox');if(!box)return;const on=!!(G&&G.online);box.hidden=!on;if(!on)return;
+  const n=G.ev&&G.ev.n?G.ev.n:G.roll,list=[];
+  if(n===4)list.push({t:'Back it up Terry',hot:true});
+  if(n===1)list.push({t:'Nice 1',hot:true});
+  list.push({t:'COCKED'},{t:'Nice roll'},{t:'GG'});
+  const key=list.map(x=>x.t).join('|');if(box.dataset.k===key)return;box.dataset.k=key;
+  const pr=$('chatPresets');pr.innerHTML='';
+  list.forEach(x=>{const b=document.createElement('button');b.type='button';b.textContent=x.t;if(x.hot)b.className='hot';b.onclick=()=>sendChat(x.t);pr.appendChild(b);});
+}
+$('chatForm').addEventListener('submit',async e=>{e.preventDefault();const inp=$('chatIn');const v=inp.value;if(await sendChat(v))inp.value='';});
+
 // ================= HEADER TOOLS =================
 $('btnRules').onclick=()=>{$('rulesModal').hidden=false;$('rulesClose').focus();};
 $('lobbyRules').onclick=()=>{$('rulesModal').hidden=false;$('rulesClose').focus();};
@@ -1913,6 +1979,8 @@ async function firebaseNet(cfg){
     set:(p,v)=>db.ref(p).set(v),
     update:(p,v)=>db.ref(p).update(v),
     remove:p=>db.ref(p).remove(),
+    push:(p,v)=>db.ref(p).push(v),
+    onLast(p,n,cb){const q=db.ref(p).limitToLast(n),h=sn=>cb(sn.val());q.on('value',h);return()=>q.off('value',h);},
     txn:(p,fn)=>db.ref(p).transaction(fn,undefined,false).then(r=>({committed:r.committed,value:r.snapshot.val()})),
     presence(p){const r=db.ref(p),c=db.ref('.info/connected');
       const h=sn=>{if(sn.val()===true){r.onDisconnect().remove();r.set(firebase.database.ServerValue.TIMESTAMP);}};c.on('value',h);
@@ -1938,6 +2006,8 @@ function localNet(){
     set:async(p,v)=>mut(t=>setAt(t,p,v)),
     update:async(p,o)=>mut(t=>{for(const k in o)setAt(t,p+'/'+k,o[k]);}),
     remove:async p=>mut(t=>setAt(t,p,null)),
+    push:async(p,v)=>mut(t=>setAt(t,p+'/'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),v)),
+    onLast(p,n,cb){return this.on(p,v=>{if(!v){cb(null);return;}const ks=Object.keys(v).sort().slice(-n),o={};ks.forEach(k=>o[k]=v[k]);cb(o);});},
     txn:async(p,fn)=>{const t=read();let cur=getAt(t,p);cur=cur===undefined?null:JSON.parse(JSON.stringify(cur));const nv=fn(cur);if(nv===undefined)return {committed:false,value:cur};setAt(t,p,nv);write(t);setTimeout(fire,0);return {committed:true,value:nv};},
     presence(p){const beat=()=>mut(t=>setAt(t,p,Date.now()));beat();const iv=setInterval(beat,1500);const bye=()=>{clearInterval(iv);mut(t=>setAt(t,p,null));};addEventListener('pagehide',bye);return bye;},
     now:()=>Date.now()};
@@ -1993,6 +2063,7 @@ async function enterRoom(code){
   ON.unsubs.push(net.on(`rooms/${code}/lobby`,v=>{ON.lobby=parseLobby(v);electHost();if(!$('room').hidden)renderRoom();}));
   ON.unsubs.push(net.on(`rooms/${code}/presence`,v=>{ON.presence=v||{};presenceChanged();}));
   ON.unsubs.push(net.on(`rooms/${code}/game`,v=>{if(v&&typeof v.seq==='number'){ON.queue.push(v);processQueue();}}));
+  resetChat();ON.unsubs.push(net.onLast(`rooms/${code}/chat`,60,chatIncoming));
   ON.presIv=setInterval(presenceChanged,2000);
   $('lobby').hidden=true;
 }
@@ -2212,7 +2283,7 @@ function onlineStatus(){
   }
   setStatus(msg);
 }
-$('backBtn').onclick=async()=>{if(!G||!G.online)return;const S=cleanState(G);const me=S.players.find(p=>p.type==='human'&&p.uid===ON.net.uid);if(!me)return;me.away=false;me.missed=0;S.ev=null;await commit(S,ON.seq);};
+$('backBtn').onclick=async()=>{if(!G||!G.online)return;const S=cleanState(G);const me=S.players.find(p=>p.type==='human'&&p.uid===ON.net.uid);if(!me)return;me.away=false;me.missed=0;S.ev=null;logPure(S,S.players.indexOf(me),`${me.name} is back`,'note');await commit(S,ON.seq);};
 function fmtClock(ms){const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s/60)%60,x=s%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0');}
 function gameElapsed(){if(!G||!G.started)return 0;const now=G.online?ON.net.now():Date.now();
   if(G.winner!==null&&G.winner!==undefined){if(!G.ended)G.ended=now;return G.ended-G.started;}return now-G.started;}
