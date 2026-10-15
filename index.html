@@ -215,7 +215,9 @@ table.stats td.top{color:var(--warn);font-weight:800}
 .timer.warn{color:var(--danger);font-weight:700}
 #backBtn{margin-top:8px;width:100%}
 @media (max-width:640px){.online-grid{grid-template-columns:minmax(0,1fr)}}
-.howto{margin-top:10px;height:36px;font-size:14px}
+.howto{height:36px;font-size:14px;text-decoration:none;color:var(--fg)}
+.howto-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.fine a{color:var(--accent);font-weight:600}
 .modal .card.rules-card{max-width:820px}
 .rules-lede{margin:0 0 12px;font-size:15px}
 .rules-grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:4px 22px}
@@ -291,7 +293,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <div>
           <h1>Red Arse</h1>
           <p class="lede">The classic wooden marble game on the 6-player or 4-player hex board. Add people playing on this device, fill the other seats with bots, then start.</p>
-          <button class="btn howto" id="lobbyRules" type="button">How to play</button>
+          <div class="howto-row"><button class="btn howto" id="lobbyRules" type="button">How to play</button><a class="btn howto" id="lobbyChangelog" href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">What's new</a></div>
         </div>
       </div>
       <section class="card online-card" id="onlineCard" hidden>
@@ -455,7 +457,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
         </ul>
       </section>
     </div>
-    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Chance to win</b> (on the board and in the player list) comes from playing the rest of the game out 300 times with medium-strength bots after every move.</p>
+    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Chance to win</b> (on the board and in the player list) comes from playing the rest of the game out 300 times with medium-strength bots after every move. See <a href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">what's new</a> for every change.</p>
     <div class="actions"><button class="btn primary" id="rulesClose" type="button">Got it</button></div>
   </div>
 </div>
@@ -698,8 +700,31 @@ function danger(S,pi,d){
   });
   return risk;
 }
+// How likely each player is to win, 0..1. Uses the live win chances when the game has them
+// (S.odds), otherwise a quick estimate from how far everyone's marbles have travelled.
+function threatShare(S){
+  if(S.odds&&S.odds.length===S.players.length)return S.odds;
+  const L=B.L,prog=S.players.map(p=>p.marbles.reduce((t,m)=>{const d=m.d;
+    if(d===null)return t;if(d==='C')return t+L*.55;if(typeof d==='string')return t+L*.4;return t+(d>=B.H0?L+(d-B.H0)*3:Math.max(0,d));},0)+1);
+  const sum=prog.reduce((a,b)=>a+b,0);return prog.map(v=>v/sum);
+}
+// "Don't lose": medium and hard bots go after whoever is most likely to win. The further a
+// player is ahead of an even share, the more a kill on them is worth, and hard bots also
+// like to park within striking distance (1-6 holes) behind the leader's marbles.
+function leaderPressure(S,pi,mv,level){
+  if(level==='easy')return 0;
+  const th=threatShare(S),N=S.players.length,even=1/N;let s=0;
+  if(mv.victim&&mv.victim.pi!==pi){const lead=th[mv.victim.pi]-Math.max(even,th[pi]);if(lead>0)s+=lead*(level==='hard'?260:180);}
+  if(level==='hard'&&onTrack(mv.to)){
+    const g=gOf(S.players[pi].s,mv.to);
+    S.players.forEach((q,qi)=>{if(qi===pi)return;const lead=th[qi]-Math.max(even,th[pi]);if(lead<=0)return;
+      q.marbles.forEach(m=>{if(!onTrack(m.d))return;const ahead=mod(gOf(q.s,m.d)-g,B.L);if(ahead>=1&&ahead<=6)s+=lead*30;});});
+  }
+  return s;
+}
 function scoreMove(S,pi,mv,level){
   let s=0;const {from,to}=mv;
+  s+=leaderPressure(S,pi,mv,level);
   if(mv.victim){const vm=S.players[mv.victim.pi].marbles[mv.victim.mi];s+=40+(onTrack(vm.d)?Math.max(0,vm.d)*.45*84/B.L:inHome(vm.d)?45:12);}
   if(mv.kind==='backOut')s-=35;
   if(mv.kind==='leave')s+=28;
@@ -1120,7 +1145,7 @@ async function doRoll(){
   if(!isHuman(P)){
     setStatus(`<b>${esc(P.name)}</b> rolled <b>${n}</b>.`);renderPanel();renderLive();
     await wait(reduced?200:600);if(tok!==G?.token)return;
-    await localExecute(botChoose(G,pi,moves,P.type));return;
+    G.odds=currentOdds();await localExecute(botChoose(G,pi,moves,P.type));return;
   }
   if(moves.length===1&&G.rules.autoSingle){
     const mv=moves[0];
@@ -1371,6 +1396,7 @@ document.addEventListener('keydown',e=>{
 
 // ================= WIN CHANCE DISPLAY =================
 const ODDS={key:'',shown:'',pct:null,timer:null,token:0};
+function currentOdds(){if(!G||!ODDS.pct||ODDS.pct.length!==G.players.length)return null;const t=ODDS.pct.reduce((a,b)=>a+b,0)||1;return ODDS.pct.map(v=>v/t);}
 function oddsKey(){return G?(G.gid||G.token)+'|'+G.turn+'|'+G.players.map(p=>p.marbles.map(m=>m.d).join(',')).join(';'):'';}
 function oddsText(qi){
   if(!G)return '';
@@ -1745,7 +1771,7 @@ async function onlineMove(mv,manual=true){if(!G||!G.online||G.phase!=='move'||!c
 async function botAct(o={}){
   if(!G||!G.online||G.winner!==null)return;const seq=ON.seq,P=cur();
   if(G.phase==='roll')await commit(reduceRoll(G,1+Math.floor(Math.random()*6),{timeout:!!o.timeout}),seq);
-  else if(G.phase==='move'){const mv=botChoose(G,G.turn,G.moves,P.type==='human'?'medium':P.type);if(mv)await commit(reduceMove(G,mv,{}),seq);}
+  else if(G.phase==='move'){G.odds=currentOdds();const mv=botChoose(G,G.turn,G.moves,P.type==='human'?'medium':P.type);if(mv)await commit(reduceMove(G,mv,{}),seq);}
 }
 function clearDrive(){ON.timers.forEach(clearTimeout);ON.timers=[];}
 function later(fn,ms){const seq=ON.seq;ON.timers.push(setTimeout(()=>{if(ON.seq===seq&&!ON.processing&&G&&G.online)fn();},ms));}
