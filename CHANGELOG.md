@@ -1,6 +1,7 @@
 # Red Arse – Change log
 
 ## 2026-10-15
+- **Online play is live:** Firebase project `red-arse` set up (anonymous sign-in, Realtime Database with room-only rules, vmannusa.github.io authorized) and connected in `config.js`. Choose **Play online** on the setup screen to create a room and share the invite link.
 - **Move review:** every real choice a human player makes is graded Best, Good, Inaccuracy, Mistake or Blunder by how much chance to win it gave up versus the best move. New stats: accuracy, blunders, mistakes, missed kills and points lost to moves (Acc also shows in the side panel; Corners moved to the full Stats window to make room).
 - **End-of-game review:** a chance-to-win chart for the whole game, plus a card for each human player with their grades, whether the moves or the dice cost them, and their 3 costliest moves with the better play and a **Show on board** button.
 - **Bots gang up on the leader:** as someone's chance to win climbs, Medium and Hard bots go after that player's marbles first; Hard bots also line up behind the leader's marbles.
