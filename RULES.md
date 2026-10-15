@@ -56,6 +56,7 @@ Rules marked *(house rule)* can be switched off on the setup screen; everything 
 - **Easy:** random legal moves (likes kills sometimes).
 - **Medium:** scores every move (kills, getting home, leaving base, progress, corners) with a little randomness.
 - **Hard:** same scoring, no randomness, and avoids ending next to opponents who could kill it.
+- **Gang up on the leader:** Medium and Hard bots play "not to lose". The further a player pulls ahead in chance to win, the more the bots value killing that player's marbles, and Hard bots also try to sit 1–6 holes behind the leader's marbles, ready to strike.
 - All bots roll the same fair die as humans.
 
 ## Chance to win
