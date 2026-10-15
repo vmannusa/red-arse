@@ -441,7 +441,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <h3>Shortcuts</h3>
         <ul>
           <li><b>Stars:</b> a marble that starts its turn on a star can hop clockwise from star to star, one star per pip. The roll must be used exactly on stars (a 3 means exactly 3 stars), with no extra steps onto the track or into the center. Hops can pass over any marble on the stars in between, yours included, but can't land on your own. You can't go past your own color's star.</li>
-          <li><b>Center hole:</b> a roll that passes over a star with one step left can finish in the center. A 6 from your start hole goes straight in. Leave the center only on a <b>1</b>, to any star.</li>
+          <li><b>Center hole:</b> a roll that passes over a star with one step left can finish in the center. A 6 from your start hole goes straight in, and so does a 1 from a star. Leave the center only on a <b>1</b>, to any star.</li>
         </ul>
       </section>
       <section>
@@ -450,11 +450,12 @@ table.stats td.top{color:var(--warn);font-weight:800}
           <li>4 is the only roll that can move backward: 4 holes counter-clockwise instead of forward.</li>
           <li>If no forward move is possible on a 4, you must move backward.</li>
           <li>Backward moves follow the track only. They can't hop stars or go straight into home, but they can drop into the center and kill.</li>
+          <li>Home marbles that aren't locked in can back out of home onto the track.</li>
           <li>Backing up behind your own start hole parks that marble right outside your home.</li>
         </ul>
       </section>
     </div>
-    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen.</p>
+    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Chance to win</b> (on the board and in the player list) comes from playing the rest of the game out 300 times with medium-strength bots after every move.</p>
     <div class="actions"><button class="btn primary" id="rulesClose" type="button">Got it</button></div>
   </div>
 </div>
