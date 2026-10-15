@@ -29,6 +29,8 @@ Bots and pass-and-play work right away. Online rooms stay hidden until Part 2 is
 
 ## Part 2: Turn on online play with Firebase (free Spark plan)
 
+**Status: done (Oct 2026).** Project `red-arse`, Realtime Database at `red-arse-default-rtdb` (us-central1), anonymous sign-in on, `vmannusa.github.io` authorized, and `config.js` filled in. The steps below are kept for reference.
+
 1. Go to https://console.firebase.google.com, **Create a project** (e.g. `red-arse`). Google Analytics is not needed.
 2. **Build > Authentication > Get started > Sign-in method**: enable **Anonymous**.
 3. **Authentication > Settings > Authorized domains > Add domain**: `<your-username>.github.io`
