@@ -62,6 +62,26 @@ Rules marked *(house rule)* can be switched off on the setup screen; everything 
 ## Chance to win
 After every move the game plays the rest of the match out 300 times with medium-strength bots and shows each player's share of wins, next to their base on the board and in the player list.
 
+## Move review
+- Whenever a human player has a real choice (two or more moves that lead to different positions), the game plays the rest of the match out from every option, hundreds of times each, using the same dice for every option so they're compared fairly. It keeps going until the gap between your move and the best one is known to within about 1.5 points.
+- Each move is graded by how much chance to win it gave up compared with the best option:
+  - **Best:** under 1 point
+  - **Good:** under 3
+  - **Inaccuracy:** under 6
+  - **Mistake:** under 12
+  - **Blunder:** 12 or more
+- **Stats** (rail and Stats window):
+  - **Acc:** share of Best and Good moves.
+  - **Blunders** and **Mistakes**.
+  - **Missed kills:** a kill was the better move but wasn't taken.
+  - **Lost to moves:** points of chance to win given up by moves that cost 3 or more, added up.
+- **End-of-game review**, for each human player:
+  - A chart of every player's chance to win over the game.
+  - Grade counts and a one-line verdict: was it the moves, or the dice and the other players?
+  - The 3 costliest moves with the better play, each with **Show on board** to see both moves drawn on the position.
+- Bots aren't graded. Moves auto-played for an away player online aren't graded either. In online games every device grades the same moves the same way.
+- The review runs in the background, so it never slows the game down.
+
 ## Online rooms (once Firebase is set up)
 - Create a room for a 4-letter code and invite link; the host picks the board, adds bots and sets the turn timer.
 - Run out of time and your turn is auto-played; miss two turns and you're auto-played until you tap **I'm back**.
