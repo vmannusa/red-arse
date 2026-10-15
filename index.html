@@ -187,6 +187,36 @@ table.stats td.top{color:var(--warn);font-weight:800}
 .award{font-size:12.5px;border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:3px 10px}
 .award b{color:var(--warn);margin-right:4px}
 .win-stats{margin-top:14px}
+.win-review{margin-top:14px}
+.rv-title{font-family:var(--font-display);font-weight:700;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.rv-cap{margin:0 0 2px;font-size:12.5px;color:var(--muted)}
+.rv-chart-wrap{position:relative}
+.rv-chart{width:100%;height:auto;display:block;touch-action:pan-y}
+.rv-grid line{stroke:var(--line);stroke-width:1}
+.rv-grid text,.rv-ax{font-size:10.5px;fill:var(--muted);font-variant-numeric:tabular-nums}
+.rv-lab{font-size:11px;fill:var(--fg);font-weight:600}
+.rv-cross{stroke:var(--muted);stroke-width:1}
+.rv-tip{position:absolute;top:0;min-width:120px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px;box-shadow:var(--shadow);pointer-events:none}
+.rv-tip .rv-tt{font-weight:700;margin-bottom:2px}
+.rv-tip .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.rv-card{border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:10px 12px;margin-top:10px}
+.rv-head{display:flex;align-items:center;gap:8px}
+.rv-head .dot{width:14px;height:14px;border-radius:50%;flex:none}
+.rv-acc{margin-left:auto;font-weight:800;font-variant-numeric:tabular-nums}
+.rv-grades{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 4px}
+.rv-g{font-size:11.5px;border-radius:999px;padding:1px 8px;border:1px solid var(--line);background:var(--surface)}
+.rv-g b{font-variant-numeric:tabular-nums}
+.rv-best,.rv-good{border-color:#3FB37A}.rv-inacc{border-color:#C9A500}.rv-mistake{border-color:#F0A020}.rv-blunder{border-color:var(--danger);color:var(--danger);font-weight:700}
+.rv-v{margin:6px 0 2px;font-size:13.5px}
+.rv-split{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+.rv-split b{color:var(--fg);font-variant-numeric:tabular-nums}
+.rv-list{margin:8px 0 0;padding-left:20px;font-size:13px}
+.rv-list li{margin:8px 0}
+.rv-when{font-size:12px;color:var(--muted);margin-bottom:2px}
+.rv-better{color:var(--accent);font-weight:600}
+.rv-pct{font-variant-numeric:tabular-nums;font-weight:700;margin-left:4px}
+.rv-show{height:30px;font-size:12.5px;margin-top:4px}
+.rv-back{height:32px;font-size:13px;margin-left:6px;vertical-align:middle}
 .modal .card.wide{max-width:860px}
 .fine{color:var(--muted);font-size:12.5px;margin:10px 0 0}
 /* online */
@@ -457,7 +487,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
         </ul>
       </section>
     </div>
-    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Chance to win</b> (on the board and in the player list) comes from playing the rest of the game out 300 times with medium-strength bots after every move. See <a href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">what's new</a> for every change.</p>
+    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Chance to win</b> (on the board and in the player list) comes from playing the rest of the game out 300 times with medium-strength bots after every move. <b>Move review:</b> whenever a human player has a real choice, each option is played out hundreds of times on the same dice and compared with the best one. A move that gives up under 1 point of chance to win is <b>Best</b>, under 3 <b>Good</b>, under 6 an <b>Inaccuracy</b>, under 12 a <b>Mistake</b>, and 12 or more a <b>Blunder</b>. Accuracy is the share of Best and Good moves. The end-of-game review shows each player's costliest moves and the better play. See <a href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">what's new</a> for every change.</p>
     <div class="actions"><button class="btn primary" id="rulesClose" type="button">Got it</button></div>
   </div>
 </div>
@@ -467,6 +497,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
     <h2 id="winTitle">Winner</h2>
     <div class="win-name" id="winName"></div>
     <ol class="standings" id="standings"></ol>
+    <div id="winReview" class="win-review"></div>
     <div id="winStats" class="win-stats"></div>
     <div class="actions">
       <button class="btn" id="winLobby" type="button">Change players</button>
@@ -478,7 +509,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
   <div class="card wide" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
     <h2 id="statsTitle">Game stats</h2>
     <div id="statsBody"></div>
-    <p class="fine">Gold numbers lead their column. All-time wins and games are kept by player name in this browser.</p>
+    <p class="fine">Gold numbers lead their column. Acc, Blunders, Mistakes, Missed kills and Lost to moves come from the move review: whenever a human player has a real choice, every option is played out hundreds of times and compared with the best one. Bots aren't graded. All-time wins and games are kept by player name in this browser.</p>
     <div class="actions"><button class="btn primary" id="statsClose" type="button">Close</button></div>
   </div>
 </div>
@@ -801,7 +832,7 @@ function reduceMove(S0,mv,o={}){
   if(['stars','backStars','starsCenter','center','exitCenter'].includes(mv.kind))st.shortcuts++;
   if(corner)st.corners++;
   if(o.manual){P.missed=0;P.away=false;}
-  S.ev={t:'move',pi,mv,n,corner};
+  S.ev={t:'move',pi,mv,n,corner,auto:!o.manual};
   if(hasWon(S.players[pi])){S.winner=pi;S.phase='over';}
   else endTurnPure(S,n,corner,!!mv.victim);
   return S;
@@ -810,11 +841,11 @@ function reduceMove(S0,mv,o={}){
 // ================= WIN CHANCES =================
 // Play the rest of the game out many times from the current position with quick "medium" bots and
 // count who finishes first. Each player's share of those wins is their chance to win.
-function rolloutWinner(S0,maxRolls){
+function rolloutWinner(S0,maxRolls,dice){
   const S={rules:S0.rules,players:S0.players.map(p=>({s:p.s,c:p.c,marbles:p.marbles.map(m=>({d:m.d,dx:m.dx}))}))};
   const N=S.players.length;let turn=S0.turn;
   for(let k=0;k<maxRolls;k++){
-    const n=1+Math.floor(Math.random()*6),mv=legalMoves(S,turn,n);let bonus=n===6&&S.rules.rollAgain;
+    const n=1+Math.floor((dice||Math.random)()*6),mv=legalMoves(S,turn,n);let bonus=n===6&&S.rules.rollAgain;
     if(mv.length){
       let best=mv[0];
       if(mv.length>1){let bs=-1e9;for(const m of mv){const sc=scoreMove(S,turn,m,'medium');if(sc>bs){bs=sc;best=m;}}}
@@ -826,6 +857,39 @@ function rolloutWinner(S0,maxRolls){
     if(!bonus)turn=(turn+1)%N;
   }
   return -1;
+}
+
+// ================= MOVE REVIEW (engine side) =================
+// Each distinct position a decision could lead to, with whose roll comes next.
+function seeded(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function snapPlayers(ps){return ps.map(p=>({s:p.s,c:p.c,marbles:p.marbles.map(m=>({d:m.d,dx:m.dx}))}));}
+function optionResults(S,pi,n,moves){
+  const out=[],seen={},N=S.players.length;
+  moves.forEach((mv,idx)=>{
+    const T={rules:S.rules,players:snapPlayers(S.players)};
+    const corner=earnsCorner(T,pi,mv);applyMove(T,pi,mv);
+    const won=hasWon(T.players[pi]);
+    T.turn=bonusRoll(S.rules,n,corner,!!mv.victim)?pi:(pi+1)%N;
+    const key=T.turn+'|'+T.players.map(p=>p.marbles.map(m=>m.d).sort().join(',')).join(';');
+    if(seen[key]!==undefined){out[seen[key]].idxs.push(idx);return;}
+    seen[key]=out.length;out.push({key,S:T,won,idxs:[idx]});
+  });
+  return out;
+}
+// Win chance of every player from position S, playing it out K times. Rollout i always uses the
+// same random seed, so two candidate moves are compared on the same dice ("common random numbers"),
+// which keeps the difference between them far less noisy than the raw percentages.
+function rolloutBatch(S,from,count,seed){
+  const out=[],saved=Math.random;
+  try{for(let i=from;i<from+count;i++){const s0=(seed|0)+i*7919;Math.random=seeded(s0^0x5bd1e995);out.push(rolloutWinner(S,4000,seeded(s0)));}}
+  finally{Math.random=saved;}
+  return out;
+}
+function evalState(S,K,seed){
+  const N=S.players.length,w=new Array(N).fill(0);let fin=0;const saved=Math.random;
+  try{for(let i=0;i<K;i++){const s0=(seed|0)+i*7919;Math.random=seeded(s0^0x5bd1e995);const r=rolloutWinner(S,4000,seeded(s0));if(r>=0){w[r]++;fin++;}}}
+  finally{Math.random=saved;}
+  return w.map(x=>x/(fin||1));
 }
 /*ENGINE-END*/
 
@@ -1065,11 +1129,16 @@ const STAT_COLS=[
   {k:'kills',label:'Kills (aggravated someone)',short:'Kills',rail:true},
   {k:'lost',label:'Times aggravated',short:'Lost',rail:true},
   {k:'back',label:'Backward moves',short:'Back'},
-  {k:'corners',label:'Corner rerolls',short:'Corners',rail:true},
+  {k:'corners',label:'Corner rerolls',short:'Corners'},
   {k:'shortcuts',label:'Star / center shortcuts',short:'Shortcuts'},
   {k:'dist',label:'Holes moved',short:'Holes'},
   {k:'passes',label:'Turns with no move',short:'No move'},
   {k:'streak',label:'Longest turn (rolls in a row)',short:'Best streak'},
+  {k:'acc',label:'Move accuracy: share of real choices played best or close to best (human players)',short:'Acc',rail:true,review:true},
+  {k:'blunders',label:'Blunders: moves that gave up 12%+ chance to win',short:'Blunders',review:true},
+  {k:'mistakes',label:'Mistakes: moves that gave up 6-12% chance to win',short:'Mistakes',review:true},
+  {k:'missed',label:'Missed kills: a kill was the better move but was not taken',short:'Missed kills',review:true},
+  {k:'wlost',label:'Chance to win given up by moves that cost 3+ points, added up (points, not a %)',short:'Lost to moves',review:true},
 ];
 const blankStats=()=>({rolls:0,sixes:0,fours:0,ones:0,kills:0,lost:0,back:0,corners:0,shortcuts:0,dist:0,passes:0,streak:0,run:0});
 function loadRecords(){try{return JSON.parse(safeGet('aggravation-records')||'{}')||{};}catch(e){return {};}}
@@ -1093,7 +1162,7 @@ function newGameState(){
 }
 function resetHeader(){$('btnRestart').hidden=false;$('roomChip').hidden=true;$('btnLobby').querySelector('span').textContent='Players';$('turnTimer').textContent='';$('backBtn').hidden=true;}
 function startGame(){
-  saveSetup();G=newGameState();resetHeader();$('room').hidden=true;
+  saveSetup();G=newGameState();resetCoach(G.players.length);resetHeader();$('room').hidden=true;
   $('lobby').hidden=true;$('game').hidden=false;$('tools').hidden=false;$('winModal').hidden=true;
   buildBoard($('boardStatic'),'S',B);
   buildLive();addLog(null,'New game: '+G.players.map(p=>p.name).join(', '));
@@ -1110,6 +1179,7 @@ function esc(s){return String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;',
 
 async function beginTurn(){
   if(!G)return;const tok=G.token,P=cur();
+  if(!G.again)coachTurn(G.turn);
   G.phase='roll';G.roll=null;G.moves=[];G.sel=null;
   renderPanel();renderLive();
   if(isHuman(P)){
@@ -1170,6 +1240,7 @@ function endTurn(n,corner,kill){
 function describe(pi,mv){return describePure(G,pi,mv,G.roll);}
 async function localExecute(mv){
   if(!G||G.phase!=='move')return;const tok=G.token,pi=G.turn,P=cur();
+  if(isHuman(P))coachDecision(G,pi,G.roll,G.moves,mv);
   G.phase='anim';G.sel=null;renderPanel();renderLive();
   const corner=earnsCorner(G,pi,mv);
   const node=MARBLE_NODES[pi][mv.mi];node.parentNode.appendChild(node);
@@ -1206,7 +1277,7 @@ function buildLive(){
   const svg=$('boardLive');svg.innerHTML='';setViewBox(svg,B);defsCommon(svg,'L',B);
   LAYERS.glow=el('g',null,svg);LAYERS.ghostLines=el('g',{'pointer-events':'none'},svg);LAYERS.marbles=el('g',null,svg);LAYERS.ghostDest=el('g',null,svg);LAYERS.targets=el('g',null,svg);LAYERS.odds=el('g',{'pointer-events':'none'},svg);LAYERS.fx=el('g',{'pointer-events':'none'},svg);
   const defs=svg.querySelector('defs');
-  [['fwd','#3FB37A'],['back','#F0A020'],['cap','#E5262E']].forEach(([k,c])=>{
+  [['fwd','#3FB37A'],['back','#F0A020'],['cap','#E5262E'],['rvyou','#FFFFFF']].forEach(([k,c])=>{
     const m=el('marker',{id:'arr-'+k,viewBox:'0 0 10 10',refX:'7',refY:'5',markerWidth:'.46',markerHeight:'.46',markerUnits:'userSpaceOnUse',orient:'auto'},defs);
     el('path',{d:'M0 0 L10 5 L0 10 z',fill:c},m);});
   MARBLE_NODES=G.players.map((P,pi)=>P.marbles.map((m,mi)=>{
@@ -1363,10 +1434,12 @@ function statsTable(cols,withRecords){
   const th=document.createElement('thead');th.appendChild(hr);t.appendChild(th);
   const tb=document.createElement('tbody');
   const rec=withRecords?loadRecords():{};
-  const best={};cols.forEach(c=>{best[c.k]=Math.max(...G.stats.map(st=>st[c.k]));});
+  const val=(c,qi)=>c.review?coachStat(c.k,qi):{v:G.stats[qi][c.k],text:String(G.stats[qi][c.k])};
+  const best={};cols.forEach(c=>{const vs=G.players.map((_,qi)=>val(c,qi).v).filter(v=>v!==null);best[c.k]=vs.length?Math.max(...vs):null;});
+  const hi=c=>!c.review||c.k==='acc';
   G.players.forEach((Q,qi)=>{const tr=document.createElement('tr');if(qi===G.turn&&G.winner===null)tr.className='active';
     let h=`<th scope="row"><span class="dot" style="background:${marbleBg(Q.c)}"></span><span class="sn">${esc(Q.name)}</span></th>`;
-    cols.forEach(c=>{const v=G.stats[qi][c.k];h+=`<td${v>0&&v===best[c.k]&&c.k!=='lost'&&c.k!=='passes'&&G.players.length>1?' class="top"':''}>${v}</td>`;});
+    cols.forEach(c=>{const x=val(c,qi),v=x.v;h+=`<td${hi(c)&&v!==null&&v>0&&v===best[c.k]&&c.k!=='lost'&&c.k!=='passes'&&G.players.length>1?' class="top"':''}>${x.text}</td>`;});
     if(withRecords){const r=rec[Q.name];h+=`<td>${r?r.wins+'/'+r.games:'–'}</td>`;}
     tr.innerHTML=h;tb.appendChild(tr);});
   t.appendChild(tb);return t;
@@ -1431,9 +1504,229 @@ function runOdds(tok,key){
     const t0=performance.now();
     while(done<total&&performance.now()-t0<12){const w=rolloutWinner(snap,4000);if(w>=0)wins[w]++;done++;}
     if(done<total){setTimeout(step,0);return;}
-    const sum=wins.reduce((a,b)=>a+b,0)||1;ODDS.pct=wins.map(w=>Math.round(100*w/sum));ODDS.shown=key;renderOdds();
+    const sum=wins.reduce((a,b)=>a+b,0)||1;ODDS.pct=wins.map(w=>Math.round(100*w/sum));ODDS.shown=key;oddsHistory(ODDS.pct);renderOdds();
   };
   step();
+}
+
+// ================= MOVE REVIEW =================
+// Every time a human player picks between moves that lead to different positions, the game plays
+// the rest out from each option (same dice for each, see evalState) and compares the player's win
+// chance after their pick with the best option. The gap is what the move cost. Runs on background
+// workers when the browser allows it, otherwise in small slices between frames.
+const GRADES=[{k:'best',label:'Best',max:1},{k:'good',label:'Good',max:3},{k:'inacc',label:'Inaccuracy',max:6},{k:'mistake',label:'Mistake',max:12},{k:'blunder',label:'Blunder',max:1e9}];
+function gradeOf(loss){return GRADES.find(g=>loss<g.max).k;}
+let COACH=null;
+function resetCoach(n){COACH={gen:(COACH?COACH.gen:0)+1,turns:new Array(n).fill(0),decisions:[],queue:[],busy:false,hist:[],lastPi:null,view:null};}
+function coachTurn(pi){if(!COACH)return;COACH.turns[pi]=(COACH.turns[pi]||0)+1;}
+function sameMove(a,b){return a.mi===b.mi&&a.to===b.to&&a.kind===b.kind&&a.dir===b.dir;}
+function moveText(S,pi,mv,n){const t=describePure(S,pi,mv,n),nm=S.players[pi].name;return (t.startsWith(nm+' ')?t.slice(nm.length+1):t).replace(/!$/,'');}
+// S: the position just before the move (with real player names), pi: mover, n: roll
+function coachDecision(S,pi,n,moves,chosen){
+  if(!COACH||!moves||moves.length<2)return;
+  const opts=optionResults(S,pi,n,moves);if(opts.length<2)return;
+  const ci=moves.findIndex(m=>sameMove(m,chosen));if(ci<0)return;
+  const d={pi,n,turn:COACH.turns[pi]||1,board:B.kind,rules:S.rules,players:snapPlayers(S.players),
+    opts:opts.map(o=>({S:o.S,won:o.won,idxs:o.idxs,mv:moves[o.idxs[0]],kill:o.idxs.some(i=>moves[i].victim),text:moveText(S,pi,moves[o.idxs[0]],n)})),
+    chosen:opts.findIndex(o=>o.idxs.includes(ci)),done:false};
+  // seed from the position itself, so every device in an online game grades a move the same way
+  const key=pi+'|'+n+'|'+d.players.map(p=>p.marbles.map(m=>m.d).join(',')).join(';');let h=2166136261;
+  for(let i=0;i<key.length;i++){h^=key.charCodeAt(i);h=Math.imul(h,16777619);}d.seed=(h>>>1)||1;
+  COACH.decisions.push(d);COACH.queue.push(d);pumpCoach();
+}
+// ---- rollout runners: a small pool of workers built from the engine source, or the main thread
+const POOL={workers:[],idle:[],jobs:[],cb:{},id:0,tried:false};
+function engineSource(){const A='/*ENGINE-'+'START*/',Z='/*ENGINE-'+'END*/';const sc=[...document.scripts].find(x=>x.textContent.includes(A));if(!sc)return null;const t=sc.textContent;return t.slice(t.indexOf(A),t.indexOf(Z));}
+function initPool(){
+  if(POOL.tried)return;POOL.tried=true;
+  try{
+    const src=engineSource();if(!src||!window.Worker||!window.Blob)return;
+    const code=src+'\nonmessage=e=>{const m=e.data;try{if(!B||B.kind!==m.board)setBoard(m.board);postMessage({id:m.id,w:rolloutBatch(m.S,m.from,m.count,m.seed)});}catch(err){postMessage({id:m.id,err:String(err)});}};';
+    const url=URL.createObjectURL(new Blob([code],{type:'text/javascript'}));
+    const n=Math.max(1,Math.min(3,(navigator.hardwareConcurrency||2)-1));
+    for(let i=0;i<n;i++){const w=new Worker(url);
+      w.onmessage=e=>{const m=e.data,cb=POOL.cb[m.id];delete POOL.cb[m.id];POOL.idle.push(w);if(cb){if(m.err)mainBatch(cb.job).then(cb.res);else cb.res(m.w);}nextBatch();};
+      w.onerror=()=>{POOL.broken=true;};
+      POOL.workers.push(w);POOL.idle.push(w);}
+  }catch(e){POOL.workers=[];POOL.idle=[];}
+}
+function nextBatch(){
+  while(POOL.jobs.length&&POOL.idle.length&&!POOL.broken){
+    const {job,res}=POOL.jobs.shift(),w=POOL.idle.pop(),id=++POOL.id;POOL.cb[id]={job,res};
+    w.postMessage(Object.assign({id},job));
+  }
+  if(POOL.broken){const q=POOL.jobs.splice(0);q.forEach(x=>mainBatch(x.job).then(x.res));}
+}
+// main-thread fallback: a few rollouts at a time so the page stays smooth
+const MAINQ=[];let mainBusy=false;
+function mainBatch(job){return new Promise(res=>{MAINQ.push({job,res,done:[]});if(!mainBusy)mainTick();});}
+function mainTick(){
+  mainBusy=true;const t0=performance.now();
+  while(MAINQ.length&&performance.now()-t0<10){
+    const x=MAINQ[0],prevB=B;
+    if(B.kind!==x.job.board)setBoard(x.job.board);
+    const k=x.done.length;x.done.push(...rolloutBatch(x.job.S,x.job.from+k,1,x.job.seed));
+    if(prevB!==B)B=prevB;
+    if(x.done.length>=x.job.count){MAINQ.shift();x.res(x.done);}
+  }
+  if(MAINQ.length)setTimeout(mainTick,0);else mainBusy=false;
+}
+function runBatch(job){
+  initPool();
+  if(POOL.workers.length&&!POOL.broken)return new Promise(res=>{POOL.jobs.push({job,res});nextBatch();});
+  return mainBatch(job);
+}
+// ---- evaluate one decision: add rollouts until the gap between the pick and the best option is
+// known to within about 1.5 points (or 1200 playouts each), dropping options that are clearly worse
+async function evalDecision(d,gen){
+  const R=d.opts.map(o=>({w:[],won:o.won}));let active=d.opts.map((_,i)=>i),K=0;
+  const clean=JSON.parse(JSON.stringify(d.rules));
+  while(true){
+    const batch=active.filter(i=>!R[i].won).map(i=>runBatch({board:d.board,S:{rules:clean,turn:d.opts[i].S.turn,players:d.opts[i].S.players},from:K,count:100,seed:d.seed}).then(w=>{R[i].w.push(...w);}));
+    await Promise.all(batch);if(!COACH||COACH.gen!==gen)return false;
+    K+=100;
+    const win=(i,k)=>R[i].won?1:(R[i].w[k]===d.pi?1:0);
+    const mean=i=>{let s=0;for(let k=0;k<K;k++)s+=win(i,k);return s/K;};
+    const means=d.opts.map((_,i)=>active.includes(i)?mean(i):-1);
+    let b=active[0];active.forEach(i=>{if(means[i]>means[b])b=i;});
+    const c=d.chosen;let se=0;
+    if(b!==c){let s=0,s2=0;for(let k=0;k<K;k++){const x=win(b,k)-win(c,k);s+=x;s2+=x*x;}const m=s/K;se=Math.sqrt(Math.max(0,s2/K-m*m)/K);}
+    if(K>=200)active=active.filter(i=>i===c||i===b||means[i]>means[b]-.12);
+    if((K>=300&&se<=.015)||K>=1200||active.every(i=>R[i].won)){
+      d.vals=means;d.best=b;d.loss=Math.max(0,(means[b]-means[c])*100);d.grade=gradeOf(d.loss);
+      d.missedKill=d.opts[b].kill&&!d.opts[c].kill&&d.loss>=3;d.done=true;return true;
+    }
+  }
+}
+async function pumpCoach(){
+  if(!COACH||COACH.busy)return;COACH.busy=true;const gen=COACH.gen;
+  try{
+    while(COACH&&COACH.gen===gen&&COACH.queue.length){
+      const d=COACH.queue[0];
+      try{await evalDecision(d,gen);}catch(e){console.warn(e);d.done=true;d.loss=0;d.grade='best';d.vals=d.opts.map(()=>0);d.best=d.chosen;}
+      if(!COACH||COACH.gen!==gen)return;
+      COACH.queue.shift();renderStats();if(!$('winModal').hidden)renderReview();
+    }
+  }finally{if(COACH&&COACH.gen===gen)COACH.busy=false;}
+}
+// ---- per-player summary
+function coachSummary(qi){
+  if(!COACH||!G)return null;const P=G.players[qi];if(P.type!=='human')return null;
+  const ds=COACH.decisions.filter(d=>d.pi===qi),done=ds.filter(d=>d.done);
+  const cnt={};GRADES.forEach(g=>cnt[g.k]=0);done.forEach(d=>cnt[d.grade]++);
+  // only moves that clearly cost something (3+ points) count toward the total, so estimate noise on
+  // near-equal choices doesn't pile up
+  const lost=done.reduce((s,d)=>s+(d.loss>=3?d.loss:0),0);
+  return {graded:done.length,pending:ds.length-done.length,cnt,lost,
+    acc:done.length?Math.round(100*(cnt.best+cnt.good)/done.length):null,
+    missed:done.filter(d=>d.missedKill).length,
+    worst:done.filter(d=>d.loss>=3).sort((a,b)=>b.loss-a.loss).slice(0,3)};
+}
+function coachStat(k,qi){
+  const s=coachSummary(qi);if(!s)return {v:null,text:'–'};
+  if(k==='acc')return s.acc===null?{v:null,text:s.pending?'…':'–'}:{v:s.acc,text:s.acc+'%'};
+  if(k==='blunders')return {v:s.cnt.blunder,text:String(s.cnt.blunder)};
+  if(k==='mistakes')return {v:s.cnt.mistake,text:String(s.cnt.mistake)};
+  if(k==='missed')return {v:s.missed,text:String(s.missed)};
+  if(k==='wlost')return {v:Math.round(s.lost),text:Math.round(s.lost)+' pts'};
+  return {v:null,text:'–'};
+}
+function oddsHistory(pct){if(!COACH||!G)return;const last=COACH.hist[COACH.hist.length-1];
+  if(last&&last.pct.join()===pct.join())return;COACH.hist.push({pct:pct.slice(),tn:COACH.turns.slice()});}
+// ---- end-of-game review
+function pctTxt(v){const p=Math.round(v*100);return p<1&&v>0?'<1%':p+'%';}
+function reviewChart(){
+  const H=COACH.hist.slice();if(G.winner!==null)H.push({pct:G.players.map((_,i)=>i===G.winner?100:0),tn:COACH.turns.slice()});
+  if(H.length<3)return null;
+  const W=innerWidth<560?360:520,Ht=170,pl=34,pr=74,pt=10,pb=22,iw=W-pl-pr,ih=Ht-pt-pb,X=i=>pl+iw*i/(H.length-1),Y=v=>pt+ih*(1-v/100);
+  const ink=c=>COLORS[c].hex;
+  let h=`<svg class="rv-chart" viewBox="0 0 ${W} ${Ht}" role="img" aria-label="Chance to win over the game"><g class="rv-grid">`;
+  [0,25,50,75,100].forEach(v=>{h+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${pl-6}" y="${Y(v)}" dy=".32em" text-anchor="end">${v}%</text>`;});
+  h+=`</g><text class="rv-ax" x="${pl}" y="${Ht-4}">Start</text><text class="rv-ax" x="${W-pr}" y="${Ht-4}" text-anchor="end">End</text>`;
+  const ends=G.players.map((Q,qi)=>({qi,y:Y(H[H.length-1].pct[qi])})).sort((a,b)=>a.y-b.y);
+  for(let i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<12)ends[i].y=ends[i-1].y+12;
+  G.players.forEach((Q,qi)=>{const pts=H.map((e,i)=>X(i).toFixed(1)+','+Y(e.pct[qi]).toFixed(1)).join(' ');
+    h+=`<polyline points="${pts}" fill="none" stroke="${ink(Q.c)}" stroke-width="${qi===G.winner?2.5:2}" stroke-linejoin="round" stroke-linecap="round" class="rv-line"/>`;
+    const e=ends.find(x=>x.qi===qi);h+=`<text class="rv-lab" x="${W-pr+6}" y="${e.y}" dy=".32em"><tspan fill="${ink(Q.c)}">●</tspan> ${esc(Q.name.length>9?Q.name.slice(0,8)+'…':Q.name)}</text>`;});
+  h+=`<line class="rv-cross" x1="0" x2="0" y1="${pt}" y2="${pt+ih}" visibility="hidden"/><rect class="rv-hit" x="${pl}" y="${pt}" width="${iw}" height="${ih}" fill="transparent"/></svg>`;
+  const wrap=document.createElement('div');wrap.className='rv-chart-wrap';wrap.innerHTML=h+'<div class="rv-tip" hidden></div>';
+  const svg=wrap.querySelector('svg'),tip=wrap.querySelector('.rv-tip'),cross=svg.querySelector('.rv-cross');
+  const move=ev=>{const r=svg.getBoundingClientRect(),x=(ev.clientX-r.left)*W/r.width;let i=Math.round((x-pl)/iw*(H.length-1));i=Math.max(0,Math.min(H.length-1,i));
+    cross.setAttribute('x1',X(i));cross.setAttribute('x2',X(i));cross.setAttribute('visibility','visible');
+    const rows=G.players.map((Q,qi)=>({Q,v:H[i].pct[qi]})).sort((a,b)=>b.v-a.v);
+    tip.innerHTML='<div class="rv-tt">'+(i===0?'Start':i===H.length-1?'End':`Turn ${Math.max(1,...H[i].tn)}`)+'</div>'+rows.map(r=>`<div><span class="dot" style="background:${ink(r.Q.c)}"></span>${esc(r.Q.name)} <b>${r.v}%</b></div>`).join('');
+    tip.hidden=false;const left=X(i)/W*r.width;tip.style.left=Math.min(r.width-140,Math.max(0,left+10))+'px';};
+  svg.addEventListener('pointermove',move);svg.addEventListener('pointerdown',move);
+  svg.addEventListener('pointerleave',()=>{tip.hidden=true;cross.setAttribute('visibility','hidden');});
+  return wrap;
+}
+function verdict(qi,s){
+  const P=G.players[qi],won=qi===G.winner,N=G.players.length;
+  const start=COACH.hist.length?COACH.hist[0].pct[qi]:100/N,end=won?100:0;
+  let peak=start,peakTn=1;COACH.hist.forEach(e=>{if(e.pct[qi]>peak){peak=e.pct[qi];peakTn=e.tn[qi]||1;}});
+  const rivals=Math.round(end-start+s.lost),lost=Math.round(s.lost);
+  let v;
+  if(won)v=lost<5?'Won it with clean play.':'Won it, even with a few costly moves (below).';
+  else if(lost<6)v='Played it well. The dice and the other players decided this one.';
+  else if(lost>=-rivals)v='Your moves cost more than the dice did. The costliest ones are below; the better move would have kept you in it.';
+  else v='Mostly the dice and the other players, but the moves below didn\'t help.';
+  const peakTxt=!won&&peak>=start+8?` Peaked at ${Math.round(peak)}% on turn ${peakTn}.`:'';
+  return {v:v+peakTxt,lost,rivals};
+}
+function renderReview(){
+  const box=$('winReview');if(!box||!G||!COACH)return;box.innerHTML='';
+  const humans=G.players.map((Q,qi)=>qi).filter(qi=>G.players[qi].type==='human');
+  const h=document.createElement('h3');h.className='rv-title';h.textContent='Game review';box.appendChild(h);
+  const ch=reviewChart();if(ch){const cap=document.createElement('p');cap.className='rv-cap';cap.textContent='Chance to win over the game';box.append(cap,ch);}
+  if(!humans.length)return;
+  const pending=COACH.decisions.filter(d=>!d.done).length;
+  if(pending){const p=document.createElement('p');p.className='fine rv-pending';p.textContent=`Reviewing moves… ${pending} left`;box.appendChild(p);}
+  humans.forEach(qi=>{
+    const Q=G.players[qi],s=coachSummary(qi),card=document.createElement('div');card.className='rv-card';
+    const vd=verdict(qi,s);
+    let html=`<div class="rv-head"><span class="dot" style="background:${marbleBg(Q.c)}"></span><b>${esc(Q.name)}</b>`+
+      (s.acc!==null?`<span class="rv-acc">${s.acc}% accurate</span>`:'')+`</div>`;
+    if(!s.graded&&!s.pending)html+=`<p class="rv-v">No real choices to grade this game. Every move was forced.</p>`;
+    else{
+      html+=`<div class="rv-grades">`+GRADES.map(g=>`<span class="rv-g rv-${g.k}">${g.label} <b>${s.cnt[g.k]}</b></span>`).join('')+`</div>`;
+      html+=`<p class="rv-v">${esc(vd.v)}</p><p class="rv-split" title="Points of chance to win, added up over the game">Moves gave away <b>${vd.lost} pts</b> · Dice &amp; other players <b>${vd.rivals>0?'+':vd.rivals<0?'−':''}${Math.abs(vd.rivals)} pts</b></p>`;
+      if(s.worst.length){html+=`<ol class="rv-list">`;s.worst.forEach(d=>{const di=COACH.decisions.indexOf(d),c=d.opts[d.chosen],b=d.opts[d.best];
+        html+=`<li><div class="rv-when">Turn ${d.turn} · rolled ${d.n} · <span class="rv-g rv-${d.grade}">${GRADES.find(g=>g.k===d.grade).label}</span></div>`+
+          `<div>You: ${esc(c.text)} <span class="rv-pct">${pctTxt(d.vals[d.chosen])}</span></div>`+
+          `<div class="rv-better">Better: ${esc(b.text)} <span class="rv-pct">${pctTxt(d.vals[d.best])}</span></div>`+
+          `<button class="btn rv-show" type="button" data-d="${di}">Show on board</button></li>`;});html+=`</ol>`;}
+      else if(s.graded)html+=`<p class="fine">No moves cost more than 3%. Nothing to fix.</p>`;
+      if(s.missed)html+=`<p class="fine">Missed ${s.missed} kill${s.missed>1?'s':''} that would have been the better move.</p>`;
+    }
+    card.innerHTML=html;box.appendChild(card);
+  });
+  box.querySelectorAll('.rv-show').forEach(b=>b.onclick=()=>showDecision(COACH.decisions[+b.dataset.d]));
+}
+// show a reviewed position on the board: white arrow = the move played, green = the better move
+function showDecision(d){
+  if(!G||!d)return;
+  if(!COACH.view)COACH.view={players:G.players,turn:G.turn,phase:G.phase,roll:G.roll};
+  G.players=COACH.view.players.map((Q,qi)=>Object.assign({},Q,{marbles:d.players[qi].marbles.map(m=>({d:m.d,dx:m.dx}))}));
+  G.turn=d.pi;G.phase='review';G.roll=d.n;G.moves=[];G.sel=null;setDie(d.n,false);
+  $('winModal').hidden=true;renderLive();renderPanel();LAYERS.odds.innerHTML='';
+  const draw=(mv,col,mk,label)=>{
+    const pts=[posOf(d.pi,mv.mi)].concat(mv.path.map(stepPos));const end=pts[pts.length-1],prev=pts[pts.length-2]||end,len=Math.hypot(end.x-prev.x,end.y-prev.y)||1;
+    const tip={x:end.x-(end.x-prev.x)/len*.55,y:end.y-(end.y-prev.y)/len*.55};
+    el('polyline',{points:pts.slice(0,-1).concat([tip]).map(p=>f(p.x)+','+f(p.y)).join(' '),fill:'none',stroke:col,'stroke-width':.16,'stroke-linecap':'round','stroke-linejoin':'round','stroke-dasharray':mk==='rvyou'?'.05 .22':'none','marker-end':`url(#arr-${mk})`},LAYERS.ghostLines);
+    const g=el('g',{transform:`translate(${f(end.x)} ${f(end.y)})`},LAYERS.ghostDest);
+    el('circle',{r:.55,fill:'none',stroke:col,'stroke-width':.12},g);
+    const w=.3+label.length*.3;el('rect',{x:f(-w/2),y:-1.25,width:f(w),height:.6,rx:.3,fill:col,stroke:'#1C2520','stroke-width':.04},g);
+    el('text',{y:-.94,'font-size':.4,'font-weight':800,'font-family':'Archivo, sans-serif',fill:'#1C2520','text-anchor':'middle','dominant-baseline':'central'},g).textContent=label;
+  };
+  draw(d.opts[d.chosen].mv,'#FFFFFF','rvyou','You');draw(d.opts[d.best].mv,'#3FB37A','fwd','Better');
+  const Q=G.players[d.pi];
+  setStatus(`<b>${esc(Q.name)}</b>, turn ${d.turn}, rolled <b>${d.n}</b>. You: ${esc(d.opts[d.chosen].text)} (${pctTxt(d.vals[d.chosen])}). Better: ${esc(d.opts[d.best].text)} (${pctTxt(d.vals[d.best])}). <button class="btn rv-back" id="rvBack" type="button">Back to review</button>`);
+  $('rvBack').onclick=closeDecision;$('rvBack').focus({preventScroll:true});
+}
+function closeDecision(){
+  if(!G||!COACH||!COACH.view)return;const v=COACH.view;COACH.view=null;
+  G.players=v.players;G.turn=v.turn;G.phase=v.phase;G.roll=v.roll;if(v.roll)setDie(v.roll,false);renderLive();renderPanel();setStatus('Game over.');
+  $('winModal').hidden=false;
 }
 
 // ================= HEADER TOOLS =================
@@ -1472,6 +1765,7 @@ function showWin(pi){
     .forEach((r,k)=>{const li=document.createElement('li');li.innerHTML=`<span style="width:20px;color:var(--muted)">${k+1}</span><span class="dot" style="width:14px;height:14px;border-radius:50%;background:${COLORS[r.Q.c].hex}"></span><span style="flex:1">${esc(r.Q.name)}</span><span>${r.h}/4 home</span>`;st.appendChild(li);});
   const wb=$('winStats');wb.innerHTML='';const aw=document.createElement('div');aw.className='awards';aw.innerHTML=awards();if(aw.innerHTML)wb.appendChild(aw);
   const sc=document.createElement('div');sc.className='table-scroll';sc.appendChild(statsTable(STAT_COLS,true));wb.appendChild(sc);
+  if(COACH)COACH.view=null;renderReview();
   $('winModal').hidden=false;$('winAgain').focus();confetti();
 }
 $('winAgain').onclick=()=>{if(G&&G.online){if(ON.isHost)startOnlineGame();return;}$('winModal').hidden=true;startGame();};
@@ -1718,6 +2012,13 @@ async function processQueue(){
       const v=ON.queue.shift();if(v.seq<=ON.seq)continue;
       let ns;try{ns=JSON.parse(v.g);}catch(e){continue;}
       const fresh=!G||!G.online||G.gid!==ns.gid;
+      if(fresh){resetCoach(ns.players.length);coachTurn(ns.turn);}
+      else{
+        const ev=ns.ev;
+        if(ev&&ev.t==='move'&&!ev.auto&&G.phase==='move'&&G.turn===ev.pi&&G.roll===ev.n&&G.players[ev.pi].type==='human')
+          try{coachDecision(G,ev.pi,ev.n,legalMoves(G,ev.pi,ev.n),ev.mv);}catch(e){console.warn(e);}
+        if(ns.turn!==G.turn)coachTurn(ns.turn);
+      }
       if(!fresh&&$('game').hidden===false)await presentTransition(ns,ON.queue.length>0);
       ON.seq=v.seq;installState(ns,fresh);
     }
@@ -1841,7 +2142,7 @@ function start(data){
   buildBoard($('heroBoard'),'M',makeBoard('hex'),{mini:true});
   const g=data.game;
   if(g&&g.winner===null&&g.board&&g.stats&&g.players.every(p=>typeof p.s==='number')){
-    G=Object.assign(newGameState(),{board:g.board,rules:g.rules,players:g.players,stats:g.stats,turn:g.turn,log:g.log||[]});
+    G=Object.assign(newGameState(),{board:g.board,rules:g.rules,players:g.players,stats:g.stats,turn:g.turn,log:g.log||[]});resetCoach(G.players.length);
     setBoard(g.board);buildBoard($('boardStatic'),'S',B);
     $('lobby').hidden=true;$('game').hidden=false;$('tools').hidden=false;buildLive();renderLog();beginTurn();
   }else showLobby();
