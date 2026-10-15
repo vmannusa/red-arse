@@ -1,6 +1,8 @@
 # Red Arse – Change log
 
 ## 2026-10-15
+- **Move review:** every real choice a human player makes is graded Best, Good, Inaccuracy, Mistake or Blunder by how much chance to win it gave up versus the best move. New stats: accuracy, blunders, mistakes, missed kills and points lost to moves (Acc also shows in the side panel; Corners moved to the full Stats window to make room).
+- **End-of-game review:** a chance-to-win chart for the whole game, plus a card for each human player with their grades, whether the moves or the dice cost them, and their 3 costliest moves with the better play and a **Show on board** button.
 - **Bots gang up on the leader:** as someone's chance to win climbs, Medium and Hard bots go after that player's marbles first; Hard bots also line up behind the leader's marbles.
 - **What's new** link on the setup screen (next to How to play) and in the rules, pointing to this change log.
 - Filled gaps in the in-game rules: a 1 from a star goes into the center, unlocked home marbles can back out on a 4, and how chance to win is worked out. Added RULES.md and this change log to GitHub.
