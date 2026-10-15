@@ -495,6 +495,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <h3>Shortcuts</h3>
         <ul>
           <li><b>Inside corners</b> (the stars): a marble that starts its turn on an inside corner can hop clockwise from corner to corner, one corner per pip, instead of moving along the track. The roll must be used exactly on corners (a 3 means exactly 3 corners), with no extra steps onto the track or into the center. Hops can pass over any marble on the corners in between, yours included, but can't land on your own. You can't go past your own color's inside corner (the one before your home).</li>
+          <li><b>Backward hop on a 4</b> (6-player board): a marble on an inside corner can instead hop exactly 4 inside corners counter-clockwise. Going backward it <i>can</i> pass your own home corner. Backing behind your start this way works like the back-past-start shortcut. (On the 4-player board 4 back is a full circle, so there's no backward hop.)</li>
           <li><b>Center hole:</b> a roll that passes over an inside corner with one step left can finish in the center. A 6 from your start hole goes straight in, and so does a 1 from an inside corner. Leave the center on a <b>1</b> or a <b>6</b>, to any inside corner.</li>
         </ul>
       </section>
@@ -503,7 +504,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <ul>
           <li>On a <b>4</b> you choose: forward, or 4 holes counter-clockwise. 4 is the only roll that can move backward.</li>
           <li>If no forward move is possible on a 4, you must move backward.</li>
-          <li>Backward moves follow the track only. They can't hop inside corners or go straight into home, but they can drop into the center and kill.</li>
+          <li>Backward moves follow the track one hole at a time, except the backward inside-corner hop (see Shortcuts). They can't go straight into home, but they can drop into the center and kill.</li>
           <li>Home marbles that aren't locked in can back out of home onto the track.</li>
           <li>Backing up behind your own start hole parks that marble right outside your home.</li>
         </ul>
@@ -715,6 +716,15 @@ function legalMoves(S,pi,n){
     }
     // Backward 4: track marbles, and home marbles that aren't locked in (they back out of home).
     if(n===4&&R.back&&(onTrack(d0)||inHome(d0)))backWalk(d0,4,[],false);
+    // Backward inside-corner hop: from an inside corner, a 4 can hop exactly 4 inside corners
+    // counter-clockwise, and may pass your own home corner going that way. (On the 4-player board,
+    // 4 corners back is a full circle, so there is no such move.)
+    if(n===4&&R.back&&R.stars&&onTrack(d0)&&isStar(gOf(c,d0))&&(14*4)%B.L!==0){
+      const p=[];for(let h=1;h<=4;h++)p.push({k:'t',g:gOf(c,d0-14*h),hop:true});
+      const nd0=d0-56,g=gOf(c,nd0);
+      if(!ownAt(g)){let to=nd0;if(R.backShortcut&&to<0){to=mod(to,B.L);if(to===B.L-1)to=-1;}
+        back.push(mk(mi,d0,to,p,'back',foeAt(g),'backStars'));}
+    }
   });
   const seen=new Set();const uniq=a=>a.filter(mv=>{const k=mv.mi+'|'+mv.to+'|'+mv.dir;if(seen.has(k))return false;seen.add(k);return true;});
   const F=uniq(fwd),Bk=uniq(back);
@@ -808,7 +818,7 @@ function describePure(S,pi,mv,roll){
   else if(mv.kind==='exitCenter')t=`${P.name} left the center`;
   else if(mv.to==='C')t=mv.dir==='back'?`${P.name} backed into the center hole`:`${P.name} took the center hole`;
   else if(mv.kind==='home'||mv.kind==='homeShift')t=`${P.name} moved ${roll} into home`;
-  else if(mv.kind==='backStars')t=`${P.name} moved back 4 using the stars`;
+  else if(mv.kind==='backStars')t=`${P.name} hopped back 4 inside corners`;
   else if(mv.kind==='raid'){const q=S.players.find(x=>x.s===parseFH(mv.to)[0]);t=`${P.name} raided ${q?q.name:'a'}'s home`;}
   else if(mv.kind==='backOut')t=`${P.name} backed a marble out of home`;
   else if(mv.kind==='raidOut')t=`${P.name} backed out of a raided home`;
@@ -1067,9 +1077,9 @@ const RULE_DEFS=[
   {k:'rollOff',label:'Highest roll goes first',sub:'Everyone rolls at the start; ties roll again. Off: the first seat starts.',def:true},
   {k:'oneOrSix',label:'Leave base on 1 or 6',sub:'Off: only a 6 brings a marble out.',def:true},
   {k:'rollAgain',label:'Roll again on 6',sub:'A 6 gives the same player another roll.',def:true},
-  {k:'stars',label:'Inside corner shortcuts',sub:'From an inside corner (star), hop clockwise exactly one inside corner per pip, never past your own.',def:true},
+  {k:'stars',label:'Inside corner shortcuts',sub:'From an inside corner (star), hop clockwise exactly one inside corner per pip, never past your own. On a 4 you can instead hop 4 back (6-player board).',def:true},
   {k:'center',label:'Center hole',sub:'Finish a roll one step past an inside corner to drop in (a 6 from your start hole works). Leave on a 1 or 6, to any inside corner.',def:true},
-  {k:'back',label:'Backward on 4',sub:'A 4 can move forward or back. Backward follows the track (no inside-corner hops). Forced if no forward move.',def:true,house:true},
+  {k:'back',label:'Backward on 4',sub:'A 4 can move forward or back 4 holes. From an inside corner it can also hop 4 inside corners back. Forced if no forward move.',def:true},
   {k:'backShortcut',label:'Back-past-start shortcut',sub:'Backing up behind your start sets you up to enter home.',def:true,house:true},
   {k:'corners',label:'Outside corners: roll again',sub:'End a move on an outside corner hole to roll again, backward moves included. Coming out of base onto your start doesn\'t count.',def:true},
   {k:'homeRaid',label:'Raid homes',sub:'Turn into (or back into) another player\'s home to kill a marble that isn\'t locked in. You stay there until you back out with a 4.',def:true},
