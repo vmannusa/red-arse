@@ -388,7 +388,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <ul>
           <li>Roll the die, then move one marble that many holes. Marbles travel clockwise.</li>
           <li>Dotted arrows show every move you can make. Tap a marble, or tap a landing spot to move straight there.</li>
-          <li>You can jump over other players' marbles, but you can't jump over or land on your own.</li>
+          <li>You can jump over other players' marbles, but you can't jump over or land on your own. (Star hops are the exception: they can pass your own marbles sitting on stars in between.)</li>
           <li>If no move is possible, your turn ends.</li>
         </ul>
       </section>
@@ -420,7 +420,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
       <section>
         <h3>Shortcuts</h3>
         <ul>
-          <li><b>Stars:</b> a marble that starts its turn on a star can hop clockwise from star to star, one star per pip. The roll must be used exactly on stars (a 3 means exactly 3 stars), with no extra steps onto the track or into the center. You can't go past your own color's star.</li>
+          <li><b>Stars:</b> a marble that starts its turn on a star can hop clockwise from star to star, one star per pip. The roll must be used exactly on stars (a 3 means exactly 3 stars), with no extra steps onto the track or into the center. Hops can pass over any marble on the stars in between, yours included, but can't land on your own. You can't go past your own color's star.</li>
           <li><b>Center hole:</b> a roll that passes over a star with one step left can finish in the center. A 6 from your start hole goes straight in. Leave the center only on a <b>1</b>, to any star.</li>
         </ul>
       </section>
@@ -569,7 +569,6 @@ function legalMoves(S,pi,n){
       const p=[];
       for(let h=1;h<=n;h++){
         const nd=d0+14*h;if(nd>B.OWNSTAR)break; // never hop past own star
-        if(ownAt(gOf(c,nd)))break; // can't hop onto or over your own marble
         p.push({k:'t',g:gOf(c,nd),hop:true});
         // the whole roll must be spent on stars: a 3 means exactly 3 stars, nothing extra on the track or into the center
         if(h===n){const g=gOf(c,nd);if(!ownAt(g))fwd.push(mk(mi,d0,nd,p.slice(),'fwd',foeAt(g),'stars'));}
