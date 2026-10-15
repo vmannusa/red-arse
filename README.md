@@ -5,6 +5,8 @@ pass-and-play on one device, and online rooms with friends.
 
 **Play:** https://vmannusa.github.io/red-arse/
 
+![Red Arse: a 4-player game in progress on the 6-player wooden hex board, with chance-to-win percentages, the game feed and player stats](screenshot.jpg)
+
 - [How to play (full rules)](RULES.md)
 - [Change log](CHANGELOG.md)
 
@@ -17,6 +19,8 @@ pass-and-play on one device, and online rooms with friends.
 | `database.rules.json` | Security rules to paste into Firebase Realtime Database. |
 | `RULES.md` | The full rules. |
 | `CHANGELOG.md` | What changed and when. |
+| `screenshot.jpg` | The screenshot above. |
+| `LICENSE` | MIT license. |
 
 ## Part 1: Host it free on GitHub Pages
 
@@ -53,3 +57,7 @@ Bots and pass-and-play work right away. Online rooms stay hidden until Part 2 is
 
 Open the game with `?net=local` at the end of the address and use two tabs in the same browser.
 The tabs share a pretend database, so you can try rooms, bots, timers and leaving.
+
+## License
+
+[MIT](LICENSE)
