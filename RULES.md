@@ -82,7 +82,7 @@ After every move the game plays the rest of the match out 300 times with medium-
 - Bots aren't graded. Moves auto-played for an away player online aren't graded either. In online games every device grades the same moves the same way.
 - The review runs in the background, so it never slows the game down.
 
-## Online rooms (once Firebase is set up)
+## Online rooms
 - Create a room for a 4-letter code and invite link; the host picks the board, adds bots and sets the turn timer.
 - Run out of time and your turn is auto-played; miss two turns and you're auto-played until you tap **I'm back**.
 - If someone leaves, their marbles are auto-played; if the host leaves, the next player becomes host.
