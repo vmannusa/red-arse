@@ -3,6 +3,11 @@
 The wooden-board marble game (6-player or 4-player hex board) with bots,
 pass-and-play on one device, and online rooms with friends.
 
+**Play:** https://vmannusa.github.io/red-arse/
+
+- [How to play (full rules)](RULES.md)
+- [Change log](CHANGELOG.md)
+
 ## Files
 
 | File | What it is |
@@ -10,6 +15,8 @@ pass-and-play on one device, and online rooms with friends.
 | `index.html` | The whole game. |
 | `config.js` | Online play settings. `null` = offline only (bots + pass-and-play). |
 | `database.rules.json` | Security rules to paste into Firebase Realtime Database. |
+| `RULES.md` | The full rules. |
+| `CHANGELOG.md` | What changed and when. |
 
 ## Part 1: Host it free on GitHub Pages
 
