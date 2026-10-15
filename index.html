@@ -215,6 +215,12 @@ table.stats td.top{color:var(--warn);font-weight:800}
 .timer.warn{color:var(--danger);font-weight:700}
 #backBtn{margin-top:8px;width:100%}
 @media (max-width:640px){.online-grid{grid-template-columns:minmax(0,1fr)}}
+.howto{margin-top:10px;height:36px;font-size:14px}
+.modal .card.rules-card{max-width:820px}
+.rules-lede{margin:0 0 12px;font-size:15px}
+.rules-grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:4px 22px}
+.rules-grid-2 h3{font-family:var(--font-display);font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:10px 0 2px}
+.rules-grid-2 ul{margin:4px 0;padding-left:18px}
 /* ---------- Modals ---------- */
 .modal{position:fixed;inset:0;background:rgba(10,15,12,.55);display:flex;align-items:center;justify-content:center;z-index:20;
   padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
@@ -264,6 +270,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <div>
           <h1>Red Arse</h1>
           <p class="lede">The classic wooden marble game on the 6-player or 4-player hex board. Add people playing on this device, fill the other seats with bots, then start.</p>
+          <button class="btn howto" id="lobbyRules" type="button">How to play</button>
         </div>
       </div>
       <section class="card online-card" id="onlineCard" hidden>
@@ -368,21 +375,62 @@ table.stats td.top{color:var(--warn);font-weight:800}
 </div>
 
 <div class="modal" id="rulesModal" hidden>
-  <div class="card" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
-    <h2 id="rulesTitle">How to play</h2>
-    <ul>
-      <li><b>Boards:</b> the 6-player and 4-player hex boards play exactly the same; the 4-player board just has 4 sections, so its track is shorter (56 holes instead of 84).</li>
-      <li><b>Goal:</b> be the first to get all 4 marbles from your BASE around the board and into your HOME column.</li>
-      <li><b>Leave base:</b> roll a 1 or a 6 to put a marble on your start hole (the colored ring next to your base). A 6 also gives you another roll.</li>
-      <li><b>Move:</b> marbles travel clockwise. You can jump over any marble, but you can't land on your own.</li>
-      <li><b>Aggravate:</b> land exactly on an opponent to send it back to their base.</li>
-      <li><b>Home:</b> after a full lap, turn into your home column. You need the exact count and can't jump your own marbles there.</li>
-      <li><b>Stars:</b> if a marble starts its turn on a star hole, it can hop star-to-star clockwise (1 step per hop), but not past your own color's star.</li>
-      <li><b>Center:</b> any roll that passes over a star with exactly one step left can finish in the center hole. For example, a marble on its start hole that rolls a 6 can go straight in. Leave the center only on a roll of 1, to any star.</li>
-      <li><b>Backward 4 (house rule):</b> 4 is the only roll that can move backward. On a 4 you may move a marble on the track 4 holes backward instead of forward, and you must if no forward move is possible. Backward moves can hop stars and drop into the center, but can't go straight into home. Backing up behind your own start hole puts that marble right next to your home.</li>
-      <li><b>Inside corners (house rule):</b> end any move, forward or backward, on an edge corner hole on either side of a home column and you roll again. Your own start hole counts when you back onto it with a 4, but not when a marble comes out of base onto it.</li>
-      <li><b>No move:</b> on any other roll with no legal move, your turn ends. A 6 still gets you another roll.</li>
-    </ul>
+  <div class="card rules-card" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+    <h2 id="rulesTitle">How to play Red Arse</h2>
+    <p class="rules-lede">Race all 4 of your marbles from your <b>BASE</b>, once around the board, and into your <b>HOME</b> column. First player with 4 marbles home wins.</p>
+    <div class="rules-grid-2">
+      <section>
+        <h3>Your turn</h3>
+        <ul>
+          <li>Roll the die, then move one marble that many holes. Marbles travel clockwise.</li>
+          <li>Dotted arrows show every move you can make. Tap a marble, or tap a landing spot to move straight there.</li>
+          <li>You can jump over any marble, but you can't land on your own.</li>
+          <li>If no move is possible, your turn ends.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Getting out</h3>
+        <ul>
+          <li>Roll a <b>1</b> or a <b>6</b> to put a marble from your base on your start hole (the colored ring next to your base).</li>
+        </ul>
+        <h3>Getting home</h3>
+        <ul>
+          <li>After a full lap, turn into your home column. You need the exact count and can't jump your own marbles there.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Aggravate (kill)</h3>
+        <ul>
+          <li>Land exactly on an opponent to send that marble back to their base.</li>
+          <li>Moving backward or into the center can kill too.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Roll again when you…</h3>
+        <ul>
+          <li>Roll a <b>6</b>.</li>
+          <li>Get a <b>kill</b>.</li>
+          <li>End a move on an <b>inside corner</b>: the corner holes on either side of any home column. Your own start hole counts when you back onto it with a 4, not when a marble comes out of base.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Shortcuts</h3>
+        <ul>
+          <li><b>Stars:</b> a marble that starts its turn on a star can hop star-to-star clockwise, 1 step per hop, but not past your own color's star.</li>
+          <li><b>Center hole:</b> a roll that passes over a star with one step left can finish in the center. A 6 from your start hole goes straight in. Leave the center only on a <b>1</b>, to any star.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Backward 4</h3>
+        <ul>
+          <li>4 is the only roll that can move backward: 4 holes counter-clockwise instead of forward.</li>
+          <li>If no forward move is possible on a 4, you must move backward.</li>
+          <li>Backward moves can hop stars, drop into the center and kill, but can't go straight into home.</li>
+          <li>Backing up behind your own start hole parks that marble right outside your home.</li>
+        </ul>
+      </section>
+    </div>
+    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen.</p>
     <div class="actions"><button class="btn primary" id="rulesClose" type="button">Got it</button></div>
   </div>
 </div>
@@ -627,12 +675,17 @@ function describePure(S,pi,mv,roll){
   return t;
 }
 function logPure(S,pi,text,cls){S.log=S.log||[];S.log.unshift({c:pi===null?null:S.players[pi].c,text,cls:cls||''});if(S.log.length>40)S.log.length=40;}
-function endTurnPure(S,n,corner){
-  const six=n===6&&S.rules.rollAgain;S.again='';
-  if(six||corner){
-    S.again=corner&&!six?'Landed on a corner, roll again!':corner?'Rolled a 6 and landed on a corner, roll again!':'Rolled a 6, roll again!';
-    logPure(S,S.turn,`${S.players[S.turn].name} ${corner&&!six?'landed on a corner':'rolled a 6'} and goes again`);
-  }else{S.stats[S.turn].run=0;S.turn=(S.turn+1)%S.players.length;}
+// Bonus rolls: a 6, landing on an inside corner, or aggravating (killing) an opponent each earn another roll.
+function bonusRoll(rules,n,corner,kill){
+  const why=[];if(n===6&&rules.rollAgain)why.push('rolled a 6');if(corner)why.push('landed on a corner');if(kill&&rules.killAgain)why.push('got a kill');
+  if(!why.length)return null;
+  const list=why.length===1?why[0]:why.slice(0,-1).join(', ')+' and '+why[why.length-1];
+  return {again:list.charAt(0).toUpperCase()+list.slice(1)+', roll again!',log:list};
+}
+function endTurnPure(S,n,corner,kill){
+  const b=bonusRoll(S.rules,n,corner,kill);S.again='';
+  if(b){S.again=b.again;logPure(S,S.turn,`${S.players[S.turn].name} ${b.log}: another roll`);}
+  else{S.stats[S.turn].run=0;S.turn=(S.turn+1)%S.players.length;}
   S.phase='roll';S.roll=null;
 }
 // o.manual: the seat's own player acted. o.timeout: the turn timer ran out and the host auto-played it.
@@ -660,7 +713,7 @@ function reduceMove(S0,mv,o={}){
   if(o.manual){P.missed=0;P.away=false;}
   S.ev={t:'move',pi,mv,n,corner};
   if(hasWon(S.players[pi])){S.winner=pi;S.phase='over';}
-  else endTurnPure(S,n,corner);
+  else endTurnPure(S,n,corner,!!mv.victim);
   return S;
 }
 /*ENGINE-END*/
@@ -805,6 +858,7 @@ const RULE_DEFS=[
   {k:'back',label:'Backward on 4',sub:'Only a 4 moves back, stars and center included. Forced if no forward move.',def:true,house:true},
   {k:'backShortcut',label:'Back-past-start shortcut',sub:'Backing up behind your start sets you up to enter home.',def:true,house:true},
   {k:'corners',label:'Inside corners: roll again',sub:'End a move on an edge corner hole to roll again, backward moves included. Coming out of base onto your start doesn\'t count.',def:true,house:true},
+  {k:'killAgain',label:'Kill: roll again',sub:'Aggravate an opponent (send them back to base) and you roll again.',def:true,house:true},
   {k:'autoSingle',label:'Auto-play forced moves',sub:'If only one move is possible, make it automatically.',def:true},
 ];
 const TYPE_LABEL={human:'Human',easy:'Bot · Easy',medium:'Bot · Medium',hard:'Bot · Hard'};
@@ -923,7 +977,7 @@ function newGameState(){
   const players=setup.players.map(p=>({name:(p.name||'').trim()||COLORS[p.c].name,c:p.c,s:sec(p.c),type:p.type,marbles:[0,1,2,3].map(()=>({d:null}))}))
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
   const r=setup.rules;
-  return {token:++tokenSeq,board:bd.kind,rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,autoSingle:r.autoSingle},
+  return {token:++tokenSeq,board:bd.kind,rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,autoSingle:r.autoSingle},
     players,stats:players.map(blankStats),turn:0,phase:'roll',roll:null,moves:[],sel:null,log:[],winner:null,again:'',msg:''};
 }
 function resetHeader(){$('btnRestart').hidden=false;$('roomChip').hidden=true;$('btnLobby').querySelector('span').textContent='Players';$('turnTimer').textContent='';$('backBtn').hidden=true;}
@@ -995,14 +1049,11 @@ async function doRoll(){
   if(mis.length===1||(mis.length===baseMis.length))G.sel=mis[0];
   setStatus(msg);renderPanel();renderLive();
 }
-function endTurn(n,corner){
+function endTurn(n,corner,kill){
   if(!G)return;
-  const six=n===6&&G.rules.rollAgain;
-  G.again='';
-  if(six||corner){
-    G.again=corner&&!six?'Landed on a corner, roll again!':corner?'Rolled a 6 and landed on a corner, roll again!':'Rolled a 6, roll again!';
-    addLog(G.turn,`${cur().name} ${corner&&!six?'landed on a corner':'rolled a 6'} and goes again`);
-  }else{G.stats[G.turn].run=0;G.turn=(G.turn+1)%G.players.length;}
+  const b=bonusRoll(G.rules,n,corner,kill);G.again='';
+  if(b){G.again=b.again;addLog(G.turn,`${cur().name} ${b.log}: another roll`);}
+  else{G.stats[G.turn].run=0;G.turn=(G.turn+1)%G.players.length;}
   beginTurn();
 }
 function describe(pi,mv){return describePure(G,pi,mv,G.roll);}
@@ -1031,7 +1082,7 @@ async function localExecute(mv){
   renderLive();renderPanel();
   if(hasWon(P)){G.winner=pi;G.phase='over';saveRecords(pi);renderPanel();showWin(pi);return;}
   await wait(reduced?120:280);if(tok!==G?.token)return;
-  endTurn(G.roll,corner);
+  endTurn(G.roll,corner,!!mv.victim);
 }
 
 // ================= LIVE BOARD =================
@@ -1228,6 +1279,7 @@ document.addEventListener('keydown',e=>{
 
 // ================= HEADER TOOLS =================
 $('btnRules').onclick=()=>{$('rulesModal').hidden=false;$('rulesClose').focus();};
+$('lobbyRules').onclick=()=>{$('rulesModal').hidden=false;$('rulesClose').focus();};
 $('rulesClose').onclick=()=>{$('rulesModal').hidden=true;};
 $('rulesModal').addEventListener('click',e=>{if(e.target.id==='rulesModal')$('rulesModal').hidden=true;});
 $('btnStats').onclick=()=>{if(!G)return;fillStatsModal();$('statsModal').hidden=false;$('statsClose').focus();};
@@ -1491,7 +1543,7 @@ async function startOnlineGame(){
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
   const r=L.rules,secs=L.turnSecs||30;
   const S={gid:Math.random().toString(36).slice(2,10),board:L.board,
-    rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,autoSingle:r.autoSingle},
+    rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,autoSingle:r.autoSingle},
     players,stats:players.map(blankStats),turn:0,phase:'roll',roll:null,
     log:[{c:null,text:'New online game: '+players.map(p=>p.name).join(', '),cls:''}],winner:null,again:'',ev:null,turnSecs:secs,deadline:ON.net.now()+secs*1000};
   await ON.net.txn(`rooms/${ON.code}/game`,cur=>({seq:((cur&&cur.seq)||0)+1,g:JSON.stringify(S)}));
