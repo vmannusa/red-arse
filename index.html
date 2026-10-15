@@ -111,7 +111,7 @@ button,input,select{font:inherit;color:inherit}
 .homes{display:flex;gap:3px}
 .homes b{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--line);display:block}
 .log summary{cursor:pointer;margin:0;list-style-position:inside}
-.log ol{list-style:none;margin:10px 0 0;padding:0;max-height:180px;overflow:auto;font-size:13px;display:flex;flex-direction:column;gap:4px}
+.log ol{list-style:none;margin:10px 0 0;padding:0;max-height:240px;overflow:auto;font-size:13px;display:flex;flex-direction:column;gap:4px}
 .log li{display:flex;gap:8px;align-items:baseline;color:var(--fg)}
 .log li i{width:8px;height:8px;border-radius:50%;flex:none;transform:translateY(-1px)}
 .log li.cap{font-weight:700}
@@ -255,6 +255,10 @@ table.stats td.top{color:var(--warn);font-weight:800}
 .room-chip{display:inline-flex;align-items:center;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800;background:var(--accent);color:var(--accent-fg);letter-spacing:.06em}
 .timer{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;min-height:18px;margin-top:6px}
 .timer.warn{color:var(--danger);font-weight:700}
+table.stats .stag{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-left:16px}
+table.stats td.hm{white-space:nowrap;text-align:left}
+table.stats td.hm b{display:inline-block;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--line);margin-right:2px;vertical-align:middle}
+table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
 .turn-who .clock{margin-left:auto;align-self:flex-start;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
 .turn-who .clock svg{width:13px;height:13px}
 .speed-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--muted)}
@@ -442,15 +446,6 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <div class="timer" id="turnTimer" aria-live="off"></div>
         <button class="btn" id="backBtn" type="button" hidden>I'm back</button>
         <div class="legend"><span><i style="border-color:#3FB37A"></i>Forward</span><span><i style="border-color:#F0A020"></i>Backward (4)</span><span><i style="border-color:#E5262E"></i>Capture</span></div>
-        <div class="speed-row"><span>Bot speed</span><div class="seg" id="speedSeg" role="group" aria-label="Bot speed"><button type="button" data-s="normal">Normal</button><button type="button" data-s="fast">Fast</button><button type="button" data-s="turbo">Turbo</button></div></div>
-      </section>
-      <section class="card players">
-        <h3 class="players-head"><span>Players</span><span title="Estimated by playing the rest of the game out hundreds of times">Chance to win</span></h3>
-        <ul class="plist" id="plist"></ul>
-      </section>
-      <section class="card players">
-        <h3>Stats</h3>
-        <div id="railStats"></div>
       </section>
       <details class="card log" id="feed" open>
         <summary>Game feed <span class="unread" id="feedUnread" hidden></span></summary>
@@ -463,6 +458,11 @@ table.stats td.top{color:var(--warn);font-weight:800}
           </form>
         </div>
       </details>
+      <section class="card players">
+        <h3>Players &amp; stats</h3>
+        <div id="railStats"></div>
+        <div class="speed-row"><span>Bot speed</span><div class="seg" id="speedSeg" role="group" aria-label="Bot speed"><button type="button" data-s="normal">Normal</button><button type="button" data-s="fast">Fast</button><button type="button" data-s="turbo">Turbo</button></div></div>
+      </section>
     </aside>
   </main>
 </div>
@@ -529,7 +529,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
         </ul>
       </section>
     </div>
-    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Turn timer:</b> human players have 30 seconds (change it or turn it off on the setup screen) to roll and to move, then the game plays for them. <b>Bot speed</b> (under the die) only changes how fast bots play. <b>Chance to win</b> (on the board and in the player list) comes from playing the rest of the game out 300 times with medium-strength bots after every move. <b>Move review:</b> whenever a human player has a real choice, each option is played out hundreds of times on the same dice and compared with the best one. A move that gives up under 1 point of chance to win is <b>Best</b>, under 3 <b>Good</b>, under 6 an <b>Inaccuracy</b>, under 12 a <b>Mistake</b>, and 12 or more a <b>Blunder</b>. Accuracy is the share of Best and Good moves. The end-of-game review shows each player's costliest moves and the better play. See <a href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">what's new</a> for every change.</p>
+    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Turn timer:</b> human players have 30 seconds (change it or turn it off on the setup screen) to roll and to move, then the game plays for them. <b>Bot speed</b> (under the die) only changes how fast bots play. <b>Chance to win</b> (the pill next to each base on the board) comes from playing the rest of the game out 300 times with medium-strength bots after every move. <b>Move review:</b> whenever a human player has a real choice, each option is played out hundreds of times on the same dice and compared with the best one. A move that gives up under 1 point of chance to win is <b>Best</b>, under 3 <b>Good</b>, under 6 an <b>Inaccuracy</b>, under 12 a <b>Mistake</b>, and 12 or more a <b>Blunder</b>. Accuracy is the share of Best and Good moves. The end-of-game review shows each player's costliest moves and the better play. See <a href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">what's new</a> for every change.</p>
     <div class="actions"><button class="btn primary" id="rulesClose" type="button">Got it</button></div>
   </div>
 </div>
@@ -1196,7 +1196,7 @@ function showLobby(){
 const STAT_COLS=[
   {k:'rolls',label:'Rolls',short:'Rolls'},
   {k:'sixes',label:'6s rolled',short:'6s',rail:true},
-  {k:'fours',label:'4s rolled',short:'4s',rail:true},
+  {k:'fours',label:'4s rolled',short:'4s'},
   {k:'ones',label:'1s rolled',short:'1s'},
   {k:'kills',label:'Kills (aggravated someone)',short:'Kills',rail:true},
   {k:'lost',label:'Times aggravated',short:'Lost',rail:true},
@@ -1523,21 +1523,13 @@ function renderPanel(){
   rb.style.background=canRoll?C.hex:'';rb.style.color=canRoll?C.ink:'';
   const mineOnline=G.online&&ON.net&&P.uid===ON.net.uid&&P.type==='human';
   rb.innerHTML=G.phase==='rolling'?'Rolling…':canRoll?'Roll<small>or press Space</small>':G.online?(mineOnline?(G.roll?`Rolled ${G.roll}`:'Roll'):P.type==='human'?'Their turn':'Bot turn'):isHuman(P)?(G.roll?`Rolled ${G.roll}`:'Roll'):'Bot turn';
-  const ul=$('plist');ul.innerHTML='';
-  G.players.forEach((Q,qi)=>{const li=document.createElement('li');if(qi===G.turn)li.className='active';
-    const d=document.createElement('span');d.className='dot';d.style.background=marbleBg(Q.c);
-    const nm=document.createElement('div');nm.style.minWidth='0';nm.innerHTML=`<div class="pn">${esc(Q.name)}</div><div class="pt">${TYPE_LABEL[Q.type]}${G.online?onlineTag(Q):''}</div>`;
-    const hm=document.createElement('div');hm.className='homes';hm.setAttribute('aria-label',homeCount(Q)+' of 4 home');
-    Q.marbles.map(m=>inHome(m.d)).sort((a,b)=>b-a).forEach(h=>{const b=document.createElement('b');if(h){b.style.background=COLORS[Q.c].hex;b.style.borderColor=COLORS[Q.c].dark;}hm.appendChild(b);});
-    const od=document.createElement('span');od.className='odds';od.id='odds-'+qi;od.title='Chance to win';od.textContent=oddsText(qi);
-    li.append(d,nm,hm,od);ul.appendChild(li);});
   scheduleOdds();boardOdds();
   renderStats();renderPresets();
 }
 // compact table in the rail; full table in the Stats window and the end-of-game window
 function statsTable(cols,withRecords){
   const t=document.createElement('table');t.className='stats';
-  const hr=document.createElement('tr');hr.innerHTML='<th scope="col">Player</th>'+cols.map(c=>`<th scope="col" title="${c.label}">${c.short}</th>`).join('')+(withRecords?'<th scope="col" title="Wins / games on this device">All-time W/G</th>':'');
+  const hr=document.createElement('tr');hr.innerHTML='<th scope="col">Player</th>'+(withRecords?'':'<th scope="col" title="Marbles home">Home</th>')+cols.map(c=>`<th scope="col" title="${c.label}">${c.short}</th>`).join('')+(withRecords?'<th scope="col" title="Wins / games on this device">All-time W/G</th>':'');
   const th=document.createElement('thead');th.appendChild(hr);t.appendChild(th);
   const tb=document.createElement('tbody');
   const rec=withRecords?loadRecords():{};
@@ -1545,7 +1537,9 @@ function statsTable(cols,withRecords){
   const best={};cols.forEach(c=>{const vs=G.players.map((_,qi)=>val(c,qi).v).filter(v=>v!==null);best[c.k]=vs.length?Math.max(...vs):null;});
   const hi=c=>!c.review||c.k==='acc';
   G.players.forEach((Q,qi)=>{const tr=document.createElement('tr');if(qi===G.turn&&G.winner===null)tr.className='active';
-    let h=`<th scope="row"><span class="dot" style="background:${marbleBg(Q.c)}"></span><span class="sn">${esc(Q.name)}</span></th>`;
+    const tag=!withRecords&&G.online?onlineTag(Q).replace(/^ · /,''):'';
+    let h=`<th scope="row"><span class="dot" style="background:${marbleBg(Q.c)}"></span><span class="sn">${esc(Q.name)}</span>${tag?`<span class="stag">${esc(tag)}</span>`:''}</th>`;
+    if(!withRecords){const hc=homeCount(Q);h+=`<td class="hm" title="${hc} of 4 home">${`<b class="on" style="background:${COLORS[Q.c].hex};border-color:${COLORS[Q.c].dark}"></b>`.repeat(hc)}${'<b></b>'.repeat(4-hc)}</td>`;}
     cols.forEach(c=>{const x=val(c,qi),v=x.v;h+=`<td${hi(c)&&v!==null&&v>0&&v===best[c.k]&&c.k!=='lost'&&c.k!=='passes'&&G.players.length>1?' class="top"':''}>${x.text}</td>`;});
     if(withRecords){const r=rec[Q.name];h+=`<td>${r?r.wins+'/'+r.games:'–'}</td>`;}
     tr.innerHTML=h;tb.appendChild(tr);});
