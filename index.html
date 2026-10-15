@@ -243,6 +243,15 @@ table.stats td.top{color:var(--warn);font-weight:800}
 .room-chip{display:inline-flex;align-items:center;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800;background:var(--accent);color:var(--accent-fg);letter-spacing:.06em}
 .timer{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;min-height:18px;margin-top:6px}
 .timer.warn{color:var(--danger);font-weight:700}
+.turn-who .clock{margin-left:auto;align-self:flex-start;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.turn-who .clock svg{width:13px;height:13px}
+.speed-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border:0;background:var(--surface);color:var(--fg);font:600 12px var(--font-body);padding:4px 10px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.set-row{display:flex;flex-wrap:wrap;gap:12px 24px}
+.win-time{color:var(--muted);font-size:13px;margin-top:4px;font-variant-numeric:tabular-nums}
 #backBtn{margin-top:8px;width:100%}
 @media (max-width:640px){.online-grid{grid-template-columns:minmax(0,1fr)}}
 .howto{height:36px;font-size:14px;text-decoration:none;color:var(--fg)}
@@ -349,6 +358,16 @@ table.stats td.top{color:var(--warn);font-weight:800}
         </div>
       </section>
       <section class="card">
+        <h2 class="sec-title"><span>Game settings</span></h2>
+        <div class="set-row">
+          <label class="fld inline"><span>Turn timer (human players)</span>
+            <select id="setTimer"><option value="0">Off</option><option value="15">15 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option></select></label>
+          <label class="fld inline"><span>Bot speed</span>
+            <select id="setSpeed"><option value="normal">Normal</option><option value="fast">Fast</option><option value="turbo">Turbo</option></select></label>
+        </div>
+        <p class="fine">When a human player's timer runs out, the game rolls and moves for them. Bot speed can also be changed during a game.</p>
+      </section>
+      <section class="card">
         <h2 class="sec-title"><span>Rules</span></h2>
         <div class="rules-grid" id="ruleToggles"></div>
       </section>
@@ -401,6 +420,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <div class="turn-who">
           <span class="chip" id="whoChip"></span>
           <div><div class="who-name" id="whoName"></div><div class="who-sub" id="whoSub"></div></div>
+          <span class="clock" id="gameClock" title="Game time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg><span id="gameClockT">0:00</span></span>
         </div>
         <div class="dice-row">
           <div class="die-scene" aria-hidden="true"><div class="die" id="die"></div></div>
@@ -410,6 +430,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <div class="timer" id="turnTimer" aria-live="off"></div>
         <button class="btn" id="backBtn" type="button" hidden>I'm back</button>
         <div class="legend"><span><i style="border-color:#3FB37A"></i>Forward</span><span><i style="border-color:#F0A020"></i>Backward (4)</span><span><i style="border-color:#E5262E"></i>Capture</span></div>
+        <div class="speed-row"><span>Bot speed</span><div class="seg" id="speedSeg" role="group" aria-label="Bot speed"><button type="button" data-s="normal">Normal</button><button type="button" data-s="fast">Fast</button><button type="button" data-s="turbo">Turbo</button></div></div>
       </section>
       <section class="card players">
         <h3 class="players-head"><span>Players</span><span title="Estimated by playing the rest of the game out hundreds of times">Chance to win</span></h3>
@@ -437,8 +458,9 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <ul>
           <li>Roll the die, then move one marble that many holes. Marbles travel clockwise.</li>
           <li>Dotted arrows show every move you can make. Tap a marble, or tap a landing spot to move straight there.</li>
-          <li>You can jump over other players' marbles, but you can't jump over or land on your own. (Star hops are the exception: they can pass your own marbles sitting on stars in between.)</li>
-          <li>If no move is possible, your turn ends.</li>
+          <li>You can jump over other players' marbles, but you can't jump over or land on your own. (Inside-corner hops are the exception: they can pass your own marbles sitting on inside corners in between.)</li>
+          <li>If no move is possible, your turn ends (a 6 still rolls again).</li>
+          <li><b>Who goes first:</b> everyone rolls at the start and the highest roll goes first; tied players roll again.</li>
         </ul>
       </section>
       <section>
@@ -466,28 +488,28 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <ul>
           <li>Roll a <b>6</b>.</li>
           <li>Get a <b>kill</b>.</li>
-          <li>End a move on an <b>inside corner</b>: the corner holes on either side of any home column. Your own start hole counts when you back onto it with a 4, not when a marble comes out of base.</li>
+          <li>End a move on an <b>outside corner</b>: the corner holes on the board's edge, on either side of any home column. Your own start hole counts when you back onto it with a 4, not when a marble comes out of base.</li>
         </ul>
       </section>
       <section>
         <h3>Shortcuts</h3>
         <ul>
-          <li><b>Stars:</b> a marble that starts its turn on a star can hop clockwise from star to star, one star per pip. The roll must be used exactly on stars (a 3 means exactly 3 stars), with no extra steps onto the track or into the center. Hops can pass over any marble on the stars in between, yours included, but can't land on your own. You can't go past your own color's star.</li>
-          <li><b>Center hole:</b> a roll that passes over a star with one step left can finish in the center. A 6 from your start hole goes straight in, and so does a 1 from a star. Leave the center only on a <b>1</b>, to any star.</li>
+          <li><b>Inside corners</b> (the stars): a marble that starts its turn on an inside corner can hop clockwise from corner to corner, one corner per pip, instead of moving along the track. The roll must be used exactly on corners (a 3 means exactly 3 corners), with no extra steps onto the track or into the center. Hops can pass over any marble on the corners in between, yours included, but can't land on your own. You can't go past your own color's inside corner (the one before your home).</li>
+          <li><b>Center hole:</b> a roll that passes over an inside corner with one step left can finish in the center. A 6 from your start hole goes straight in, and so does a 1 from an inside corner. Leave the center on a <b>1</b> or a <b>6</b>, to any inside corner.</li>
         </ul>
       </section>
       <section>
         <h3>Backward 4</h3>
         <ul>
-          <li>4 is the only roll that can move backward: 4 holes counter-clockwise instead of forward.</li>
+          <li>On a <b>4</b> you choose: forward, or 4 holes counter-clockwise. 4 is the only roll that can move backward.</li>
           <li>If no forward move is possible on a 4, you must move backward.</li>
-          <li>Backward moves follow the track only. They can't hop stars or go straight into home, but they can drop into the center and kill.</li>
+          <li>Backward moves follow the track only. They can't hop inside corners or go straight into home, but they can drop into the center and kill.</li>
           <li>Home marbles that aren't locked in can back out of home onto the track.</li>
           <li>Backing up behind your own start hole parks that marble right outside your home.</li>
         </ul>
       </section>
     </div>
-    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Chance to win</b> (on the board and in the player list) comes from playing the rest of the game out 300 times with medium-strength bots after every move. <b>Move review:</b> whenever a human player has a real choice, each option is played out hundreds of times on the same dice and compared with the best one. A move that gives up under 1 point of chance to win is <b>Best</b>, under 3 <b>Good</b>, under 6 an <b>Inaccuracy</b>, under 12 a <b>Mistake</b>, and 12 or more a <b>Blunder</b>. Accuracy is the share of Best and Good moves. The end-of-game review shows each player's costliest moves and the better play. See <a href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">what's new</a> for every change.</p>
+    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Turn timer:</b> human players have 30 seconds (change it or turn it off on the setup screen) to roll and to move, then the game plays for them. <b>Bot speed</b> (under the die) only changes how fast bots play. <b>Chance to win</b> (on the board and in the player list) comes from playing the rest of the game out 300 times with medium-strength bots after every move. <b>Move review:</b> whenever a human player has a real choice, each option is played out hundreds of times on the same dice and compared with the best one. A move that gives up under 1 point of chance to win is <b>Best</b>, under 3 <b>Good</b>, under 6 an <b>Inaccuracy</b>, under 12 a <b>Mistake</b>, and 12 or more a <b>Blunder</b>. Accuracy is the share of Best and Good moves. The end-of-game review shows each player's costliest moves and the better play. See <a href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">what's new</a> for every change.</p>
     <div class="actions"><button class="btn primary" id="rulesClose" type="button">Got it</button></div>
   </div>
 </div>
@@ -496,6 +518,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
   <div class="card" role="dialog" aria-modal="true" aria-labelledby="winTitle">
     <h2 id="winTitle">Winner</h2>
     <div class="win-name" id="winName"></div>
+    <div class="win-time" id="winTime"></div>
     <ol class="standings" id="standings"></ol>
     <div id="winReview" class="win-review"></div>
     <div id="winStats" class="win-stats"></div>
@@ -606,7 +629,7 @@ function legalMoves(S,pi,n){
       return;
     }
     if(d0==='C'){
-      if(n===1&&R.center){
+      if((n===1||n===6)&&R.center){
         for(let s=0;s<B.N;s++){const g=14*s;if(ownAt(g))continue;
           fwd.push(mk(mi,'C',mod(g-(14*c+9),B.L),[{k:'t',g,hop:true}],'fwd',foeAt(g),'exitCenter'));}
       }
@@ -777,7 +800,7 @@ function botChoose(S,pi,moves,level){
 
 // ================= PURE TURN REDUCERS (used by online play) =================
 // State = {board,rules,players,stats,turn,phase,roll,log,winner,again,ev,turnSecs,deadline,gid}
-const STATE_KEYS=['gid','board','rules','players','stats','turn','phase','roll','log','winner','again','ev','turnSecs','deadline'];
+const STATE_KEYS=['gid','board','rules','players','stats','turn','phase','roll','log','winner','again','ev','turnSecs','deadline','started'];
 function cleanState(S){const o={};STATE_KEYS.forEach(k=>{o[k]=S[k]===undefined?null:S[k];});return JSON.parse(JSON.stringify(o));}
 function describePure(S,pi,mv,roll){
   const P=S.players[pi];let t;
@@ -790,15 +813,26 @@ function describePure(S,pi,mv,roll){
   else if(mv.kind==='backOut')t=`${P.name} backed a marble out of home`;
   else if(mv.kind==='raidOut')t=`${P.name} backed out of a raided home`;
   else if(mv.dir==='back')t=`${P.name} moved back 4`;
-  else if(mv.kind==='stars')t=`${P.name} took a star shortcut (${roll})`;
+  else if(mv.kind==='stars')t=`${P.name} hopped ${roll} inside corner${roll>1?'s':''}`;
   else t=`${P.name} moved ${roll}`;
   if(mv.victim)t+=` and aggravated ${S.players[mv.victim.pi].name}!`;
   return t;
 }
+// Who goes first: everyone rolls, highest goes first, tied players roll again.
+function rollOff(names,rnd){
+  rnd=rnd||Math.random;let alive=names.map((_,i)=>i);const lines=[];let round=0;
+  while(alive.length>1&&round<20){
+    const r=alive.map(i=>({i,n:1+Math.floor(rnd()*6)}));const hi=Math.max(...r.map(x=>x.n));
+    lines.push((round?'Tie, roll again: ':'Roll for first: ')+r.map(x=>names[x.i]+' '+x.n).join(' · '));
+    alive=r.filter(x=>x.n===hi).map(x=>x.i);round++;
+  }
+  lines.push(names[alive[0]]+' rolled highest and goes first');
+  return {first:alive[0],lines};
+}
 function logPure(S,pi,text,cls){S.log=S.log||[];S.log.unshift({c:pi===null?null:S.players[pi].c,text,cls:cls||''});if(S.log.length>40)S.log.length=40;}
 // Bonus rolls: a 6, landing on an inside corner, or aggravating (killing) an opponent each earn another roll.
 function bonusRoll(rules,n,corner,kill){
-  const why=[];if(n===6&&rules.rollAgain)why.push('rolled a 6');if(corner)why.push('landed on a corner');if(kill&&rules.killAgain)why.push('got a kill');
+  const why=[];if(n===6&&rules.rollAgain)why.push('rolled a 6');if(corner)why.push('landed on an outside corner');if(kill&&rules.killAgain)why.push('got a kill');
   if(!why.length)return null;
   const list=why.length===1?why[0]:why.slice(0,-1).join(', ')+' and '+why[why.length-1];
   return {again:list.charAt(0).toUpperCase()+list.slice(1)+', roll again!',log:list};
@@ -900,6 +934,11 @@ function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);if(attrs)
 const f=v=>Math.round(v*1000)/1000;
 const marbleBg=c=>`radial-gradient(circle at 35% 30%,#fff 0,${COLORS[c].light} 18%,${COLORS[c].hex} 55%,${COLORS[c].dark} 100%)`;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
+// Bot speed: scales every pause and marble animation on a bot's turn (humans always play at normal pace)
+const SPEEDS={normal:.75,fast:.4,turbo:.15};
+function speedFor(P){if(!P||P.type==='human')return 1;return SPEEDS[(setup&&setup.botSpeed)||'normal']||.75;}
+function setBotSpeed(v){if(!SPEEDS[v])return;setup.botSpeed=v;saveSetup();renderSpeed();if(G&&G.online)drive();}
+function renderSpeed(){const v=(setup&&setup.botSpeed)||'normal';document.querySelectorAll('#speedSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===v?'true':'false'));const ss=document.getElementById('setSpeed');if(ss)ss.value=v;}
 const reduced=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 function safeGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function safeSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
@@ -1025,15 +1064,16 @@ const sfx={
 
 // ================= APP STATE =================
 const RULE_DEFS=[
+  {k:'rollOff',label:'Highest roll goes first',sub:'Everyone rolls at the start; ties roll again. Off: the first seat starts.',def:true},
   {k:'oneOrSix',label:'Leave base on 1 or 6',sub:'Off: only a 6 brings a marble out.',def:true},
   {k:'rollAgain',label:'Roll again on 6',sub:'A 6 gives the same player another roll.',def:true},
-  {k:'stars',label:'Star shortcuts',sub:'From a star, hop clockwise exactly one star per pip, never past your own star.',def:true},
-  {k:'center',label:'Center hole',sub:'Finish a roll one step past a star to drop in (a 6 from your start hole works). Leave on a 1.',def:true},
-  {k:'back',label:'Backward on 4',sub:'Only a 4 moves back, along the track (no star hops). Forced if no forward move.',def:true,house:true},
+  {k:'stars',label:'Inside corner shortcuts',sub:'From an inside corner (star), hop clockwise exactly one inside corner per pip, never past your own.',def:true},
+  {k:'center',label:'Center hole',sub:'Finish a roll one step past an inside corner to drop in (a 6 from your start hole works). Leave on a 1 or 6, to any inside corner.',def:true},
+  {k:'back',label:'Backward on 4',sub:'A 4 can move forward or back. Backward follows the track (no inside-corner hops). Forced if no forward move.',def:true,house:true},
   {k:'backShortcut',label:'Back-past-start shortcut',sub:'Backing up behind your start sets you up to enter home.',def:true,house:true},
-  {k:'corners',label:'Inside corners: roll again',sub:'End a move on an edge corner hole to roll again, backward moves included. Coming out of base onto your start doesn\'t count.',def:true,house:true},
-  {k:'homeRaid',label:'Raid homes',sub:'Turn into (or back into) another player\'s home to kill a marble that isn\'t locked in. You stay there until you back out with a 4.',def:true,house:true},
-  {k:'killAgain',label:'Kill: roll again',sub:'Aggravate an opponent (send them back to base) and you roll again.',def:true,house:true},
+  {k:'corners',label:'Outside corners: roll again',sub:'End a move on an outside corner hole to roll again, backward moves included. Coming out of base onto your start doesn\'t count.',def:true},
+  {k:'homeRaid',label:'Raid homes',sub:'Turn into (or back into) another player\'s home to kill a marble that isn\'t locked in. You stay there until you back out with a 4.',def:true},
+  {k:'killAgain',label:'Kill: roll again',sub:'Aggravate an opponent (send them back to base) and you roll again.',def:true},
   {k:'autoSingle',label:'Auto-play forced moves',sub:'If only one move is possible, make it automatically.',def:true},
 ];
 const TYPE_LABEL={human:'Human',easy:'Bot · Easy',medium:'Bot · Medium',hard:'Bot · Hard'};
@@ -1041,10 +1081,10 @@ let setup=null,G=null,tokenSeq=0;
 
 function defaultSetup(){
   const rules={};RULE_DEFS.forEach(r=>rules[r.k]=r.def);
-  return {board:'hex',players:[{name:'You',c:3,type:'human'},{name:'Orange Bot',c:0,type:'medium'}],rules};
+  return {board:'hex',players:[{name:'You',c:3,type:'human'},{name:'Orange Bot',c:0,type:'medium'}],rules,turnSecs:30,botSpeed:'normal'};
 }
 function loadSetup(){
-  try{const s=JSON.parse(safeGet('aggravation-setup')||'null');if(s&&Array.isArray(s.players)&&s.players.length>=2&&s.rules){const d=defaultSetup();s.rules=Object.assign(d.rules,s.rules);s.board='hex';restoreColors(s);fitSetupToBoard(s);return s;}}catch(e){}
+  try{const s=JSON.parse(safeGet('aggravation-setup')||'null');if(s&&Array.isArray(s.players)&&s.players.length>=2&&s.rules){const d=defaultSetup();s.rules=Object.assign(d.rules,s.rules);s.board='hex';if(typeof s.turnSecs!=='number')s.turnSecs=30;if(!SPEEDS[s.botSpeed])s.botSpeed='normal';restoreColors(s);fitSetupToBoard(s);return s;}}catch(e){}
   return defaultSetup();
 }
 function saveSetup(){safeSet('aggravation-setup',JSON.stringify(setup));}
@@ -1104,6 +1144,7 @@ function renderLobby(){
   const mx=maxPlayers();
   $('slotCount').textContent=setup.players.length+' of '+mx;
   $('addHuman').disabled=$('addBot').disabled=setup.players.length>=mx;
+  $('setTimer').value=String(setup.turnSecs||0);$('setSpeed').value=setup.botSpeed||'normal';
   const rt=$('ruleToggles');rt.innerHTML='';
   RULE_DEFS.forEach(r=>{const lab=document.createElement('label');lab.className='tog'+(r.house?' house':'');
     const cb=document.createElement('input');cb.type='checkbox';cb.id='rule-'+r.k;cb.checked=!!setup.rules[r.k];
@@ -1113,6 +1154,8 @@ function renderLobby(){
 $('addHuman').onclick=()=>{if(setup.players.length>=maxPlayers())return;setup.players.push({name:'Player '+(setup.players.length+1),c:freeColor(),type:'human'});saveSetup();renderLobby();};
 $('addBot').onclick=()=>{if(setup.players.length>=maxPlayers())return;const c=freeColor();setup.players.push({name:botName(c),c,type:'medium'});saveSetup();renderLobby();};
 $('startBtn').onclick=()=>{ac();startGame();};
+$('setTimer').onchange=()=>{setup.turnSecs=+$('setTimer').value;saveSetup();};
+$('setSpeed').onchange=()=>{setBotSpeed($('setSpeed').value);};
 
 function showLobby(){
   if(G)G.token=-1;G=null;resetHeader();$('room').hidden=true;
@@ -1129,8 +1172,8 @@ const STAT_COLS=[
   {k:'kills',label:'Kills (aggravated someone)',short:'Kills',rail:true},
   {k:'lost',label:'Times aggravated',short:'Lost',rail:true},
   {k:'back',label:'Backward moves',short:'Back'},
-  {k:'corners',label:'Corner rerolls',short:'Corners'},
-  {k:'shortcuts',label:'Star / center shortcuts',short:'Shortcuts'},
+  {k:'corners',label:'Outside corner rerolls',short:'Corners'},
+  {k:'shortcuts',label:'Inside corner / center shortcuts',short:'Shortcuts'},
   {k:'dist',label:'Holes moved',short:'Holes'},
   {k:'passes',label:'Turns with no move',short:'No move'},
   {k:'streak',label:'Longest turn (rolls in a row)',short:'Best streak'},
@@ -1158,7 +1201,8 @@ function newGameState(){
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
   const r=setup.rules;
   return {token:++tokenSeq,board:bd.kind,rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle},
-    players,stats:players.map(blankStats),turn:0,phase:'roll',roll:null,moves:[],sel:null,log:[],winner:null,again:'',msg:''};
+    players,stats:players.map(blankStats),turn:0,phase:'roll',roll:null,moves:[],sel:null,log:[],winner:null,again:'',msg:'',
+    turnSecs:setup.turnSecs||0,deadline:0,tseq:0,started:Date.now()};
 }
 function resetHeader(){$('btnRestart').hidden=false;$('roomChip').hidden=true;$('btnLobby').querySelector('span').textContent='Players';$('turnTimer').textContent='';$('backBtn').hidden=true;}
 function startGame(){
@@ -1166,6 +1210,8 @@ function startGame(){
   $('lobby').hidden=true;$('game').hidden=false;$('tools').hidden=false;$('winModal').hidden=true;
   buildBoard($('boardStatic'),'S',B);
   buildLive();addLog(null,'New game: '+G.players.map(p=>p.name).join(', '));
+  if(setup.rules.rollOff!==false&&G.players.length>1){const ro=rollOff(G.players.map(p=>p.name));ro.lines.forEach(t=>addLog(null,t));G.turn=ro.first;G.firstNote=esc(ro.lines[ro.lines.length-1])+'. ';}
+  track('game_start',gameParams());
   beginTurn();
 }
 const cur=()=>G.players[G.turn];
@@ -1185,11 +1231,16 @@ async function beginTurn(){
   if(isHuman(P)){
     const many=G.players.filter(isHuman).length>1;
     const again=G.again?` ${G.again}`:'';
-    setStatus(many?`<b>${esc(P.name)}</b>, roll the die.${again}`:(G.again?`${G.again} Roll the die.`:'Your turn. Roll the die.'));
+    const note=G.firstNote||'';G.firstNote='';
+    setStatus(note+(many?`<b>${esc(P.name)}</b>, roll the die.${again}`:(G.again?`${G.again} Roll the die.`:'Your turn. Roll the die.')));
     $('rollBtn').focus({preventScroll:true});
+    armTimer();
   }else{
-    setStatus(`<b>${esc(P.name)}</b> is thinking…`);
-    await wait(reduced?250:650);if(tok!==G?.token)return;doRoll();
+    G.deadline=0;
+    const note=G.firstNote||'';G.firstNote='';
+    setStatus(note+`<b>${esc(P.name)}</b> is thinking…`);
+    if(note)await wait(1200);if(tok!==G?.token)return;
+    await wait((reduced?250:650)*speedFor(P));if(tok!==G?.token)return;doRoll();
   }
 }
 let dieSpin=0;
@@ -1198,24 +1249,29 @@ function setDie(n,animate){
   if(animate)dieSpin+=1+Math.floor(Math.random()*2);
   const d=$('die');d.style.transform=`rotateX(${R[0]+360*dieSpin}deg) rotateY(${R[1]+360*dieSpin}deg)`;
 }
-async function doRoll(){
-  if(!G||G.phase!=='roll')return;const tok=G.token;
-  G.phase='rolling';renderPanel();
+async function doRoll(timedOut){
+  if(!G||G.phase!=='roll')return;const tok=G.token,sp=speedFor(cur());
+  G.phase='rolling';G.deadline=0;renderPanel();
   const n=1+Math.floor(Math.random()*6);
-  sfx.dice();setDie(n,true);await wait(reduced?180:820);if(tok!==G?.token)return;
+  $('die').style.transitionDuration=sp<1?(.8*sp).toFixed(2)+'s':'';
+  sfx.dice();setDie(n,true);await wait((reduced?180:820)*sp);if(tok!==G?.token)return;
   G.roll=n;const P=cur(),pi=G.turn;
   const st=G.stats[pi];st.rolls++;st.run++;st.streak=Math.max(st.streak,st.run);if(n===6)st.sixes++;if(n===4)st.fours++;if(n===1)st.ones++;
   const moves=legalMoves(G,pi,n);G.moves=moves;
   if(!moves.length){st.passes++;renderStats();
     setStatus(`Rolled <b>${n}</b>. No legal moves, so the turn passes.`);addLog(pi,`${P.name} rolled ${n}, no move`);
-    G.phase='pass';renderPanel();await wait(1150);if(tok!==G?.token)return;endTurn(n);return;
+    G.phase='pass';renderPanel();await wait(Math.max(250,1150*sp));if(tok!==G?.token)return;endTurn(n);return;
   }
   G.phase='move';
   const hasF=moves.some(m=>m.dir==='fwd'),hasB=moves.some(m=>m.dir==='back');
   if(!isHuman(P)){
     setStatus(`<b>${esc(P.name)}</b> rolled <b>${n}</b>.`);renderPanel();renderLive();
-    await wait(reduced?200:600);if(tok!==G?.token)return;
+    await wait((reduced?200:600)*sp);if(tok!==G?.token)return;
     G.odds=currentOdds();await localExecute(botChoose(G,pi,moves,P.type));return;
+  }
+  if(timedOut){
+    setStatus(`Time's up. Rolled <b>${n}</b>, playing a move for ${G.players.filter(isHuman).length>1?esc(P.name):'you'}.`);renderPanel();renderLive();
+    await wait(reduced?300:900);if(tok!==G?.token)return;G.odds=currentOdds();await localExecute(moves.length===1?moves[0]:botChoose(G,pi,moves,'medium'),true);return;
   }
   if(moves.length===1&&G.rules.autoSingle){
     const mv=moves[0];
@@ -1228,7 +1284,18 @@ async function doRoll(){
   const mis=[...new Set(moves.map(m=>m.mi))];
   const baseMis=mis.filter(mi=>P.marbles[mi].d===null);
   if(mis.length===1||(mis.length===baseMis.length))G.sel=mis[0];
-  setStatus(msg);renderPanel();renderLive();
+  setStatus(msg);renderPanel();renderLive();armTimer();
+}
+// ---- local turn timer for human players: roll or move for them when it runs out
+let LTIMER=null;
+function armTimer(){
+  clearTimeout(LTIMER);if(!G||G.online||!G.turnSecs||!isHuman(cur()))return;
+  const tok=G.token,k=++G.tseq,ph=G.phase;G.deadline=Date.now()+G.turnSecs*1000;updateTimer();
+  LTIMER=setTimeout(()=>{
+    if(!G||G.token!==tok||G.tseq!==k||G.winner!==null||G.phase!==ph||!isHuman(cur()))return;
+    if(ph==='roll'){addLog(G.turn,`${cur().name} ran out of time`);doRoll(true);}
+    else if(ph==='move'){G.sel=null;G.odds=currentOdds();localExecute(G.moves.length===1?G.moves[0]:botChoose(G,G.turn,G.moves,'medium'),true);}
+  },G.turnSecs*1000+150);
 }
 function endTurn(n,corner,kill){
   if(!G)return;
@@ -1238,18 +1305,19 @@ function endTurn(n,corner,kill){
   beginTurn();
 }
 function describe(pi,mv){return describePure(G,pi,mv,G.roll);}
-async function localExecute(mv){
-  if(!G||G.phase!=='move')return;const tok=G.token,pi=G.turn,P=cur();
-  if(isHuman(P))coachDecision(G,pi,G.roll,G.moves,mv);
+async function localExecute(mv,auto){
+  if(!G||G.phase!=='move'||!mv)return;const tok=G.token,pi=G.turn,P=cur(),sp=speedFor(P);
+  G.deadline=0;G.tseq++;clearTimeout(LTIMER);
+  if(isHuman(P)&&!auto)coachDecision(G,pi,G.roll,G.moves,mv);
   G.phase='anim';G.sel=null;renderPanel();renderLive();
   const corner=earnsCorner(G,pi,mv);
   const node=MARBLE_NODES[pi][mv.mi];node.parentNode.appendChild(node);
   const pts=[posOf(pi,mv.mi)].concat(mv.path.map(s=>Object.assign(stepPos(s),{hop:!!s.hop})));
-  await animPath(node,pts);if(tok!==G?.token)return;
+  await animPath(node,pts,{speed:sp});if(tok!==G?.token)return;
   if(mv.victim){
     const vn=MARBLE_NODES[mv.victim.pi][mv.victim.mi],vp=posOf(mv.victim.pi,mv.victim.mi);
     applyMove(G,pi,mv);sfx.thud();burst(vp,'#E5262E');
-    const to=posOf(mv.victim.pi,mv.victim.mi);await animPath(vn,[vp,to],{dur:420,arc:true});
+    const to=posOf(mv.victim.pi,mv.victim.mi);await animPath(vn,[vp,to],{dur:420*Math.max(.35,sp),arc:true});
   }else applyMove(G,pi,mv);
   if(tok!==G?.token)return;
   if(mv.kind==='home'){sfx.home();burst(posOf(pi,mv.mi),COLORS[P.c].hex);}
@@ -1262,8 +1330,8 @@ async function localExecute(mv){
   if(corner)st.corners++;
   addLog(pi,describe(pi,mv),mv.victim?'cap':'');
   renderLive();renderPanel();
-  if(hasWon(P)){G.winner=pi;G.phase='over';saveRecords(pi);renderPanel();showWin(pi);return;}
-  await wait(reduced?120:280);if(tok!==G?.token)return;
+  if(hasWon(P)){G.winner=pi;G.phase='over';G.ended=Date.now();saveRecords(pi);trackEnd();renderPanel();showWin(pi);return;}
+  await wait((reduced?120:280)*sp);if(tok!==G?.token)return;
   endTurn(G.roll,corner,!!mv.victim);
 }
 
@@ -1360,7 +1428,7 @@ function animPath(node,pts,o={}){
     const step=()=>{
       if(i>=pts.length-1){res();return;}
       const a=pts[i],b=pts[i+1],hop=b.hop||o.arc;
-      const dur=reduced?35:(o.dur||(hop?240:125));const t0=performance.now();
+      const dur=reduced?35:(o.dur||(hop?240:125)*(o.speed||1));const t0=performance.now();
       const fr=now=>{const t=Math.min(1,(now-t0)/dur);const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
         const x=a.x+(b.x-a.x)*e,y=a.y+(b.y-a.y)*e,sc=hop?1+.35*Math.sin(Math.PI*t):1+.07*Math.sin(Math.PI*t);
         node.setAttribute('transform',`translate(${f(x)} ${f(y)}) scale(${f(sc)})`);
@@ -1737,6 +1805,7 @@ $('rulesModal').addEventListener('click',e=>{if(e.target.id==='rulesModal')$('ru
 $('btnStats').onclick=()=>{if(!G)return;fillStatsModal();$('statsModal').hidden=false;$('statsClose').focus();};
 $('statsClose').onclick=()=>{$('statsModal').hidden=true;};
 $('statsModal').addEventListener('click',e=>{if(e.target.id==='statsModal')$('statsModal').hidden=true;});
+document.querySelectorAll('#speedSeg button').forEach(b=>b.onclick=()=>setBotSpeed(b.dataset.s));
 function setSound(on){SND.on=on;safeSet('aggravation-sound',on?'1':'0');const b=$('btnSound');b.setAttribute('aria-pressed',on);b.querySelector('span').textContent=on?'Sound on':'Sound off';$('sndWave').style.display=on?'':'none';}
 $('btnSound').onclick=()=>setSound(!SND.on);
 function armButton(btn,label,fn){
@@ -1758,6 +1827,7 @@ function showWin(pi){
   const wa=$('winAgain'),wl=$('winLobby');
   if(G.online){wa.textContent=ON.isHost?'New game':'Waiting for host';wa.disabled=!ON.isHost;wl.textContent=ON.isHost?'Back to room':'Leave room';}
   else{wa.textContent='Play again';wa.disabled=false;wl.textContent='Change players';}
+  $('winTime').textContent='Game time '+fmtClock(gameElapsed());
   const wn=$('winName');wn.textContent=P.name;wn.style.color=COLORS[P.c].hex==='#F6CF00'?'#C9A500':COLORS[P.c].hex;
   const st=$('standings');st.innerHTML='';
   G.players.map((Q,i)=>({Q,i,h:homeCount(Q),prog:Q.marbles.reduce((s,m)=>s+(m.d===null?0:m.d==='C'?40:m.d),0)}))
@@ -1799,7 +1869,24 @@ const ONLINE_LOCAL=/[?&]net=local\b/.test(location.search); // test mode: tabs i
 const ONLINE_AVAILABLE=ONLINE_LOCAL||!!(window.RED_ARSE_FIREBASE&&window.RED_ARSE_FIREBASE.apiKey);
 const ON={net:null,code:null,lobby:null,meta:null,presence:{},onlineSet:'',seq:0,gid:null,queue:[],processing:false,committing:false,timers:[],unsubs:[],stopPresence:null,presIv:null,isHost:false,hostUid:null,winShown:false};
 
-function loadScript(src){return new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=()=>rej(new Error('Could not reach the game server. Check your connection.'));document.head.appendChild(sc);});}
+const SCRIPTS={};
+function loadScript(src){return SCRIPTS[src]||(SCRIPTS[src]=new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=()=>rej(new Error('Could not reach the game server. Check your connection.'));document.head.appendChild(sc);}).catch(e=>{delete SCRIPTS[src];throw e;}));}
+// ---------- usage analytics (Google Analytics for Firebase; free). Only runs on the hosted site when
+// config.js has a measurementId. Logs game and room events only: no names or chat.
+const AN={fa:null,q:[]};
+function track(name,params){try{if(AN.fa)AN.fa.logEvent(name,params||{});else if(AN.q){AN.q.push([name,params||{}]);if(AN.q.length>50)AN.q.shift();}}catch(e){}}
+async function initAnalytics(){
+  const cfg=window.RED_ARSE_FIREBASE;if(!cfg||!cfg.measurementId||ONLINE_LOCAL){AN.q=null;return;}
+  try{const base=`https://www.gstatic.com/firebasejs/${FB_VER}/`;
+    await loadScript(base+'firebase-app-compat.js');await loadScript(base+'firebase-analytics-compat.js');
+    if(!firebase.apps.length)firebase.initializeApp(cfg);
+    AN.fa=firebase.analytics();const q=AN.q||[];AN.q=null;q.forEach(([n,p])=>AN.fa.logEvent(n,p));
+  }catch(e){AN.q=null;}
+}
+function gameParams(){if(!G)return {};const hum=G.players.filter(p=>p.type==='human').length;
+  return {mode:G.online?'online':'local',board:G.board,players:G.players.length,humans:hum,bots:G.players.length-hum,turn_timer:G.turnSecs||0,bot_speed:(setup&&setup.botSpeed)||'normal'};}
+function trackEnd(){if(!G||G.winner===null)return;const W=G.players[G.winner];
+  track('game_end',Object.assign(gameParams(),{winner:W.type==='human'?'human':'bot',winner_level:W.type,minutes:Math.round(gameElapsed()/6000)/10,rolls:G.stats.reduce((a,x)=>a+x.rolls,0)}));}
 async function firebaseNet(cfg){
   const base=`https://www.gstatic.com/firebasejs/${FB_VER}/`;
   await loadScript(base+'firebase-app-compat.js');
@@ -1865,6 +1952,7 @@ async function createRoom(){
     const pref=setup.players[0]&&BOARDS[setup.board].sectorColors.includes(setup.players[0].c)?setup.players[0].c:firstColor(setup.board,[]);
     const L={board:setup.board,rules:Object.assign({},setup.rules),turnSecs:30,seats:[{uid:net.uid,name,c:pref,type:'human'}]};
     await net.set(`rooms/${code}/lobby`,JSON.stringify(L));
+    track('room_create');
     await enterRoom(code);
   }catch(e){console.warn(e);setOnMsg(e.message||String(e),true);}
 }
@@ -1881,6 +1969,7 @@ async function joinRoom(code){
     await lobbyEdit(L=>{const me=L.seats.find(x=>x.uid===net.uid);if(me){me.name=name;return;}
       if(meta.status!=='lobby')return false;if(L.seats.length>=BOARDS[L.board].sectorColors.length)return false;
       L.seats.push({uid:net.uid,name,c:firstColor(L.board,L.seats.map(x=>x.c)),type:'human'});});
+    track('room_join');
     await enterRoom(code);
   }catch(e){console.warn(e);ON.code=null;setOnMsg(e.message||String(e),true);}
 }
@@ -1995,12 +2084,15 @@ async function startOnlineGame(){
   const players=L.seats.map(x=>({uid:x.uid||null,name:x.name,c:x.c,s:sec(x.c),type:x.type,away:false,missed:0,marbles:[0,1,2,3].map(()=>({d:null}))}))
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
   const r=L.rules,secs=L.turnSecs||30;
+  const ro=r.rollOff!==false?rollOff(players.map(p=>p.name)):null;
   const S={gid:Math.random().toString(36).slice(2,10),board:L.board,
     rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle},
-    players,stats:players.map(blankStats),turn:0,phase:'roll',roll:null,
-    log:[{c:null,text:'New online game: '+players.map(p=>p.name).join(', '),cls:''}],winner:null,again:'',ev:null,turnSecs:secs,deadline:ON.net.now()+secs*1000};
+    players,stats:players.map(blankStats),turn:ro?ro.first:0,phase:'roll',roll:null,
+    log:(ro?ro.lines.slice().reverse().map(t=>({c:null,text:t,cls:''})):[]).concat([{c:null,text:'New online game: '+players.map(p=>p.name).join(', '),cls:''}]),winner:null,again:'',ev:null,turnSecs:secs,deadline:ON.net.now()+secs*1000,started:ON.net.now()};
   await ON.net.txn(`rooms/${ON.code}/game`,cur=>({seq:((cur&&cur.seq)||0)+1,g:JSON.stringify(S)}));
   await ON.net.update(`rooms/${ON.code}/meta`,{status:'playing'});
+  const hum=players.filter(p=>p.type==='human').length;
+  track('game_start',{mode:'online',board:L.board,players:players.length,humans:hum,bots:players.length-hum,turn_timer:secs,bot_speed:setup.botSpeed||'normal'});
 }
 
 // ---------- syncing game state ----------
@@ -2036,19 +2128,20 @@ function installState(ns,fresh){
   if(G.ev&&G.ev.n)setDie(G.ev.n,false);
   electHost();routeRoom();
   renderLog();renderLive();renderPanel();onlineStatus();updateTimer();
-  if(G.winner!==null&&!ON.winShown&&!$('game').hidden){ON.winShown=true;saveRecords(G.winner);showWin(G.winner);}
+  if(G.winner!==null&&!ON.winShown&&!$('game').hidden){ON.winShown=true;saveRecords(G.winner);if(ON.isHost)trackEnd();showWin(G.winner);}
 }
 async function presentTransition(ns,fast){
   const ev=ns.ev;if(!ev||!G)return;
-  if(ev.t==='roll'){if(fast){setDie(ev.n,false);return;}sfx.dice();setDie(ev.n,true);await wait(reduced?150:800);return;}
+  const sp=speedFor(G.players[ev.pi]);
+  if(ev.t==='roll'){if(fast){setDie(ev.n,false);return;}$('die').style.transitionDuration=sp<1?(.8*sp).toFixed(2)+'s':'';sfx.dice();setDie(ev.n,true);await wait((reduced?150:800)*sp);return;}
   if(ev.t!=='move'||fast)return;
   const pi=ev.pi,mv=ev.mv,node=MARBLE_NODES[pi]&&MARBLE_NODES[pi][mv.mi];if(!node)return;
   G.phase='anim';G.sel=null;renderLive();renderPanel();
   node.parentNode.appendChild(node);
   const pts=[posOf(pi,mv.mi)].concat(mv.path.map(x=>Object.assign(stepPos(x),{hop:!!x.hop})));
-  await animPath(node,pts);
+  await animPath(node,pts,{speed:sp});
   if(mv.victim){const vn=MARBLE_NODES[mv.victim.pi][mv.victim.mi],vp=posOf(mv.victim.pi,mv.victim.mi);sfx.thud();burst(vp,'#E5262E');
-    await animPath(vn,[vp,B.BASEPOS[ns.players[mv.victim.pi].s][mv.victim.mi]],{dur:420,arc:true});}
+    await animPath(vn,[vp,B.BASEPOS[ns.players[mv.victim.pi].s][mv.victim.mi]],{dur:420*Math.max(.35,sp),arc:true});}
   if(mv.kind==='home'||ev.corner){sfx.home();const d=destPos(pi,mv);burst(d,COLORS[G.players[pi].c].hex);}
   if(mv.kind==='leave')sfx.out();
 }
@@ -2081,7 +2174,7 @@ function drive(){
   clearDrive();
   if(!G||!G.online||G.winner!==null||!ON.meta||ON.meta.status!=='playing'||ON.processing||G.phase==='anim')return;
   const P=cur(),auto=P.type!=='human'||P.away||!isOnline(P.uid);
-  if(auto){if(ON.isHost)later(()=>botAct(),G.phase==='roll'?(P.type==='human'?450:800):650);return;}
+  if(auto){if(ON.isHost)later(()=>botAct(),Math.round((G.phase==='roll'?(P.type==='human'?450:800):650)*speedFor(P)));return;}
   if(P.uid===ON.net.uid&&G.phase==='move'&&G.moves.length===1&&G.rules.autoSingle)later(()=>onlineMove(G.moves[0],false),700);
   if(ON.isHost)later(()=>botAct({timeout:true}),Math.max(0,(G.deadline||0)-ON.net.now())+300);
 }
@@ -2110,8 +2203,17 @@ function onlineStatus(){
   setStatus(msg);
 }
 $('backBtn').onclick=async()=>{if(!G||!G.online)return;const S=cleanState(G);const me=S.players.find(p=>p.type==='human'&&p.uid===ON.net.uid);if(!me)return;me.away=false;me.missed=0;S.ev=null;await commit(S,ON.seq);};
+function fmtClock(ms){const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s/60)%60,x=s%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0');}
+function gameElapsed(){if(!G||!G.started)return 0;const now=G.online?ON.net.now():Date.now();
+  if(G.winner!==null&&G.winner!==undefined){if(!G.ended)G.ended=now;return G.ended-G.started;}return now-G.started;}
 function updateTimer(){
-  if(!G||!G.online||$('game').hidden)return;const t=$('turnTimer'),P=cur();
+  if(!G||$('game').hidden)return;
+  $('gameClockT').textContent=fmtClock(gameElapsed());
+  if(!G.online){const t=$('turnTimer'),P=cur();
+    if(!G.turnSecs||!G.deadline||G.winner!==null||!isHuman(P)||(G.phase!=='roll'&&G.phase!=='move')){t.textContent='';t.className='timer';return;}
+    const left=Math.max(0,Math.ceil((G.deadline-Date.now())/1000)),many=G.players.filter(isHuman).length>1;
+    t.textContent=`Auto-play in ${left}s`;t.title=`If ${many?P.name:'you'} don't move in time, the game rolls and moves for ${many?'them':'you'}.`;t.className='timer'+(left<=10?' warn':'');return;}
+  const t=$('turnTimer'),P=cur();
   if(G.winner!==null){t.textContent='';return;}
   const auto=P.type!=='human'||P.away||!isOnline(P.uid);
   if(auto){t.textContent=P.type!=='human'?'':P.uid===ON.net.uid?'Auto-playing your turn':'Auto-playing '+P.name;t.className='timer';return;}
@@ -2134,19 +2236,20 @@ function initOnlineCard(){
 }
 
 // ================= BOOT =================
-function snapshot(){return {setup,game:G&&!G.online?{board:G.board,rules:G.rules,players:G.players,stats:G.stats,turn:G.turn,log:G.log,winner:G.winner}:null};}
+function snapshot(){return {setup,game:G&&!G.online?{board:G.board,rules:G.rules,players:G.players,stats:G.stats,turn:G.turn,log:G.log,winner:G.winner,started:G.started}:null};}
 function start(data){
   data=data||{};
   setup=data.setup||loadSetup();
-  setSound(safeGet('aggravation-sound')!=='0');
+  setSound(safeGet('aggravation-sound')!=='0');renderSpeed();
   buildBoard($('heroBoard'),'M',makeBoard('hex'),{mini:true});
   const g=data.game;
   if(g&&g.winner===null&&g.board&&g.stats&&g.players.every(p=>typeof p.s==='number')){
-    G=Object.assign(newGameState(),{board:g.board,rules:g.rules,players:g.players,stats:g.stats,turn:g.turn,log:g.log||[]});resetCoach(G.players.length);
+    G=Object.assign(newGameState(),{board:g.board,rules:g.rules,players:g.players,stats:g.stats,turn:g.turn,log:g.log||[],started:g.started||Date.now()});resetCoach(G.players.length);
     setBoard(g.board);buildBoard($('boardStatic'),'S',B);
     $('lobby').hidden=true;$('game').hidden=false;$('tools').hidden=false;buildLive();renderLog();beginTurn();
   }else showLobby();
   initOnlineCard();
+  setTimeout(initAnalytics,1500);
 }
 window.claude?.hot?.snapshot?.(snapshot);
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
