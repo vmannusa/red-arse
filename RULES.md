@@ -44,16 +44,16 @@ Every rule can be switched on or off on the setup screen. Rules marked *(house r
 - The whole roll must be used on corners: a 3 means exactly 3 corners, with no extra steps onto the track or into the center.
 - Hops can pass over any marble on the corners in between (yours included), but can't land on your own.
 - You can't hop past your own color's inside corner (the one before your home).
-- Hops only go clockwise. Backward moves never hop inside corners.
+- **Backward hop on a 4** (6-player board): instead of hopping forward, a marble on an inside corner can hop exactly **4 inside corners counter-clockwise**. Going backward it **can** pass your own home corner. If that takes it behind your start, the back-past-start shortcut applies. It can kill, but can't land on your own marble. On the 4-player board 4 corners back is a full circle, so there's no backward hop there.
 
 ## Center hole
 - A roll whose last step comes off an inside corner can finish in the center. Examples: a 6 from your start hole, or a 1 from an inside corner.
 - Leave the center on a **1** or a **6**, to any inside corner you choose (a 6 still rolls again).
 
-## Backward 4 *(house rule)*
+## Backward 4
 - On a **4** you choose: forward, or 4 holes counter-clockwise. 4 is the only roll that can move backward.
 - If no forward move is possible on a 4, you **must** move backward.
-- Backward moves follow the track one hole at a time: no inside-corner hops, can't go straight into your home, can't jump your own marbles. They can drop into the center and can kill.
+- Backward moves follow the track one hole at a time (except the backward inside-corner hop above), can't go straight into your home, can't jump your own marbles. They can drop into the center and can kill.
 - Home marbles that aren't locked in can back out of home.
 - **Back-past-start shortcut** *(house rule)*: backing up behind your own start hole parks that marble just outside your home, ready to go in.
 
