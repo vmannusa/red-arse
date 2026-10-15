@@ -263,7 +263,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <svg id="heroBoard" viewBox="-11 -11 22 22" aria-hidden="true"></svg>
         <div>
           <h1>Red Arse</h1>
-          <p class="lede">The classic wooden marble game on the 6-player hex board or the 4-player square board. Add people playing on this device, fill the other seats with bots, then start.</p>
+          <p class="lede">The classic wooden marble game on the 6-player or 4-player hex board. Add people playing on this device, fill the other seats with bots, then start.</p>
         </div>
       </div>
       <section class="card online-card" id="onlineCard" hidden>
@@ -371,7 +371,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
   <div class="card" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
     <h2 id="rulesTitle">How to play</h2>
     <ul>
-      <li><b>Boards:</b> the 6-player hex board and the 4-player square board play exactly the same; the square board's track is just shorter (56 holes instead of 84).</li>
+      <li><b>Boards:</b> the 6-player and 4-player hex boards play exactly the same; the 4-player board just has 4 sections, so its track is shorter (56 holes instead of 84).</li>
       <li><b>Goal:</b> be the first to get all 4 marbles from your BASE around the board and into your HOME column.</li>
       <li><b>Leave base:</b> roll a 1 or a 6 to put a marble on your start hole (the colored ring next to your base). A 6 also gives you another roll.</li>
       <li><b>Move:</b> marbles travel clockwise. You can jump over any marble, but you can't land on your own.</li>
@@ -424,10 +424,11 @@ const mod = (a,n)=>((a%n)+n)%n;
 function rot(p,deg){const a=deg*Math.PI/180,c=Math.cos(a),s=Math.sin(a);return {x:p.x*c-p.y*s,y:p.x*s+p.y*c};}
 // Both boards use the same 14-hole sector: inner-corner star, an arm out, 5 holes along the edge
 // (the middle one is the home entry, the right corner is the start hole), and an arm back in.
-// The hex board rotates it 6 times by 60 deg; the square board 4 times by 90 deg.
+// The 6-player hex rotates it 6 times by 60 deg; the 4-player hex 4 times by 90 deg.
+// (The 4-player board keeps the internal id 'square' so saved setups and open rooms keep working.)
 const BOARDS={
-  hex:{kind:'hex',N:6,step:60,A:2*Math.sqrt(3),base:{x:4.15,y:-7.19},sectorColors:[0,1,2,3,4,5],label:'6-player hex',vb:11},
-  square:{kind:'square',N:4,step:90,A:2,base:{x:5.05,y:-5.05},sectorColors:[2,5,3,4],label:'4-player square',vb:8.55},
+  hex:{kind:'hex',N:6,step:60,A:2*Math.sqrt(3),base:{x:4.15,y:-7.19},sectorColors:[0,1,2,3,4,5],label:'6-player hex',vb:11,ap:9.3},
+  square:{kind:'square',N:4,step:90,A:2,base:{x:5.05,y:-5.05},sectorColors:[2,5,3,4],label:'4-player hex',vb:10.55,ap:8.9},
 };
 let B=null;
 const BASE_OFF=[{x:0,y:-.62},{x:.62,y:0},{x:0,y:.62},{x:-.62,y:0}];
@@ -699,10 +700,9 @@ function polyPath(v,rr){
     d+=(i?'L':'M')+f(p1.x)+' '+f(p1.y)+' Q'+f(p.x)+' '+f(p.y)+' '+f(p2.x)+' '+f(p2.y)+' ';}
   return d+'Z';
 }
-// board outline: flat-top hexagon (apothem 9.3) or square (half-size 7.9)
+// board outline: a flat-top hexagon for both boards (6-player apothem 9.3, 4-player apothem 8.9)
 function outline(bd,inset=0,rr=.55){
-  if(bd.kind==='square'){const h=7.9-inset;return polyPath([{x:-h,y:-h},{x:h,y:-h},{x:h,y:h},{x:-h,y:h}],rr);}
-  const R=(9.3-inset)/Math.cos(Math.PI/6),v=[];for(let i=0;i<6;i++){const a=i*Math.PI/3;v.push({x:R*Math.cos(a),y:R*Math.sin(a)});}
+  const R=((bd.ap||9.3)-inset)/Math.cos(Math.PI/6),v=[];for(let i=0;i<6;i++){const a=i*Math.PI/3;v.push({x:R*Math.cos(a),y:R*Math.sin(a)});}
   return polyPath(v,rr);
 }
 function starPts(cx,cy,ro,ri){let s='';for(let i=0;i<10;i++){const r=i%2?ri:ro,a=-Math.PI/2+i*Math.PI/5;s+=f(cx+r*Math.cos(a))+','+f(cy+r*Math.sin(a))+' ';}return s;}
@@ -719,7 +719,7 @@ function defsCommon(svg,prefix,bd){
 }
 // "RED ARSE" wordmark burned into the wood around the center hole: RED arcs over the top, ARSE under the bottom.
 function drawLogo(svg,prefix,bd){
-  const sq=bd.kind==='square',r=sq?.88:1.6,fs=sq?.38:.68,defs=svg.querySelector('defs');
+  const sq=bd.N===4,r=sq?.88:1.6,fs=sq?.38:.68,defs=svg.querySelector('defs');
   const top=el('path',{id:prefix+'logoTop',d:`M ${-r} 0 A ${r} ${r} 0 0 1 ${r} 0`},defs);
   const bot=el('path',{id:prefix+'logoBot',d:`M ${-r-fs*.72} 0 A ${r+fs*.72} ${r+fs*.72} 0 0 0 ${r+fs*.72} 0`},defs);
   const g=el('g',{'aria-hidden':'true'},svg);
@@ -832,7 +832,7 @@ function fitSetupToBoard(st){
   const al=allowedColors(st);
   st.players.forEach(p=>{if(!al.includes(p.c)){p.prevC=p.c;const nc=COLOR_PREF.find(c=>al.includes(c)&&!st.players.some(q=>q.c===c));const wasBot=p.type!=='human'&&p.name===botName(p.c);p.c=nc;if(wasBot)p.name=botName(nc);}});
 }
-// going back to the hex board gives players back the colors they had before the square board swapped them
+// going back to the 6-player board gives players back the colors they had before the 4-player board swapped them
 function restoreColors(st){
   st.players.forEach(p=>{if(typeof p.prevC==='number'&&!st.players.some(q=>q!==p&&q.c===p.prevC)){const wasBot=p.type!=='human'&&p.name===botName(p.c);p.c=p.prevC;if(wasBot)p.name=botName(p.c);}delete p.prevC;});
 }
