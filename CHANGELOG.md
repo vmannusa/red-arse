@@ -1,6 +1,9 @@
 # Red Arse – Change log
 
 ## 2026-10-15
+- **Bots gang up on the leader:** as someone's chance to win climbs, Medium and Hard bots go after that player's marbles first; Hard bots also line up behind the leader's marbles.
+- **What's new** link on the setup screen (next to How to play) and in the rules, pointing to this change log.
+- Filled gaps in the in-game rules: a 1 from a star goes into the center, unlocked home marbles can back out on a 4, and how chance to win is worked out. Added RULES.md and this change log to GitHub.
 - **Home rules:** home marbles are locked in only once they fill the column from the top with no gaps. Unlocked home marbles can move, and can back out of home on a 4 (forced when nothing else can move).
 - **Raid a home:** turn into (or back into) another player's home to kill an unlocked marble; the raider stays there until it backs out on a 4.
 - **Win chance on the board:** each player's percentage now sits in a pill beside their base.
