@@ -1,6 +1,6 @@
 # Red Arse
 
-The wooden-board marble game (6-player hex or 4-player square board) with bots,
+The wooden-board marble game (6-player or 4-player hex board) with bots,
 pass-and-play on one device, and online rooms with friends.
 
 ## Files
