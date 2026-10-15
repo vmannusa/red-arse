@@ -66,7 +66,7 @@ Every rule can be switched on or off on the setup screen. Rules marked *(house r
 - All bots roll the same fair die as humans.
 
 ## Chance to win
-After every move the game plays the rest of the match out 300 times with medium-strength bots and shows each player's share of wins, next to their base on the board and in the player list.
+After every move the game plays the rest of the match out 300 times with medium-strength bots and shows each player's share of wins, in a pill next to their base on the board.
 
 ## Move review
 - Whenever a human player has a real choice (two or more moves that lead to different positions), the game plays the rest of the match out from every option, hundreds of times each, using the same dice for every option so they're compared fairly. It keeps going until the gap between your move and the best one is known to within about 1.5 points.
@@ -76,7 +76,7 @@ After every move the game plays the rest of the match out 300 times with medium-
   - **Inaccuracy:** under 6
   - **Mistake:** under 12
   - **Blunder:** 12 or more
-- **Stats** (rail and Stats window):
+- **Stats** (Players & stats panel and Stats window):
   - **Acc:** share of Best and Good moves.
   - **Blunders** and **Mistakes**.
   - **Missed kills:** a kill was the better move but wasn't taken.
