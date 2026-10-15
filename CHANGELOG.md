@@ -1,6 +1,7 @@
 # Red Arse – Change log
 
 ## 2026-10-15
+- **Backward inside-corner hop:** on a 4, a marble on an inside corner can hop exactly 4 inside corners counter-clockwise (6-player board), and going backward it can pass your own home corner.
 - **Turn timer:** human players get 30 seconds (setup screen: Off, 15–90 seconds) to roll and again to move; when it runs out the game plays for them.
 - **Game clock** in the turn panel and on the winner screen.
 - **Bot speed:** Normal (a bit quicker than before), Fast or Turbo, on the setup screen and under the die during a game.
