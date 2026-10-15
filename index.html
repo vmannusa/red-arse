@@ -250,6 +250,23 @@ table.stats td.top{color:var(--warn);font-weight:800}
   .slot{grid-template-columns:auto minmax(0,1fr) minmax(0,1fr) auto;grid-template-areas:"sw name name rm" "col col type type"}
   .brand span{font-size:19px}
 }
+/* phones held sideways: board sized to the screen height, controls beside it */
+@media (orientation:landscape) and (max-height:620px){
+  .app{gap:6px;padding-block:4px 6px}
+  .topbar{gap:6px}
+  .brand{font-size:16px;gap:6px}.brand svg{width:20px;height:20px}
+  .tbtn{padding:3px 9px;font-size:12px}.tbtn svg{width:14px;height:14px}
+  .game{grid-template-columns:auto minmax(0,1fr);gap:12px}
+  .board-wrap{width:min(calc(100dvh - 52px),calc(100vw - 280px));max-width:none}
+  .rail{display:flex;flex-direction:column;gap:8px}
+  .card{padding:10px 12px;border-radius:12px}
+  .dice-row{margin-top:8px;gap:10px}
+  .roll-btn{min-height:46px;font-size:16px}
+  .status{margin-top:8px;min-height:0;font-size:13px}
+  .legend{display:none}
+  .who-name{font-size:16px}.chip{width:26px;height:26px}
+  .plist li{padding:4px 8px}
+}
 </style>
 </head>
 <body>
@@ -400,6 +417,8 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <h3>Getting home</h3>
         <ul>
           <li>After a full lap, turn into your home column. You need the exact count and can't jump your own marbles there.</li>
+          <li><b>Locked in:</b> a home marble is safe only once it and every slot above it are filled with your marbles, no gaps, starting from the top. Locked marbles can't move.</li>
+          <li>Home marbles that aren't locked in still move. On a 4 they can back out of home, and must if nothing else can move.</li>
         </ul>
       </section>
       <section>
@@ -407,6 +426,7 @@ table.stats td.top{color:var(--warn);font-weight:800}
         <ul>
           <li>Land exactly on an opponent to send that marble back to their base.</li>
           <li>Moving backward or into the center can kill too.</li>
+          <li><b>Raid a home:</b> when a move reaches another player's home entry, you can turn into their home column with the rest of the roll (forward, or backward on a 4), but only to land exactly on one of their marbles that isn't locked in. Your marble then stays in their home until it backs out with a 4.</li>
         </ul>
       </section>
       <section>
@@ -510,16 +530,26 @@ const gOf=(s,d)=>mod(14*s+9+d,B.L);
 const inHome=d=>typeof d==='number'&&d>=B.H0;
 const onTrack=d=>typeof d==='number'&&d<B.H0;
 
+// A marble sitting in someone else's home column after a raid is stored as d='h<sector>.<slot>',
+// with m.dx = where it was on its own lap when it turned in (used when it backs out).
+const fhome=(s,j)=>'h'+s+'.'+j;
+const isFH=d=>typeof d==='string'&&d[0]==='h';
+const parseFH=d=>{const i=d.indexOf('.');return [+d.slice(1,i),+d.slice(i+1)];};
 function occupancy(S){
-  const track=new Map();let center=null;const home={};
+  const track=new Map();let center=null;const home={}; // home[sector][slot]={pi,mi}
   S.players.forEach((p,pi)=>p.marbles.forEach((m,mi)=>{
-    if(m.d===null)return;
-    if(m.d==='C'){center={pi,mi};return;}
-    if(m.d>=B.H0){(home[pi]=home[pi]||{})[m.d-B.H0]=mi;return;}
-    track.set(gOf(p.s,m.d),{pi,mi});
+    const d=m.d;if(d===null)return;
+    if(d==='C'){center={pi,mi};return;}
+    if(isFH(d)){const [sx,j]=parseFH(d);(home[sx]=home[sx]||{})[j]={pi,mi};return;}
+    if(d>=B.H0){(home[p.s]=home[p.s]||{})[d-B.H0]={pi,mi};return;}
+    track.set(gOf(p.s,d),{pi,mi});
   }));
   return {track,center,home};
 }
+// A home marble is "locked in" once it and every slot above it (toward the top of the column)
+// hold that player's own marbles with no gaps. Locked marbles can't move and can't be raided.
+function isLocked(O,ownerPi,s,j){for(let k=j;k<4;k++){const o=O.home[s]&&O.home[s][k];if(!o||o.pi!==ownerPi)return false;}return true;}
+function marbleLocked(S,pi,mi){const P=S.players[pi],d=P.marbles[mi].d;return inHome(d)&&isLocked(occupancy(S),pi,P.s,d-B.H0);}
 
 // ================= RULES =================
 function legalMoves(S,pi,n){
@@ -527,8 +557,9 @@ function legalMoves(S,pi,n){
   const fwd=[],back=[];
   const ownAt=g=>{const o=O.track.get(g);return !!(o&&o.pi===pi);};
   const foeAt=g=>{const o=O.track.get(g);return o&&o.pi!==pi?o:null;};
-  const ownHome=j=>O.home[pi]&&O.home[pi][j]!==undefined;
-  const mk=(mi,from,to,path,dir,victim,kind)=>({mi,from,to,path,dir,victim:victim||null,kind});
+  const homeAt=(s,j)=>O.home[s]&&O.home[s][j]||null;
+  const mk=(mi,from,to,path,dir,victim,kind,extra)=>Object.assign({mi,from,to,path,dir,victim:victim||null,kind},extra||{});
+  const raidOn=R.homeRaid!==false;
   let baseDone=false;
 
   P.marbles.forEach((m,mi)=>{
@@ -547,54 +578,86 @@ function legalMoves(S,pi,n){
       }
       return;
     }
-    const walk=(start,r,prefix,viaStars)=>{
+    if(inHome(d0)&&isLocked(O,pi,c,d0-H0))return; // locked in: done moving
+
+    // Raid: from another player's home-entry hole, turn into their home column using the rest of
+    // the roll, but only to land exactly on one of their marbles that isn't locked in (a kill).
+    const raid=(cur,k,p,dir)=>{
+      if(!raidOn||k<1||k>4)return;
+      const g=gOf(c,cur);
+      S.players.forEach((q,qi)=>{
+        if(qi===pi||gOf(q.s,B.ENTRY)!==g)return;
+        const path=p.slice();
+        for(let j=0;j<k;j++){const o=homeAt(q.s,j);if(o&&o.pi===pi)return;path.push({k:'h',s:q.s,j});}
+        const o=homeAt(q.s,k-1);if(!o||o.pi===pi)return;
+        if(o.pi===qi&&isLocked(O,qi,q.s,k-1))return;
+        (dir==='back'?back:fwd).push(mk(mi,d0,fhome(q.s,k-1),path,dir,o,'raid',{dx:cur}));
+      });
+    };
+    const land=(cur,p)=>{
+      const g=gOf(c,cur);if(ownAt(g))return;
+      let nd=cur;
+      if(R.backShortcut&&nd<0){nd=mod(nd,B.L);if(nd===B.L-1)nd=-1;} // behind own start: now counts as near home
+      back.push(mk(mi,d0,nd,p,'back',foeAt(g),inHome(d0)?'backOut':isFH(d0)?'raidOut':'back'));
+    };
+    // backward along the track (and out of a home column), one hole at a time, never hopping stars
+    const backWalk=(start,r,prefix,skipFirstRaid)=>{
       let cur=start;const p=prefix.slice();
       for(let i=1;i<=r;i++){
-        if(i===r&&R.center&&onTrack(cur)&&isStar(gOf(c,cur))&&!(O.center&&O.center.pi===pi)){
-          fwd.push(mk(mi,d0,'C',[...p,{k:'c'}],'fwd',O.center&&O.center.pi!==pi?O.center:null,viaStars?'starsCenter':'center'));
+        if(onTrack(cur)){
+          if(i===r&&R.center&&isStar(gOf(c,cur))&&!(O.center&&O.center.pi===pi))
+            back.push(mk(mi,d0,'C',[...p,{k:'c'}],'back',O.center&&O.center.pi!==pi?O.center:null,'center'));
+          if(!(skipFirstRaid&&i===1))raid(cur,r-i+1,p,'back');
+        }
+        cur--;
+        if(cur>=H0){const o=homeAt(c,cur-H0);if(o&&o.pi===pi)return;p.push({k:'h',s:c,j:cur-H0});}
+        else{const g=gOf(c,cur);if(ownAt(g))return;p.push({k:'t',g});} // can't jump your own marble
+      }
+      if(cur>=H0)return;
+      land(cur,p);
+    };
+
+    // A marble sitting in another player's home after a raid can only back out, on a 4.
+    if(isFH(d0)){
+      if(n!==4||!R.back)return;
+      const [sx,j]=parseFH(d0),p=[];
+      for(let t=j-1;t>=0;t--){const o=homeAt(sx,t);if(o&&o.pi===pi)return;p.push({k:'h',s:sx,j:t});}
+      const eg=gOf(sx,B.ENTRY);if(ownAt(eg))return;p.push({k:'t',g:eg});
+      const rem=4-(j+1),dx=typeof m.dx==='number'?m.dx:mod(eg-(14*c+9),B.L);
+      if(rem===0)land(dx,p);else backWalk(dx,rem,p,true);
+      return;
+    }
+
+    const walk=(start,r,prefix)=>{
+      let cur=start;const p=prefix.slice();
+      for(let i=1;i<=r;i++){
+        if(onTrack(cur)){
+          if(i===r&&R.center&&isStar(gOf(c,cur))&&!(O.center&&O.center.pi===pi))
+            fwd.push(mk(mi,d0,'C',[...p,{k:'c'}],'fwd',O.center&&O.center.pi!==pi?O.center:null,'center'));
+          raid(cur,r-i+1,p,'fwd');
         }
         const nd=cur+1;
         if(nd>H0+3)return;
-        if(nd>=H0){if(ownHome(nd-H0))return;p.push({k:'h',s:c,j:nd-H0});}
+        if(nd>=H0){const o=homeAt(c,nd-H0);if(o&&o.pi===pi)return;p.push({k:'h',s:c,j:nd-H0});}
         else{const g=gOf(c,nd);if(ownAt(g))return;p.push({k:'t',g});} // can't jump (or land on) your own marble
         cur=nd;
       }
-      if(cur>=H0){fwd.push(mk(mi,d0,cur,p,'fwd',null,inHome(d0)?'homeShift':'home'));return;}
+      if(cur>=H0){const o=homeAt(c,cur-H0);fwd.push(mk(mi,d0,cur,p,'fwd',o&&o.pi!==pi?o:null,inHome(d0)?'homeShift':'home'));return;}
       const g=gOf(c,cur);if(ownAt(g))return;
-      fwd.push(mk(mi,d0,cur,p,'fwd',foeAt(g),viaStars?'stars':'move'));
+      fwd.push(mk(mi,d0,cur,p,'fwd',foeAt(g),'move'));
     };
-    walk(d0,n,[],false);
-    // star shortcut
+    walk(d0,n,[]);
+    // star shortcut: exact hops only, can pass any marble on the stars in between
     if(R.stars&&onTrack(d0)&&isStar(gOf(c,d0))){
       const p=[];
       for(let h=1;h<=n;h++){
         const nd=d0+14*h;if(nd>B.OWNSTAR)break; // never hop past own star
         p.push({k:'t',g:gOf(c,nd),hop:true});
-        // the whole roll must be spent on stars: a 3 means exactly 3 stars, nothing extra on the track or into the center
         if(h===n){const g=gOf(c,nd);if(!ownAt(g))fwd.push(mk(mi,d0,nd,p.slice(),'fwd',foeAt(g),'stars'));}
       }
     }
-    // Backward 4: counter-clockwise along the track only (no star hops), may drop into the center, never into home.
-    if(n===4&&R.back&&onTrack(d0)){
-      const land=(cur,p,viaStars)=>{
-        const g=gOf(c,cur);if(ownAt(g))return;
-        let nd=cur;
-        if(R.backShortcut&&nd<0){nd=mod(nd,B.L);if(nd===B.L-1)nd=-1;} // behind own start: now counts as near home
-        back.push(mk(mi,d0,nd,p,'back',foeAt(g),viaStars?'backStars':'back'));
-      };
-      const backWalk=(start,r,prefix,viaStars)=>{
-        let cur=start;const p=prefix.slice();
-        for(let i=1;i<=r;i++){
-          if(i===r&&R.center&&isStar(gOf(c,cur))&&!(O.center&&O.center.pi===pi)){
-            back.push(mk(mi,d0,'C',[...p,{k:'c'}],'back',O.center&&O.center.pi!==pi?O.center:null,'center'));
-          }
-          cur--;const g=gOf(c,cur);if(ownAt(g))return; // can't jump your own marble backward either
-          p.push({k:'t',g});
-        }
-        land(cur,p,viaStars);
-      };
-      backWalk(d0,4,[],false); // no star hops backward: stars only shortcut clockwise
-    }
+    // Backward 4: track marbles, and home marbles that aren't locked in (they back out of home).
+    if(n===4&&R.back&&(onTrack(d0)||inHome(d0)))backWalk(d0,4,[],false);
   });
   const seen=new Set();const uniq=a=>a.filter(mv=>{const k=mv.mi+'|'+mv.to+'|'+mv.dir;if(seen.has(k))return false;seen.add(k);return true;});
   const F=uniq(fwd),Bk=uniq(back);
@@ -603,8 +666,9 @@ function legalMoves(S,pi,n){
 
 function applyMove(S,pi,mv){
   const m=S.players[pi].marbles[mv.mi];
-  if(mv.victim){S.players[mv.victim.pi].marbles[mv.victim.mi].d=null;}
+  if(mv.victim){const v=S.players[mv.victim.pi].marbles[mv.victim.mi];v.d=null;delete v.dx;}
   m.d=mv.to;
+  if(typeof mv.dx==='number')m.dx=mv.dx;else delete m.dx;
 }
 // Inside corners house rule: ending a move on an edge corner hole (either side of any home column)
 // earns another roll. Coming out of base onto your own start hole doesn't count; backing onto it does.
@@ -635,7 +699,8 @@ function danger(S,pi,d){
 }
 function scoreMove(S,pi,mv,level){
   let s=0;const {from,to}=mv;
-  if(mv.victim){const vm=S.players[mv.victim.pi].marbles[mv.victim.mi];s+=40+(onTrack(vm.d)?Math.max(0,vm.d)*.45*84/B.L:12);}
+  if(mv.victim){const vm=S.players[mv.victim.pi].marbles[mv.victim.mi];s+=40+(onTrack(vm.d)?Math.max(0,vm.d)*.45*84/B.L:inHome(vm.d)?45:12);}
+  if(mv.kind==='backOut')s-=35;
   if(mv.kind==='leave')s+=28;
   if(inHome(to)&&!inHome(from))s+=48;
   if(mv.kind==='homeShift')s+=4+(to-from);
@@ -664,6 +729,9 @@ function describePure(S,pi,mv,roll){
   else if(mv.to==='C')t=mv.dir==='back'?`${P.name} backed into the center hole`:`${P.name} took the center hole`;
   else if(mv.kind==='home'||mv.kind==='homeShift')t=`${P.name} moved ${roll} into home`;
   else if(mv.kind==='backStars')t=`${P.name} moved back 4 using the stars`;
+  else if(mv.kind==='raid'){const q=S.players.find(x=>x.s===parseFH(mv.to)[0]);t=`${P.name} raided ${q?q.name:'a'}'s home`;}
+  else if(mv.kind==='backOut')t=`${P.name} backed a marble out of home`;
+  else if(mv.kind==='raidOut')t=`${P.name} backed out of a raided home`;
   else if(mv.dir==='back')t=`${P.name} moved back 4`;
   else if(mv.kind==='stars')t=`${P.name} took a star shortcut (${roll})`;
   else t=`${P.name} moved ${roll}`;
@@ -717,7 +785,7 @@ function reduceMove(S0,mv,o={}){
 // Play the rest of the game out many times from the current position with quick "medium" bots and
 // count who finishes first. Each player's share of those wins is their chance to win.
 function rolloutWinner(S0,maxRolls){
-  const S={rules:S0.rules,players:S0.players.map(p=>({s:p.s,c:p.c,marbles:p.marbles.map(m=>({d:m.d}))}))};
+  const S={rules:S0.rules,players:S0.players.map(p=>({s:p.s,c:p.c,marbles:p.marbles.map(m=>({d:m.d,dx:m.dx}))}))};
   const N=S.players.length;let turn=S0.turn;
   for(let k=0;k<maxRolls;k++){
     const n=1+Math.floor(Math.random()*6),mv=legalMoves(S,turn,n);let bonus=n===6&&S.rules.rollAgain;
@@ -874,6 +942,7 @@ const RULE_DEFS=[
   {k:'back',label:'Backward on 4',sub:'Only a 4 moves back, along the track (no star hops). Forced if no forward move.',def:true,house:true},
   {k:'backShortcut',label:'Back-past-start shortcut',sub:'Backing up behind your start sets you up to enter home.',def:true,house:true},
   {k:'corners',label:'Inside corners: roll again',sub:'End a move on an edge corner hole to roll again, backward moves included. Coming out of base onto your start doesn\'t count.',def:true,house:true},
+  {k:'homeRaid',label:'Raid homes',sub:'Turn into (or back into) another player\'s home to kill a marble that isn\'t locked in. You stay there until you back out with a 4.',def:true,house:true},
   {k:'killAgain',label:'Kill: roll again',sub:'Aggravate an opponent (send them back to base) and you roll again.',def:true,house:true},
   {k:'autoSingle',label:'Auto-play forced moves',sub:'If only one move is possible, make it automatically.',def:true},
 ];
@@ -993,7 +1062,7 @@ function newGameState(){
   const players=setup.players.map(p=>({name:(p.name||'').trim()||COLORS[p.c].name,c:p.c,s:sec(p.c),type:p.type,marbles:[0,1,2,3].map(()=>({d:null}))}))
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
   const r=setup.rules;
-  return {token:++tokenSeq,board:bd.kind,rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,autoSingle:r.autoSingle},
+  return {token:++tokenSeq,board:bd.kind,rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle},
     players,stats:players.map(blankStats),turn:0,phase:'roll',roll:null,moves:[],sel:null,log:[],winner:null,again:'',msg:''};
 }
 function resetHeader(){$('btnRestart').hidden=false;$('roomChip').hidden=true;$('btnLobby').querySelector('span').textContent='Players';$('turnTimer').textContent='';$('backBtn').hidden=true;}
@@ -1104,12 +1173,12 @@ async function localExecute(mv){
 // ================= LIVE BOARD =================
 let MARBLE_NODES=[],LAYERS={};
 function posOf(pi,mi){const P=G.players[pi],m=P.marbles[mi];
-  if(m.d===null)return B.BASEPOS[P.s][mi];if(m.d==='C')return CENTER;if(m.d>=B.H0)return B.HOMEPOS[P.s][m.d-B.H0];return B.TRACK[gOf(P.s,m.d)];}
+  if(m.d===null)return B.BASEPOS[P.s][mi];if(m.d==='C')return CENTER;if(isFH(m.d)){const [sx,j]=parseFH(m.d);return B.HOMEPOS[sx][j];}if(m.d>=B.H0)return B.HOMEPOS[P.s][m.d-B.H0];return B.TRACK[gOf(P.s,m.d)];}
 function stepPos(s){if(s.k==='t')return {x:B.TRACK[s.g].x,y:B.TRACK[s.g].y};if(s.k==='h')return {x:B.HOMEPOS[s.s][s.j].x,y:B.HOMEPOS[s.s][s.j].y};return {x:0,y:0};}
-function destPos(pi,mv){const sc=G.players[pi].s;if(mv.to==='C')return CENTER;if(mv.to>=B.H0)return B.HOMEPOS[sc][mv.to-B.H0];return B.TRACK[gOf(sc,mv.to)];}
+function destPos(pi,mv){const sc=G.players[pi].s;if(mv.to==='C')return CENTER;if(isFH(mv.to)){const [sx,j]=parseFH(mv.to);return B.HOMEPOS[sx][j];}if(mv.to>=B.H0)return B.HOMEPOS[sc][mv.to-B.H0];return B.TRACK[gOf(sc,mv.to)];}
 function buildLive(){
   const svg=$('boardLive');svg.innerHTML='';setViewBox(svg,B);defsCommon(svg,'L',B);
-  LAYERS.glow=el('g',null,svg);LAYERS.ghostLines=el('g',{'pointer-events':'none'},svg);LAYERS.marbles=el('g',null,svg);LAYERS.ghostDest=el('g',null,svg);LAYERS.targets=el('g',null,svg);LAYERS.fx=el('g',{'pointer-events':'none'},svg);
+  LAYERS.glow=el('g',null,svg);LAYERS.ghostLines=el('g',{'pointer-events':'none'},svg);LAYERS.marbles=el('g',null,svg);LAYERS.ghostDest=el('g',null,svg);LAYERS.targets=el('g',null,svg);LAYERS.odds=el('g',{'pointer-events':'none'},svg);LAYERS.fx=el('g',{'pointer-events':'none'},svg);
   const defs=svg.querySelector('defs');
   [['fwd','#3FB37A'],['back','#F0A020'],['cap','#E5262E']].forEach(([k,c])=>{
     const m=el('marker',{id:'arr-'+k,viewBox:'0 0 10 10',refX:'7',refY:'5',markerWidth:'.46',markerHeight:'.46',markerUnits:'userSpaceOnUse',orient:'auto'},defs);
@@ -1258,7 +1327,7 @@ function renderPanel(){
     Q.marbles.map(m=>inHome(m.d)).sort((a,b)=>b-a).forEach(h=>{const b=document.createElement('b');if(h){b.style.background=COLORS[Q.c].hex;b.style.borderColor=COLORS[Q.c].dark;}hm.appendChild(b);});
     const od=document.createElement('span');od.className='odds';od.id='odds-'+qi;od.title='Chance to win';od.textContent=oddsText(qi);
     li.append(d,nm,hm,od);ul.appendChild(li);});
-  scheduleOdds();
+  scheduleOdds();boardOdds();
   renderStats();
 }
 // compact table in the rail; full table in the Stats window and the end-of-game window
@@ -1308,7 +1377,19 @@ function oddsText(qi){
   if(!ODDS.pct||ODDS.pct.length!==G.players.length)return '…';
   const v=ODDS.pct[qi];return v===0?'<1%':v+'%';
 }
-function renderOdds(){if(!G)return;const stale=ODDS.shown!==oddsKey();G.players.forEach((_,qi)=>{const e=$('odds-'+qi);if(e){e.textContent=oddsText(qi);e.classList.toggle('stale',stale&&G.winner===null);}});}
+function renderOdds(){if(!G)return;const stale=ODDS.shown!==oddsKey();G.players.forEach((_,qi)=>{const e=$('odds-'+qi);if(e){e.textContent=oddsText(qi);e.classList.toggle('stale',stale&&G.winner===null);}});boardOdds();}
+// win-chance pill on the board next to each player's base, so it's visible on phones too
+function boardOdds(){
+  if(!G||!LAYERS.odds)return;const L=LAYERS.odds;L.innerHTML='';
+  G.players.forEach((Q,qi)=>{
+    const txt=oddsText(qi);if(!txt||txt==='…')return;
+    const bc=B.BASECENTER[Q.s],len=Math.hypot(bc.x,bc.y),k=(len-1.86)/len,x=bc.x*k,y=bc.y*k,C=COLORS[Q.c];
+    const g=el('g',{transform:`translate(${f(x)} ${f(y)})`},L);
+    const w=.42+txt.length*.37;
+    el('rect',{x:f(-w/2),y:-.42,width:f(w),height:.84,rx:.42,fill:C.hex,stroke:'#FFFFFF','stroke-width':.06,opacity:qi===G.turn?1:.88},g);
+    el('text',{y:.03,'font-size':.6,'font-weight':800,'font-family':'Archivo, sans-serif',fill:C.ink,'text-anchor':'middle','dominant-baseline':'central'},g).textContent=txt;
+  });
+}
 function scheduleOdds(){
   if(!G||(G.winner!==null&&G.winner!==undefined))return;
   const k=oddsKey();if(k===ODDS.key)return;ODDS.key=k;
@@ -1316,7 +1397,7 @@ function scheduleOdds(){
 }
 function runOdds(tok,key){
   if(!G||tok!==ODDS.token)return;
-  const snap={rules:G.rules,turn:G.turn,players:G.players.map(p=>({s:p.s,c:p.c,marbles:p.marbles.map(m=>({d:m.d}))}))};
+  const snap={rules:G.rules,turn:G.turn,players:G.players.map(p=>({s:p.s,c:p.c,marbles:p.marbles.map(m=>({d:m.d,dx:m.dx}))}))};
   const wins=new Array(snap.players.length).fill(0),total=300;let done=0;
   const step=()=>{
     if(!G||tok!==ODDS.token)return;
@@ -1594,7 +1675,7 @@ async function startOnlineGame(){
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
   const r=L.rules,secs=L.turnSecs||30;
   const S={gid:Math.random().toString(36).slice(2,10),board:L.board,
-    rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,autoSingle:r.autoSingle},
+    rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle},
     players,stats:players.map(blankStats),turn:0,phase:'roll',roll:null,
     log:[{c:null,text:'New online game: '+players.map(p=>p.name).join(', '),cls:''}],winner:null,again:'',ev:null,turnSecs:secs,deadline:ON.net.now()+secs*1000};
   await ON.net.txn(`rooms/${ON.code}/game`,cur=>({seq:((cur&&cur.seq)||0)+1,g:JSON.stringify(S)}));
