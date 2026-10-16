@@ -1,6 +1,8 @@
 # Red Arse – Change log
 
 ## 2026-10-16
+- **Setup screen makeover:** Play online split into **Host a game** and **Join a room**; a second **Start game** button at the top of Players; **Shuffle seats**; bots with default names follow their color and taken colors swap seats; Rules shows "N of 12 active" and folds away after your first game; **See how** diagrams for inside corners, center hole, back-past-start and raids (also in How to play); the board theme previews live on the setup screen; the whole setup (including board size) is remembered, with **Reset defaults**.
+- **Nice One** now shows now and then on a 1 (about 3 in 10) instead of every time; online, everyone sees the same callouts.
 - "**X is sitting at home on the couch**" now takes turns at random with "Phil luck".
 - **Nice One** banner on every roll of 1, and **COCKED** once or twice a game after a random roll.
 - **Theme marbles:** picking a theme sets everyone's marble to match (Halloween pumpkins, Cougar Red basketballs, Christmas ornaments); players can still change their own. New **Pumpkin** and **Ornament** marbles.
