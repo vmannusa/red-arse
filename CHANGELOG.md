@@ -1,6 +1,8 @@
 # Red Arse – Change log
 
 ## 2026-10-15
+- **Names on the board:** each player's name is engraved where their base used to say BASE, turned to read upright; the current player's name lights up in their color. Empty seats still say BASE.
+- **Fix:** in online games, "Show on board" in the review could lose its Back button (the status line was refreshed when someone's connection changed). There's now a **Back to review** button on the board itself, and Esc works too. The review says "Played" instead of "You" so it reads right for every player's card.
 - **Fix:** on some browsers one home ring (green's outermost slot) wasn't drawn, so green's home looked 3 long. The colored rings are now drawn without the etching filter and the filter covers the whole board. Every home was always 4 slots in the game itself.
 - **Fairer move review:** close calls get more playouts and are graded on the cautious side, so 3-point coin flips no longer show as missteps; moves name where they go ("left the center to your home corner"); danger checks (review and Hard bots) now see inside-corner hop threats.
 - **Claim your re-rolls:** after a 6, a kill or an outside corner, human players have 5 seconds to roll again with no reminder; miss it and the turn passes ("missed re-rolls" stat).
