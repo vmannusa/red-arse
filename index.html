@@ -121,7 +121,7 @@ button,input,select{font:inherit;color:inherit}
 .log summary{cursor:pointer;margin:0;list-style-position:inside}
 .log ol{list-style:none;margin:10px 0 0;padding:0;max-height:240px;overflow:auto;font-size:13px;display:flex;flex-direction:column;gap:4px}
 .log li{display:flex;gap:8px;align-items:baseline;color:var(--fg)}
-.log li i{width:8px;height:8px;border-radius:50%;flex:none;transform:translateY(-1px)}
+.log li i{width:8px;height:8px;border-radius:50%;flex:none;transform:translateY(-1px);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
 .log li.cap{font-weight:700}
 .log li.note span{color:var(--muted);font-style:italic}
 .log li.chat span{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px 8px;overflow-wrap:anywhere}
@@ -583,7 +583,21 @@ const COLORS = [
   {name:'Yellow', hex:'#F6CF00', dark:'#A88500', light:'#FFF6A8', ink:'#2A2100'},
   {name:'Green',  hex:'#1F7A30', dark:'#0B4317', light:'#7FD892', ink:'#FFFFFF'},
   {name:'Blue',   hex:'#2A4FC2', dark:'#122672', light:'#9DB4FF', ink:'#FFFFFF'},
+  {name:'Black',  hex:'#24242A', dark:'#050506', light:'#8E8E9A', ink:'#FFFFFF', board:'#3C3C46'},
+  {name:'White',  hex:'#EEEBE3', dark:'#9C988D', light:'#FFFFFF', ink:'#1C1C1C'},
 ];
+// Black and White aren't printed on the board; a player who picks one takes an open seat and that
+// seat's base, home ring and star are drawn in black or white for the game.
+const EXTRA_COLORS=[6,7];
+function assignSectors(bd,colors){
+  const nat=bd.nativeColors||bd.sectorColors,out=new Array(colors.length).fill(-1),taken=new Set();
+  colors.forEach((c,i)=>{const s=nat.indexOf(c);if(s>=0&&!taken.has(s)){out[i]=s;taken.add(s);}});
+  const pref=[3,0,5,1,4,2]; // seat preference: bottom (yellow) first, like the default player colors
+  const free=nat.map((c,s)=>s).filter(s=>!taken.has(s)).sort((a,b)=>(colors.includes(nat[a])-colors.includes(nat[b]))||(pref.indexOf(nat[a])-pref.indexOf(nat[b])));
+  colors.forEach((c,i)=>{if(out[i]<0)out[i]=free.shift();});
+  return out;
+}
+function applySeatColors(players){if(!B)return;const nat=B.nativeColors||B.sectorColors;B.sectorColors=nat.map((c,s)=>{const q=players.find(p=>p.s===s);return q?q.c:c;});}
 const mod = (a,n)=>((a%n)+n)%n;
 function rot(p,deg){const a=deg*Math.PI/180,c=Math.cos(a),s=Math.sin(a);return {x:p.x*c-p.y*s,y:p.x*s+p.y*c};}
 // Both boards use the same 14-hole sector: inner-corner star, an arm out, 5 holes along the edge
@@ -598,7 +612,7 @@ let B=null;
 const BASE_OFF=[{x:0,y:-.62},{x:.62,y:0},{x:0,y:.62},{x:-.62,y:0}];
 const CENTER={x:0,y:0};
 function makeBoard(kind){
-  const b=Object.assign({},BOARDS[kind]);const A=b.A;
+  const b=Object.assign({},BOARDS[kind]);const A=b.A;b.nativeColors=b.sectorColors.slice();b.sectorColors=b.sectorColors.slice();
   b.L=14*b.N;b.H0=b.L-1;b.ENTRY=b.L-2;b.OWNSTAR=b.L-9;
   const LT=[{x:-2,y:-A}];
   for(let i=1;i<=4;i++)LT.push({x:-2,y:-(A+i)});
@@ -1116,7 +1130,7 @@ function buildBoard(svg,prefix,bd,opts={}){
   }
   const deco=el('g',{filter:`url(#${prefix}etch)`,opacity:.78},svg),y0=-(A+1); // y0 = innermost home hole
   for(let k=0;k<bd.N;k++){
-    const C=COLORS[bd.sectorColors[k]],g=el('g',{transform:`rotate(${k*bd.step})`},deco);
+    const C0=COLORS[bd.sectorColors[k]],C=Object.assign({},C0,{hex:C0.board||C0.hex}),g=el('g',{transform:`rotate(${k*bd.step})`},deco);
     el('polygon',{points:starPts(-2,-A,.74,.31),fill:C.hex,opacity:.92},g);
     el('path',{d:`M-0.79 ${f(y0-.52)} L-0.79 ${f(y0+.48)} L0 ${f(y0+1.16)} L0.79 ${f(y0+.48)} L0.79 ${f(y0-.52)}`,fill:'none',stroke:C.hex,'stroke-width':.3,'stroke-linejoin':'miter',opacity:.93},g);
     el('path',{d:`M-1.24 ${f(y0+.24)} L0 ${f(y0+1.48)} L1.24 ${f(y0+.24)}`,fill:'none',stroke:C.hex,'stroke-width':.09,'stroke-linecap':'round',opacity:.93},g);
@@ -1136,11 +1150,11 @@ function buildBoard(svg,prefix,bd,opts={}){
   bd.HOMEPOS.forEach(a=>a.forEach(p=>hole(p)));
   hole(CENTER,.42);
   for(let k=0;k<bd.N;k++){
-    const C=COLORS[bd.sectorColors[k]];
+    const C0=COLORS[bd.sectorColors[k]],C=Object.assign({},C0,{hex:C0.board||C0.hex}),lip=C0.board?.5:.22;
     // home and start rings, carved by hand (groove shadow, stained ring, light lip) rather than through a filter
     const ring=p=>{el('circle',{cx:f(p.x+.025),cy:f(p.y+.035),r:.5,fill:'none',stroke:'rgba(10,4,1,.55)','stroke-width':.13},holes);
       el('circle',{cx:f(p.x),cy:f(p.y),r:.5,fill:'none',stroke:C.hex,'stroke-width':.11,opacity:.82},holes);
-      el('circle',{cx:f(p.x-.015),cy:f(p.y-.02),r:.555,fill:'none',stroke:'rgba(255,226,188,.22)','stroke-width':.025},holes);};
+      el('circle',{cx:f(p.x-.015),cy:f(p.y-.02),r:.555,fill:'none',stroke:`rgba(255,226,188,${lip})`,'stroke-width':.025},holes);};
     bd.HOMEPOS[k].forEach(ring);ring(bd.TRACK[startG(k)]);
   }
 }
@@ -1190,11 +1204,11 @@ function loadSetup(){
 function saveSetup(){safeSet('aggravation-setup',JSON.stringify(setup));}
 
 // ================= LOBBY =================
-const allowedColors=st=>BOARDS[(st||setup).board].sectorColors;
+const allowedColors=st=>BOARDS[(st||setup).board].sectorColors.concat(EXTRA_COLORS);
 const maxPlayers=st=>BOARDS[(st||setup).board].sectorColors.length;
 const usedColors=()=>setup.players.map(p=>p.c);
 function botName(c){return COLORS[c].name+' Bot';}
-const COLOR_PREF=[3,0,5,1,4,2];
+const COLOR_PREF=[3,0,5,1,4,2,6,7];
 function freeColor(st){st=st||setup;const al=allowedColors(st),u=st.players.map(p=>p.c);return COLOR_PREF.find(c=>al.includes(c)&&!u.includes(c));}
 // keep every player on a color that exists on the chosen board
 function fitSetupToBoard(st){
@@ -1296,10 +1310,10 @@ function saveRecords(winnerPi){
 // ================= GAME =================
 function newGameState(){
   const bd=setBoard(setup.board);fitSetupToBoard(setup);
-  const sec=c=>bd.sectorColors.indexOf(c);
-  const s0=sec(setup.players[0].c);
-  const players=setup.players.map(p=>({name:(p.name||'').trim()||COLORS[p.c].name,c:p.c,s:sec(p.c),type:p.type,marbles:[0,1,2,3].map(()=>({d:null}))}))
+  const secs=assignSectors(bd,setup.players.map(p=>p.c)),s0=secs[0];
+  const players=setup.players.map((p,i)=>({name:(p.name||'').trim()||COLORS[p.c].name,c:p.c,s:secs[i],type:p.type,marbles:[0,1,2,3].map(()=>({d:null}))}))
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
+  applySeatColors(players);
   const r=setup.rules;
   return {token:++tokenSeq,board:bd.kind,rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle,claimRolls:r.claimRolls!==false},
     players,stats:players.map(blankStats),turn:0,phase:'roll',roll:null,moves:[],sel:null,log:[],winner:null,again:'',msg:'',
@@ -1896,6 +1910,7 @@ function reviewChart(){
   const ends=G.players.map((Q,qi)=>({qi,y:Y(H[H.length-1].pct[qi])})).sort((a,b)=>a.y-b.y);
   for(let i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<12)ends[i].y=ends[i-1].y+12;
   G.players.forEach((Q,qi)=>{const pts=H.map((e,i)=>X(i).toFixed(1)+','+Y(e.pct[qi]).toFixed(1)).join(' ');
+    h+=`<polyline points="${pts}" fill="none" stroke="var(--muted)" stroke-opacity=".55" stroke-width="${qi===G.winner?4:3.5}" stroke-linejoin="round" stroke-linecap="round"/>`;
     h+=`<polyline points="${pts}" fill="none" stroke="${ink(Q.c)}" stroke-width="${qi===G.winner?2.5:2}" stroke-linejoin="round" stroke-linecap="round" class="rv-line"/>`;
     const e=ends.find(x=>x.qi===qi);h+=`<text class="rv-lab" x="${W-pr+6}" y="${e.y}" dy=".32em"><tspan fill="${ink(Q.c)}">●</tspan> ${esc(Q.name.length>9?Q.name.slice(0,8)+'…':Q.name)}</text>`;});
   h+=`<line class="rv-cross" x1="0" x2="0" y1="${pt}" y2="${pt+ih}" visibility="hidden"/><rect class="rv-hit" x="${pl}" y="${pt}" width="${iw}" height="${ih}" fill="transparent"/></svg>`;
@@ -2050,7 +2065,7 @@ function showWin(pi){
   if(G.online){wa.textContent=ON.isHost?'New game':'Waiting for host';wa.disabled=!ON.isHost;wl.textContent=ON.isHost?'Back to room':'Leave room';}
   else{wa.textContent='Play again';wa.disabled=false;wl.textContent='Change players';}
   $('winTime').textContent='Game time '+fmtClock(gameElapsed());
-  const wn=$('winName');wn.textContent=P.name;wn.style.color=COLORS[P.c].hex==='#F6CF00'?'#C9A500':COLORS[P.c].hex;
+  const wn=$('winName');wn.textContent=P.name;wn.style.color=COLORS[P.c].hex==='#F6CF00'?'#C9A500':P.c>=6?'var(--fg)':COLORS[P.c].hex;
   const st=$('standings');st.innerHTML='';
   G.players.map((Q,i)=>({Q,i,h:homeCount(Q),prog:Q.marbles.reduce((s,m)=>s+(m.d===null?0:m.d==='C'?40:m.d),0)}))
     .sort((a,b)=>(b.i===pi)-(a.i===pi)||b.h-a.h||b.prog-a.prog)
@@ -2166,7 +2181,7 @@ const parseLobby=v=>{try{return v?JSON.parse(v):null;}catch(e){return null;}};
 function lobbyEdit(fn){return ON.net.txn(`rooms/${ON.code}/lobby`,cur=>{if(cur===null)return null;const L=JSON.parse(cur);if(fn(L)===false)return;return JSON.stringify(L);});}
 function setOnMsg(t,err){const m=$('onMsg');m.textContent=t;m.classList.toggle('err',!!err);}
 function onlineName(){const v=$('onName').value.trim();if(!v){setOnMsg('Type your name first.',true);$('onName').focus();return null;}safeSet('ra-online-name',v);return v;}
-function firstColor(board,used){const al=BOARDS[board].sectorColors;return COLOR_PREF.find(c=>al.includes(c)&&!used.includes(c));}
+function firstColor(board,used){const al=BOARDS[board].sectorColors.concat(EXTRA_COLORS);return COLOR_PREF.find(c=>al.includes(c)&&!used.includes(c));}
 
 async function createRoom(){
   const name=onlineName();if(!name)return;
@@ -2175,7 +2190,7 @@ async function createRoom(){
     const net=await getNet();let code=null;
     for(let i=0;i<8&&!code;i++){const c=genCode();const r=await net.txn(`rooms/${c}/meta`,cur=>cur===null?{created:net.now(),status:'lobby',creator:net.uid}:undefined);if(r.committed&&r.value)code=c;}
     if(!code)throw new Error('Could not create a room. Try again.');
-    const pref=setup.players[0]&&BOARDS[setup.board].sectorColors.includes(setup.players[0].c)?setup.players[0].c:firstColor(setup.board,[]);
+    const pref=setup.players[0]&&BOARDS[setup.board].sectorColors.concat(EXTRA_COLORS).includes(setup.players[0].c)?setup.players[0].c:firstColor(setup.board,[]);
     const L={board:setup.board,rules:Object.assign({},setup.rules),turnSecs:30,seats:[{uid:net.uid,name,c:pref,type:'human'}]};
     await net.set(`rooms/${code}/lobby`,JSON.stringify(L));
     track('room_create');
@@ -2264,7 +2279,7 @@ function renderRoom(){
     btn.append(sv,tx);btn.onclick=()=>lobbyEdit(L2=>{L2.board=bd.kind;fitSetupToBoard({board:bd.kind,players:L2.seats});});
     bp.appendChild(btn);
   });
-  const box=$('roomSeats');box.innerHTML='';const al=BOARDS[L.board].sectorColors;
+  const box=$('roomSeats');box.innerHTML='';const al=BOARDS[L.board].sectorColors.concat(EXTRA_COLORS);
   L.seats.forEach((st,i)=>{
     const row=document.createElement('div');row.className='slot';const mine=st.uid===me,isBot=st.type!=='human';
     const sw=document.createElement('span');sw.className='sw';sw.style.background=marbleBg(st.c);row.appendChild(sw);
@@ -2307,8 +2322,8 @@ async function startOnlineGame(){
   if(!ON.isHost||!ON.lobby)return;
   const L=ON.lobby,bd=makeBoard(L.board);
   if(L.seats.length<2){setRoomNote('Add at least one more player or bot.',true);return;}
-  const sec=c=>bd.sectorColors.indexOf(c),s0=sec(L.seats[0].c);
-  const players=L.seats.map(x=>({uid:x.uid||null,name:x.name,c:x.c,s:sec(x.c),type:x.type,away:false,missed:0,marbles:[0,1,2,3].map(()=>({d:null}))}))
+  const seatS=assignSectors(bd,L.seats.map(x=>x.c)),s0=seatS[0];
+  const players=L.seats.map((x,i)=>({uid:x.uid||null,name:x.name,c:x.c,s:seatS[i],type:x.type,away:false,missed:0,marbles:[0,1,2,3].map(()=>({d:null}))}))
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
   const r=L.rules,secs=L.turnSecs||30;
   const ro=r.rollOff!==false?rollOff(players.map(p=>p.name)):null;
@@ -2346,7 +2361,7 @@ async function processQueue(){
   drive();
 }
 function installState(ns,fresh){
-  if(fresh)setBoard(ns.board);
+  if(fresh){setBoard(ns.board);applySeatColors(ns.players);}
   G=Object.assign(ns,{online:true,token:-1,moves:[],sel:null,msg:''});ON.gid=ns.gid;
   if(fresh){buildBoard($('boardStatic'),'S',B);buildLive();ON.winShown=false;$('winModal').hidden=true;}
   G.moves=G.phase==='move'&&G.roll?legalMoves(G,G.turn,G.roll):[];
@@ -2484,7 +2499,7 @@ function start(data){
   const g=data.game;
   if(g&&g.winner===null&&g.board&&g.stats&&g.players.every(p=>typeof p.s==='number')){
     G=Object.assign(newGameState(),{board:g.board,rules:g.rules,players:g.players,stats:g.stats,turn:g.turn,log:g.log||[],started:g.started||Date.now()});resetCoach(G.players.length);
-    setBoard(g.board);buildBoard($('boardStatic'),'S',B);
+    setBoard(g.board);applySeatColors(G.players);buildBoard($('boardStatic'),'S',B);
     $('lobby').hidden=true;$('game').hidden=false;$('tools').hidden=false;buildLive();renderLog();beginTurn();
   }else showLobby();
   initOnlineCard();
