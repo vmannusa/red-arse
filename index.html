@@ -1079,7 +1079,7 @@ function baseWait(rules,P,st,n){
 function noteNoMove(st){st.noMove=(st.noMove||0)+1;return st.noMove>=3;}
 // "COCKED": once or twice a game, on a roll picked at random when the game starts
 function pickCocked(){const n=Math.random()<.5?1:2,a=[];while(a.length<n){const r=8+Math.floor(Math.random()*140);if(!a.includes(r))a.push(r);}return a;}
-// "Nice One" now and then (about 3 in 10 ones), not on every 1
+// "Nice, One" now and then (about 3 in 10 ones), not on every 1
 function rollFx(S,pi,n,add){if(n===1&&Math.random()<.3)add('nice1',pi);const tot=S.stats.reduce((t,x)=>t+(x.rolls||0),0);if((S.cockAt||[]).includes(tot))add('cocked',pi);}
 // v picks the wording where a callout has more than one (chosen once, so every device shows the same)
 function addFx(S,k,pi){if(S.ev){S.ev.fx=S.ev.fx||[];S.ev.fx.push({k,pi,v:Math.random()<.5?0:1});}}
@@ -2160,7 +2160,7 @@ function showFlash(){
   clearTimeout(KFT);KFT=setTimeout(()=>{kf.classList.remove('on');setTimeout(()=>{KFQ.shift();showFlash();},260);},reduced?1400:1900);
 }
 function killFlash(api,vpi){if(!G)return;const A=G.players[api],V=G.players[vpi];if(!A||!V)return;flashMsg(`${nameTag(A)}<span class="kf-v">aggravated</span>${nameTag(V)}`,'kill');}
-const FX_TEXT={nice1:()=>`<span class="kf-big">Nice One</span>`,cocked:()=>`<span class="kf-big">COCKED</span>`,terry:()=>`<span class="kf-big">Back it up Terry</span>`,crazy:Q=>`${nameTag(Q)}<span class="kf-v">is rolling crazy</span>`,phil:(Q,v)=>v?`${nameTag(Q)}<span class="kf-v">is sitting at home on the couch</span>`:`${nameTag(Q)}<span class="kf-v">had Phil luck</span>`};
+const FX_TEXT={nice1:()=>`<span class="kf-big">Nice, One</span>`,cocked:()=>`<span class="kf-big">COCKED</span>`,terry:()=>`<span class="kf-big">Back it up Terry</span>`,crazy:Q=>`${nameTag(Q)}<span class="kf-v">is rolling crazy</span>`,phil:(Q,v)=>v?`${nameTag(Q)}<span class="kf-v">is sitting at home on the couch</span>`:`${nameTag(Q)}<span class="kf-v">had Phil luck</span>`};
 function fxFlash(k,pi,v){if(!G||!FX_TEXT[k])return;const Q=G.players[pi];if(Q)flashMsg(FX_TEXT[k](Q,v===undefined?(Math.random()<.5?0:1):v),k);}
 function showFx(ev){(ev&&ev.fx||[]).forEach(x=>fxFlash(x.k,x.pi,x.v));}
 function burst(p,col){if(!LAYERS.fx)return;const c=el('circle',{class:'burst',cx:f(p.x),cy:f(p.y),r:.5,fill:'none',stroke:col,'stroke-width':.14},LAYERS.fx);setTimeout(()=>c.remove(),700);}
