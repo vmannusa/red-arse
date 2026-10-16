@@ -88,17 +88,36 @@ After every move the game plays the rest of the match out 300 times with medium-
 - **End-of-game review**, for each human player:
   - A chart of every player's chance to win over the game.
   - Grade counts and a one-line verdict: was it the moves, or the dice and the other players?
-  - **Every misstep and blunder**, in order, with how many points it cost, the better play, and **what was missed** when it's a known pattern: the win, a kill, getting home, the back-past-start shortcut, a re-roll corner, getting a marble out, the center, an inside-corner hop, leaving your start hole blocked (so the next marble can't come out), or leaving a marble in danger. Each has **Show on board** to see both moves drawn on the position.
+  - **Every misstep and blunder**, in order, with how many points it cost, the better play, and **what was missed** when it's a known pattern: the win, a kill, getting home, the back-past-start shortcut, a re-roll corner, locking a home marble (moving it to the top of home, where it can't be raided or block the marbles behind it), getting a marble out, the center, an inside-corner hop, leaving your start hole blocked, or leaving a marble in danger. Under each one is a **one-line reason** in plain words, and **Show on board** draws both moves on the position.
+- "Left your start hole blocked" only counts when a marble was already sitting on your start hole before the move and you left it there. Bringing a marble out is never flagged for it.
+- The playouts use Medium-bot play for everyone. We tested bots that value having more marbles out (flexibility) against normal bots over 6,000 games: they didn't win more, so the playouts stay as they are. Bots that lock home marbles first won noticeably more (about 30% vs 25% in 4-player games).
 - Moves played by the turn timer aren't graded.
 - Bots aren't graded. Moves auto-played for an away player online aren't graded either. In online games every device grades the same moves the same way.
 - The review runs in the background, so it never slows the game down.
 
 ## Helpers on the board and in the stats
 - **Danger glow:** your marbles that an opponent could hit with their next roll (1–6 holes behind, a 4 back, an inside-corner hop, coming out of base onto them, or out of the center) pulse with a red ring. In online games you only see it on your own marbles.
-- **Kill banner:** "X aggravated Y" flashes over the board when someone gets sent home.
+- **Banners** flash over the board (everyone in an online room sees them):
+  - "**X** aggravated **Y**" when someone gets sent home.
+  - "**Back it up Terry**" when someone moves backward on a 4.
+  - "**X** is rolling crazy" when someone earns a 3rd re-roll in one turn (6s, kills and outside corners all count).
+  - "**X** had Phil luck" after 3 rolls in a row with no move at all (and again at 6, 9…).
 - **Stuck in base:** rolls made with nothing on the board that weren't a 1 or 6, and the **longest wait** to get out (also the "Most patient" award).
 - **Rivalries:** who aggravated whom and how often, with grudge matches when it went both ways (Stats window and the winner screen).
 - **Rematch:** same players, colors and seats; the roll for first decides who starts. Online, the host starts it and anyone else can ask for one (it posts "Rematch?" in the chat).
+
+## Themes and marbles
+- **Board theme** (setup screen under Game settings; in an online room the host picks it, so everyone sees the same board):
+  - **Classic walnut.**
+  - **Halloween:** black board with glowing orange grain and an orange rim, pumpkin bases in each player's color, cobwebs and spiders, bats in the logo, and a moon, bats and a gravestone around the board.
+  - **Cougar Red:** white board with scarlet lettering and trim, white-ringed bases, paw prints, HOUSTON along the bottom, a GO COOGS pennant and a football.
+  - **Christmas:** evergreen board with a candy-cane rim, string lights, snow along the top, a Christmas tree for each base, holly, snowflakes in the logo, and a little tree and snowflakes around the board.
+  - Each theme has its own **sounds** for the dice, moves, kills, getting home, coming out and winning: bones and a ghostly wail for Halloween; drumline, whistles, crowd and a charge for Cougar Red; sleigh bells, chimes and Jingle Bells for Christmas.
+- **Marbles:** each player picks their own next to their color: Glass, Golf, Basketball, Tennis or Baseball (online, everyone picks their own and the host picks for bots). Every style is drawn in the player's color.
+
+## On your phone
+- **Add to Home Screen** (setup screen, next to How to play) puts Red Arse on your home screen with its own icon, and it opens full screen like an app. On Android and desktop Chrome it installs straight from the button; on iPhone it shows the steps (Share, then Add to Home Screen), since iPhones only allow that from the Share menu.
+- Shared links show the Red Arse picture and title in Messages and other apps.
 
 ## Online rooms
 - **Game feed and chat:** moves, kills, rolls for first, and players going away or coming back all show in the game feed. In online games the feed also has a chat bar and quick-chat buttons (COCKED, Nice roll, GG, plus "Back it up Terry" after a 4 and "Nice 1" after a 1). Messages are up to 200 characters, a few per few seconds, and stay with the room.
