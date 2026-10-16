@@ -1,6 +1,7 @@
 # Red Arse – Change log
 
 ## 2026-10-15
+- **Black and White player colors:** pick them on the setup screen or in an online room. They take an open seat (bottom first), and the board, marbles and die all switch to black or white for that player.
 - **Names on the board:** each player's name is engraved where their base used to say BASE, turned to read upright; the current player's name lights up in their color. Empty seats still say BASE.
 - **Fix:** in online games, "Show on board" in the review could lose its Back button (the status line was refreshed when someone's connection changed). There's now a **Back to review** button on the board itself, and Esc works too. The review says "Played" instead of "You" so it reads right for every player's card.
 - **Fix:** on some browsers one home ring (green's outermost slot) wasn't drawn, so green's home looked 3 long. The colored rings are now drawn without the etching filter and the filter covers the whole board. Every home was always 4 slots in the game itself.
