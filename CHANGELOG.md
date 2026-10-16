@@ -1,6 +1,7 @@
 # Red Arse – Change log
 
 ## 2026-10-15
+- **Danger glow** on your marbles that can be hit next roll, a **kill banner** ("X aggravated Y"), **stuck-in-base** and **longest wait** stats with a "Most patient" award, **rivalries** (who aggravated whom, grudge matches), and a **Rematch** button (online: the host starts it, others can ask).
 - **Black and White player colors:** pick them on the setup screen or in an online room. They take an open seat (bottom first), and the board, marbles and die all switch to black or white for that player.
 - **Names on the board:** each player's name is engraved where their base used to say BASE, turned to read upright; the current player's name lights up in their color. Empty seats still say BASE.
 - **Fix:** in online games, "Show on board" in the review could lose its Back button (the status line was refreshed when someone's connection changed). There's now a **Back to review** button on the board itself, and Esc works too. The review says "Played" instead of "You" so it reads right for every player's card.
