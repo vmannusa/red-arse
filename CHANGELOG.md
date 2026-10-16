@@ -1,6 +1,7 @@
 # Red Arse – Change log
 
 ## 2026-10-15
+- **Fix:** on some browsers one home ring (green's outermost slot) wasn't drawn, so green's home looked 3 long. The colored rings are now drawn without the etching filter and the filter covers the whole board. Every home was always 4 slots in the game itself.
 - **Fairer move review:** close calls get more playouts and are graded on the cautious side, so 3-point coin flips no longer show as missteps; moves name where they go ("left the center to your home corner"); danger checks (review and Hard bots) now see inside-corner hop threats.
 - **Claim your re-rolls:** after a 6, a kill or an outside corner, human players have 5 seconds to roll again with no reminder; miss it and the turn passes ("missed re-rolls" stat).
 - **Simpler move review:** three grades (Good under 3 points, Misstep 3–10, Blunder 10+), every misstep and blunder listed, each named when it fits a pattern (missed a kill, a re-roll corner, the back-past-start shortcut, getting home, left your start hole blocked, left a marble in danger, and more).
