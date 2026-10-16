@@ -1,5 +1,14 @@
 # Red Arse – Change log
 
+## 2026-10-16
+- **Board themes:** Halloween (black and orange), Cougar Red (white and scarlet, HOUSTON along the bottom) and Christmas (evergreen with a candy-cane rim and Christmas-tree bases), each with its own **sound effects**. Pick one under Game settings; online, the host picks it in the room.
+- **Sports-ball marbles, per player:** each player picks Glass, Golf, Basketball, Tennis or Baseball next to their color (setup screen and online rooms).
+- **More banners:** "Back it up Terry" on a backward 4, "X is rolling crazy" on a 3rd re-roll in one turn, and "X had Phil luck" after 3 rolls in a row with no move. Banners now queue, so two in a row both show.
+- **Move review fixes:** "Left your start hole blocked" no longer fires when you bring a marble out (it only counts if a marble was already parked there). New pattern: **Missed locking a home marble**. Every misstep and blunder now has a one-line reason under it.
+- **Tested flexibility-minded playouts:** bots that value more marbles out didn't win more than normal bots over 6,000 games, so the review's playouts are unchanged.
+- **Add to Home Screen** button, app icons and a web app manifest, so Red Arse can live on a phone's home screen and open full screen.
+- **Link preview:** shared links now show a Red Arse picture, title and description instead of a gray box.
+
 ## 2026-10-15
 - **Danger glow** on your marbles that can be hit next roll, a **kill banner** ("X aggravated Y"), **stuck-in-base** and **longest wait** stats with a "Most patient" award, **rivalries** (who aggravated whom, grudge matches), and a **Rematch** button (online: the host starts it, others can ask).
 - **Black and White player colors:** pick them on the setup screen or in an online room. They take an open seat (bottom first), and the board, marbles and die all switch to black or white for that player.
