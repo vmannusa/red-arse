@@ -99,7 +99,7 @@ After every move the game plays the rest of the match out 300 times with medium-
 - **Danger glow:** your marbles that an opponent could hit with their next roll (1–6 holes behind, a 4 back, an inside-corner hop, coming out of base onto them, or out of the center) pulse with a red ring. In online games you only see it on your own marbles.
 - **Banners** flash over the board (everyone in an online room sees them):
   - "**X** aggravated **Y**" when someone gets sent home.
-  - "**Nice One**" whenever someone rolls a 1.
+  - "**Nice One**" now and then when someone rolls a 1 (about 3 in 10), so it stays a surprise.
   - "**COCKED**" once or twice a game, right after a roll picked at random.
   - "**Back it up Terry**" when someone moves backward on a 4.
   - "**X** is rolling crazy" when someone earns a 3rd re-roll in one turn, and again on every re-roll after that in the same turn (6s, kills and outside corners all count).
@@ -107,6 +107,15 @@ After every move the game plays the rest of the match out 300 times with medium-
 - **Stuck in base:** rolls made with nothing on the board that weren't a 1 or 6, and the **longest wait** to get out (also the "Most patient" award).
 - **Rivalries:** who aggravated whom and how often, with grudge matches when it went both ways (Stats window and the winner screen).
 - **Rematch:** same players, colors and seats; the roll for first decides who starts. Online, the host starts it and anyone else can ask for one (it posts "Rematch?" in the chat).
+
+## Setup screen
+- **Play online:** type your name once, then either **Create room** (host a game and share the link or code) or enter a code and **Join**.
+- **Start game** is at the top of the Players list as well as at the bottom of the page.
+- **Colors:** picking a color someone else has swaps the two seats. Bots with a default name ("Orange Bot") rename themselves to match their new color; a name you typed stays. New players and bots get the first free color.
+- **Shuffle seats** puts everyone in a random seat (and that seat's color).
+- **Rules** shows how many are on and folds away once you've played a game; **See how** opens a small diagram for inside corners, the center hole, the back-past-start shortcut and raiding homes (also in How to play).
+- **Board theme** previews right away on the setup screen: page colors and the little boards change to match.
+- Everything on the setup screen is remembered on this device (board, players, colors, marbles, bot levels, timer, bot speed, theme, rules). **Reset defaults** (Game settings) clears it.
 
 ## Themes and marbles
 - **Board theme** (setup screen under Game settings; in an online room the host picks it, so everyone sees the same board):
