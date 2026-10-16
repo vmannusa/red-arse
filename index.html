@@ -63,6 +63,18 @@
   --board-shadow:drop-shadow(0 18px 30px rgba(0,0,0,.55)) drop-shadow(0 3px 6px rgba(0,0,0,.5));
   color-scheme:dark;
 }
+/* board-theme accents for the whole page (live preview in the lobby, carried into the game) */
+:root[data-bt="halloween"]{--accent:#C24E0A;--bg:#E5DBD1;--surface-2:#F0E8E0}
+:root[data-bt="coogs"]{--accent:#C8102E;--bg:#E8E2E2;--surface-2:#F3EDED}
+:root[data-bt="christmas"]{--accent:#1E6B3A;--bg:#DCE6DC;--danger:#B3202A}
+@media (prefers-color-scheme: dark){
+  :root[data-bt="halloween"]:not([data-theme="light"]){--accent:#FF8A3D;--accent-fg:#1A0D05;--bg:#15100D;--surface:#1E1713;--surface-2:#271E18;--line:#3A2D24}
+  :root[data-bt="coogs"]:not([data-theme="light"]){--accent:#FF5C70;--accent-fg:#1A0508;--bg:#171012;--surface:#20171A;--surface-2:#2A1E22;--line:#3D2A30}
+  :root[data-bt="christmas"]:not([data-theme="light"]){--accent:#6BD08E;--accent-fg:#06180C;--bg:#0E1711;--danger:#FF6B6B}
+}
+:root[data-theme="dark"][data-bt="halloween"]{--accent:#FF8A3D;--accent-fg:#1A0D05;--bg:#15100D;--surface:#1E1713;--surface-2:#271E18;--line:#3A2D24}
+:root[data-theme="dark"][data-bt="coogs"]{--accent:#FF5C70;--accent-fg:#1A0508;--bg:#171012;--surface:#20171A;--surface-2:#2A1E22;--line:#3D2A30}
+:root[data-theme="dark"][data-bt="christmas"]{--accent:#6BD08E;--accent-fg:#06180C;--bg:#0E1711;--danger:#FF6B6B}
 html,body{height:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.45}
 *{box-sizing:border-box}
@@ -207,6 +219,15 @@ button,input,select{font:inherit;color:inherit}
 .btn:disabled{opacity:.45;cursor:default}
 .btn.primary{background:var(--accent);color:var(--accent-fg);border-color:transparent;height:52px;font-family:var(--font-display);font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:17px;padding:0 28px}
 .btn.primary:hover{filter:brightness(1.06);background:var(--accent)}
+.btn.xs{height:30px;padding:0 12px;font-size:12px;letter-spacing:0;text-transform:none;border-radius:8px}
+.btn.ghost{background:transparent}
+.sec-actions{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.rule-count{font-weight:600;letter-spacing:.06em;opacity:.85}
+.rule-cell{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rdiag-d{margin:0 0 4px 28px;font-size:12px;color:var(--muted)}
+.rdiag-d summary{cursor:pointer;color:var(--accent);font-weight:600;width:max-content}
+.rdiag{display:block;max-width:300px;width:100%;height:auto;margin-top:6px}
+.rules-card .rdiag{max-width:320px;margin:4px 0 8px}
 .rules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px 18px}
 .tog{display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer}
 .tog input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--accent);flex:none}
@@ -287,7 +308,13 @@ table.stats td.top{color:var(--warn);font-weight:800}
 .fine{color:var(--muted);font-size:12.5px;margin:10px 0 0}
 /* online */
 .online-card{border-color:var(--accent)}
-.online-grid{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1.2fr);gap:10px;align-items:end}
+.on-name{max-width:360px;margin-bottom:14px}
+.online-split{display:grid;grid-template-columns:minmax(0,1fr) 1px minmax(0,1fr);gap:18px;align-items:start}
+.on-div{background:var(--line);width:1px;align-self:stretch}
+.on-pane{display:flex;flex-direction:column;gap:8px;min-width:0}
+.on-pane .fine{margin:0}
+.on-pane #onCreate{align-self:flex-start;height:44px;padding:0 22px}
+.on-h{font-family:var(--font-display);font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin:0;color:var(--fg)}
 .fld{display:flex;flex-direction:column;gap:4px;min-width:0}
 .fld span{font-size:12px;font-weight:600;color:var(--muted)}
 .fld input,.fld select{height:40px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0 10px;min-width:0;width:100%}
@@ -323,7 +350,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
 .set-row{display:flex;flex-wrap:wrap;gap:12px 24px}
 .win-time{color:var(--muted);font-size:13px;margin-top:4px;font-variant-numeric:tabular-nums}
 #backBtn{margin-top:8px;width:100%}
-@media (max-width:640px){.online-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){.online-split{grid-template-columns:minmax(0,1fr)}.on-div{height:1px;width:auto}}
 .howto{height:36px;font-size:14px;text-decoration:none;color:var(--fg)}
 .howto-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .fine a{color:var(--accent);font-weight:600}
@@ -408,12 +435,20 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
       </div>
       <section class="card online-card" id="onlineCard" hidden>
         <h2 class="sec-title"><span>Play online</span></h2>
-        <div class="online-grid">
-          <label class="fld"><span>Your name</span><input id="onName" maxlength="18" autocomplete="nickname"></label>
-          <button class="btn primary sm" id="onCreate" type="button">Create room</button>
-          <div class="join"><label class="fld"><span>Room code</span><input id="onCode" maxlength="4" autocapitalize="characters" autocomplete="off" placeholder="ABCD"></label><button class="btn" id="onJoin" type="button">Join</button></div>
+        <label class="fld on-name"><span>Your name</span><input id="onName" maxlength="18" autocomplete="nickname"></label>
+        <div class="online-split">
+          <div class="on-pane">
+            <h3 class="on-h">Host a game</h3>
+            <button class="btn primary" id="onCreate" type="button">Create room</button>
+            <p class="fine">Start a room and share the link or code.</p>
+          </div>
+          <div class="on-div" aria-hidden="true"></div>
+          <div class="on-pane">
+            <h3 class="on-h">Join a room</h3>
+            <div class="join"><label class="fld"><span>Room code</span><input id="onCode" maxlength="4" autocapitalize="characters" autocomplete="off" placeholder="ABCD"></label><button class="btn" id="onJoin" type="button">Join</button></div>
+          </div>
         </div>
-        <p class="fine" id="onMsg">Create a room and send the link, or join with a code. Bots can fill empty seats, and anyone who walks away gets auto-played.</p>
+        <p class="fine" id="onMsg">Bots can fill empty seats, and anyone who walks away gets auto-played.</p>
       </section>
       <h2 class="local-head" id="localHead" hidden>Or play on this device</h2>
       <section class="card">
@@ -421,7 +456,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
         <div class="board-pick" id="boardPick"></div>
       </section>
       <section class="card">
-        <h2 class="sec-title"><span>Game settings</span></h2>
+        <h2 class="sec-title"><span>Game settings</span><button class="btn xs ghost" id="resetSetup" type="button" title="Forget the saved setup and go back to the defaults">Reset defaults</button></h2>
         <div class="set-row">
           <label class="fld inline"><span>Turn timer (human players)</span>
             <select id="setTimer"><option value="0">Off</option><option value="15">15 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option></select></label>
@@ -434,7 +469,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
         <p class="fine">When a human player's timer runs out, the game rolls and moves for them. Bot speed can also be changed during a game.</p>
       </section>
       <section class="card">
-        <h2 class="sec-title"><span>Players</span><span id="slotCount"></span></h2>
+        <h2 class="sec-title"><span>Players</span><span class="sec-actions"><span id="slotCount"></span><button class="btn xs" id="shuffleSeats" type="button" title="Randomly swap which seat (and color) everyone gets">Shuffle seats</button><button class="btn xs primary" id="startBtnTop" type="button">Start game</button></span></h2>
         <div class="slots" id="slots"></div>
         <div class="add-row">
           <button class="btn" id="addHuman" type="button">+ Add player</button>
@@ -442,7 +477,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
         </div>
       </section>
       <section class="card">
-        <h2 class="sec-title"><span>Rules</span></h2>
+        <h2 class="sec-title"><span>Rules <span id="ruleCount" class="rule-count"></span></span><button class="btn xs ghost" id="rulesToggle" type="button" aria-controls="ruleToggles" aria-expanded="true">Hide</button></h2>
         <div class="rules-grid" id="ruleToggles"></div>
       </section>
       <div class="start-row">
@@ -563,6 +598,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
           <li>Moving backward or into the center can kill too.</li>
           <li><b>Raid a home:</b> when a move reaches another player's home entry, you can turn into their home column with the rest of the roll (forward, or backward on a 4), but only to land exactly on one of their marbles that isn't locked in. Your marble then stays in their home until it backs out with a 4.</li>
         </ul>
+        <div class="rdiag-slot" data-diag="homeRaid"></div>
       </section>
       <section>
         <h3>Roll again when you…</h3>
@@ -580,6 +616,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
           <li><b>Backward hop on a 4</b> (6-player board): a marble on an inside corner can instead hop exactly 4 inside corners counter-clockwise. Going backward it <i>can</i> pass your own home corner. Backing behind your start this way works like the back-past-start shortcut. (On the 4-player board 4 back is a full circle, so there's no backward hop.)</li>
           <li><b>Center hole:</b> a roll that passes over an inside corner with one step left can finish in the center. A 6 from your start hole goes straight in, and so does a 1 from an inside corner. Leave the center on a <b>1</b> or a <b>6</b>, to any inside corner.</li>
         </ul>
+        <div class="rdiag-slot" data-diag="stars"></div><div class="rdiag-slot" data-diag="center"></div>
       </section>
       <section>
         <h3>Backward 4</h3>
@@ -590,6 +627,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
           <li>Home marbles that aren't locked in can back out of home onto the track.</li>
           <li>Backing up behind your own start hole parks that marble right outside your home.</li>
         </ul>
+        <div class="rdiag-slot" data-diag="backShortcut"></div>
       </section>
     </div>
     <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Turn timer:</b> human players have 30 seconds (change it or turn it off on the setup screen) to roll and to move, then the game plays for them. <b>Bot speed</b> (under the die) only changes how fast bots play. <b>Chance to win</b> (the pill next to each base on the board) comes from playing the rest of the game out 300 times with medium-strength bots after every move. <b>Move review:</b> whenever a human player has a real choice, each option is played out hundreds of times on the same dice and compared with the best one. A move that gives up under 3 points of chance to win is <b>Good</b>, 3 to 10 is a <b>Misstep</b>, and 10 or more is a <b>Blunder</b>. Close calls get extra playouts, and moves are graded on the cautious end of the estimate, so a move is only flagged when it clearly cost something. Accuracy is the share of Good moves. The end-of-game review lists every misstep and blunder with the better play and what you missed (a kill, a re-roll corner, the back-past-start shortcut, getting home, a marble left in danger…). See <a href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">what's new</a> for every change.</p>
@@ -989,7 +1027,8 @@ function baseWait(rules,P,st,n){
 function noteNoMove(st){st.noMove=(st.noMove||0)+1;return st.noMove>=3;}
 // "COCKED": once or twice a game, on a roll picked at random when the game starts
 function pickCocked(){const n=Math.random()<.5?1:2,a=[];while(a.length<n){const r=8+Math.floor(Math.random()*140);if(!a.includes(r))a.push(r);}return a;}
-function rollFx(S,pi,n,add){if(n===1)add('nice1',pi);const tot=S.stats.reduce((t,x)=>t+(x.rolls||0),0);if((S.cockAt||[]).includes(tot))add('cocked',pi);}
+// "Nice One" now and then (about 3 in 10 ones), not on every 1
+function rollFx(S,pi,n,add){if(n===1&&Math.random()<.3)add('nice1',pi);const tot=S.stats.reduce((t,x)=>t+(x.rolls||0),0);if((S.cockAt||[]).includes(tot))add('cocked',pi);}
 // v picks the wording where a callout has more than one (chosen once, so every device shows the same)
 function addFx(S,k,pi){if(S.ev){S.ev.fx=S.ev.fx||[];S.ev.fx.push({k,pi,v:Math.random()<.5?0:1});}}
 function noteKill(stats,pi,vpi){const st=stats[pi];st.kv=st.kv||{};st.kv[vpi]=(st.kv[vpi]||0)+1;}
@@ -1413,6 +1452,49 @@ function tone(fq,dur,type,vol,when=0,to){const c=ac();if(!c)return;const t=c.cur
   g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.02);}
 function noise(dur,vol,fq,q,when=0){const c=ac();if(!c)return;const t=c.currentTime+when,len=Math.max(1,Math.floor(c.sampleRate*dur)),b=c.createBuffer(1,len,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
   const s=c.createBufferSource();s.buffer=b;const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=fq;bp.Q.value=q;const g=c.createGain();g.gain.value=vol;s.connect(bp).connect(g).connect(c.destination);s.start(t);}
+// ---- little diagrams for the trickier rules (setup screen and How to play)
+const RULE_DIAG={stars:1,center:1,backShortcut:1,homeRaid:1};let RD_N=0;
+function ruleDiagram(k){const u=k+'-'+(++RD_N); // each copy gets its own arrowhead ids
+  const hole=(x,y,r=5.5)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="var(--surface-2)" stroke="var(--muted)" stroke-opacity=".45" stroke-width="1.5"/>`;
+  const star=(x,y,r=7)=>{let p='';for(let i=0;i<10;i++){const rr=i%2?r*.42:r,a=-Math.PI/2+i*Math.PI/5;p+=(x+rr*Math.cos(a)).toFixed(1)+','+(y+rr*Math.sin(a)).toFixed(1)+' ';}return `<polygon points="${p}" fill="var(--muted)" opacity=".6"/>`;};
+  const marble=(x,y,c='#F6CF00',d='#9A7A00')=>`<circle cx="${x}" cy="${y}" r="6" fill="${c}" stroke="${d}" stroke-width="1.5"/><circle cx="${x-2}" cy="${y-2}" r="1.6" fill="#fff" opacity=".8"/>`;
+  const arrow=(d,col='var(--accent)',m='A')=>`<path d="${d}" fill="none" stroke="${col}" stroke-width="2" stroke-dasharray="3 3" stroke-linecap="round" marker-end="url(#rd${m}-${u})"/>`;
+  const txt=(x,y,t,a='start',w=500)=>`<text x="${x}" y="${y}" font-size="10" font-weight="${w}" fill="var(--muted)" text-anchor="${a}" font-family="Figtree,system-ui,sans-serif">${t}</text>`;
+  const mk=(id,col)=>`<marker id="rd${id}-${u}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="${col}"/></marker>`;
+  const open=lbl=>`<svg class="rdiag" viewBox="0 0 270 110" role="img" aria-label="${lbl}"><defs>${mk('A','var(--accent)')}${mk('B','#E08A10')}</defs>`;
+  const cx=58,cy=55,R=38,pt=i=>{const a=(-90+i*60)*Math.PI/180;return [+(cx+R*Math.cos(a)).toFixed(1),+(cy+R*Math.sin(a)).toFixed(1)];};
+  if(k==='stars'){
+    let g=hole(cx,cy,7);for(let i=0;i<6;i++){const [x,y]=pt(i);g+=star(x,y);}
+    const P=[3,4,5,0].map(pt);g+=marble(P[0][0],P[0][1]);
+    for(let i=1;i<P.length;i++){const [a,b]=P[i-1],[c,d]=P[i],mx=(a+c)/2-(cx-(a+c)/2)*.35,my=(b+d)/2-(cy-(b+d)/2)*.35;
+      g+=arrow(`M${a} ${b} Q${mx.toFixed(1)} ${my.toFixed(1)} ${c} ${d}`);g+=txt(mx.toFixed(1),(my-3).toFixed(1),String(i),'middle',800);}
+    return open('Inside corner hops')+g+txt(112,36,'Start your turn on an inside','start',700)+txt(112,49,'corner (star): hop clockwise,')+txt(112,62,'one corner per pip.')+txt(112,82,'Roll 3 → hop 3 corners.','start',700)+'</svg>';
+  }
+  if(k==='center'){
+    let g='';for(let i=0;i<6;i++){const [x,y]=pt(i);g+=star(x,y);}g+=hole(cx,cy,8);
+    [0,2].forEach(i=>{const [x,y]=pt(i);g+=arrow(`M${cx} ${cy-2} L${x} ${y}`);});
+    const [sx,sy]=pt(4),tx=sx+2,ty=sy+20;g+=hole(tx,ty)+marble(tx,ty);
+    g+=arrow(`M${tx+5} ${ty-4} Q${sx+14} ${sy+2} ${cx-8} ${cy+2}`,'#E08A10','B');
+    return open('Center hole')+g+txt(112,30,'In: a roll that passes a star','start',700)+txt(112,43,'with 1 step left ends in')+txt(112,56,'the center.')+txt(112,76,'Out: roll a 1 or 6 and go to','start',700)+txt(112,89,'any inside corner.')+'</svg>';
+  }
+  if(k==='backShortcut'){
+    const xs=[18,40,62,84,106,128],y=88;let g='';xs.forEach(x=>g+=hole(x,y));
+    [0,1,2,3].forEach(j=>g+=`<circle cx="62" cy="${66-j*15}" r="5.5" fill="none" stroke="#C9A100" stroke-width="2"/>`);
+    g+=`<circle cx="106" cy="${y}" r="8.5" fill="none" stroke="#C9A100" stroke-width="2"/>`+marble(106,y);
+    g+=arrow(`M102 ${y+7} Q62 ${y+24} 21 ${y+7}`,'#E08A10','B');
+    g+=arrow(`M18 ${y-7} Q24 ${y-28} 56 ${y-18} L60 ${y-26}`);
+    return open('Back-past-start shortcut')+g+txt(70,14,'HOME','start',800)+txt(106,y-13,'start','middle')+txt(62,108,'back 4','middle',800)+txt(146,34,'Back 4 from your','start',700)+txt(146,47,'start, then turn')+txt(146,60,'into home next roll:')+txt(146,73,'skips almost a')+txt(146,86,'whole lap.')+'</svg>';
+  }
+  if(k==='homeRaid'){
+    const xs=[18,40,62,84,106],y=92;let g='';xs.forEach(x=>g+=hole(x,y));
+    [0,1,2,3].forEach(j=>g+=`<circle cx="84" cy="${70-j*16}" r="5.5" fill="none" stroke="#E5262E" stroke-width="2"/>`);
+    g+=marble(84,54,'#E5262E','#8A1418')+marble(18,y);
+    g+=arrow(`M24 ${y-6} Q70 ${y-6} 82 76 L84 64`);
+    g+=`<path d="M77 47 L91 61 M91 47 L77 61" stroke="#E5262E" stroke-width="2.4" stroke-linecap="round"/>`;
+    return open('Raid homes')+g+txt(92,12,"Red's home",'start',700)+txt(132,40,'An exact roll into','start',700)+txt(132,53,"someone's home kills")+txt(132,66,"a marble that isn't")+txt(132,79,'locked in. Back out')+txt(132,92,'later on a 4.')+'</svg>';
+  }
+  return '';
+}
 // themed sounds: each board theme swaps in its own version of every effect
 function vib(fq,dur,vol,rate,depth,when=0,type='sine',to){const c=ac();if(!c)return;const t=c.currentTime+when,o=c.createOscillator(),l=c.createOscillator(),lg=c.createGain(),g=c.createGain();
   o.type=type;o.frequency.setValueAtTime(fq,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);l.frequency.value=rate;lg.gain.value=depth;l.connect(lg).connect(o.frequency);
@@ -1479,7 +1561,7 @@ function defaultSetup(){
   return {board:'hex',players:[{name:'You',c:3,type:'human'},{name:'Orange Bot',c:0,type:'medium'}],rules,turnSecs:30,botSpeed:'normal',theme:'classic'};
 }
 function loadSetup(){
-  try{const s=JSON.parse(safeGet('aggravation-setup')||'null');if(s&&Array.isArray(s.players)&&s.players.length>=2&&s.rules){const d=defaultSetup();s.rules=Object.assign(d.rules,s.rules);s.board='hex';if(typeof s.turnSecs!=='number')s.turnSecs=30;if(!SPEEDS[s.botSpeed])s.botSpeed='normal';if(!THEMES[s.theme])s.theme='classic';s.players.forEach(p=>{if(!BALLS[p.ball])p.ball=BALLS[s.balls]?s.balls:'glass';});delete s.balls;restoreColors(s);fitSetupToBoard(s);return s;}}catch(e){}
+  try{const s=JSON.parse(safeGet('aggravation-setup')||'null');if(s&&Array.isArray(s.players)&&s.players.length>=2&&s.rules){const d=defaultSetup();s.rules=Object.assign(d.rules,s.rules);if(!BOARDS[s.board])s.board='hex';if(typeof s.turnSecs!=='number')s.turnSecs=30;if(!SPEEDS[s.botSpeed])s.botSpeed='normal';if(!THEMES[s.theme])s.theme='classic';s.players.forEach(p=>{if(!BALLS[p.ball])p.ball=BALLS[s.balls]?s.balls:'glass';});delete s.balls;restoreColors(s);fitSetupToBoard(s);return s;}}catch(e){}
   return defaultSetup();
 }
 function saveSetup(){safeSet('aggravation-setup',JSON.stringify(setup));}
@@ -1489,6 +1571,9 @@ const allowedColors=st=>BOARDS[(st||setup).board].sectorColors.concat(EXTRA_COLO
 const maxPlayers=st=>BOARDS[(st||setup).board].sectorColors.length;
 const usedColors=()=>setup.players.map(p=>p.c);
 function botName(c){return COLORS[c].name+' Bot';}
+// a bot still using a "<Color> Bot" name follows its color; any custom name is left alone
+const isDefaultBotName=nm=>COLORS.some(C=>nm===C.name+' Bot');
+function syncBotName(p){if(p&&p.type!=='human'&&isDefaultBotName(p.name))p.name=botName(p.c);}
 const COLOR_PREF=[3,0,5,1,4,2,6,7];
 function freeColor(st){st=st||setup;const al=allowedColors(st),u=st.players.map(p=>p.c);return COLOR_PREF.find(c=>al.includes(c)&&!u.includes(c));}
 // keep every player on a color that exists on the chosen board
@@ -1506,7 +1591,7 @@ function renderBoardPick(){
     const btn=document.createElement('button');btn.type='button';btn.className='bp'+(setup.board===bd.kind?' on':'');btn.id='board-'+bd.kind;
     btn.setAttribute('aria-pressed',setup.board===bd.kind);
     const tooMany=setup.players.length>bd.sectorColors.length;btn.disabled=tooMany;
-    const sv=document.createElementNS(NS,'svg');sv.setAttribute('aria-hidden','true');buildBoard(sv,'P'+bd.kind,makeBoard(bd.kind),{mini:true});
+    const sv=document.createElementNS(NS,'svg');sv.setAttribute('aria-hidden','true');buildBoard(sv,'P'+bd.kind,makeBoard(bd.kind),{mini:true,theme:setup.theme});
     const tx=document.createElement('span');tx.innerHTML=`<b>${bd.label}</b><small>${tooMany?'Remove players to use this board':bd.N===6?'2 to 6 players':'2 to 4 players · faster games'}</small>`;
     btn.append(sv,tx);
     btn.onclick=()=>{if(tooMany)return;setup.board=bd.kind;if(bd.kind==='hex')restoreColors(setup);fitSetupToBoard(setup);saveSetup();renderLobby();};
@@ -1514,7 +1599,7 @@ function renderBoardPick(){
   });
 }
 function renderLobby(){
-  renderBoardPick();
+  applyThemeUI(setup.theme);renderBoardPick();
   const box=$('slots');box.innerHTML='';const al=allowedColors();
   setup.players.forEach((p,i)=>{
     const row=document.createElement('div');row.className='slot';
@@ -1524,8 +1609,8 @@ function renderLobby(){
     const cs=document.createElement('select');cs.className='cl';cs.id='pcolor-'+i;cs.setAttribute('aria-label','Color');
     al.forEach(ci=>{const o=document.createElement('option');o.value=ci;o.textContent=COLORS[ci].name;o.selected=ci===p.c;cs.appendChild(o);});
     cs.addEventListener('change',()=>{const nc=+cs.value,other=setup.players.find(q=>q!==p&&q.c===nc);
-      if(other){if(other.type!=='human'&&other.name===botName(other.c))other.name=botName(p.c);other.c=p.c;}
-      if(p.type!=='human'&&p.name===botName(p.c))p.name=botName(nc);p.c=nc;saveSetup();renderLobby();});
+      if(other){other.c=p.c;syncBotName(other);} // the color was taken: the two seats swap
+      p.c=nc;syncBotName(p);saveSetup();renderLobby();});
     row.appendChild(cs);
     row.appendChild(ballSelect('pball-'+i,p.ball,v=>{p.ball=v;saveSetup();paintBall(sw,p.c,v);}));
     const ts=document.createElement('select');ts.className='ty';ts.id='ptype-'+i;ts.setAttribute('aria-label','Player type');
@@ -1543,18 +1628,38 @@ function renderLobby(){
   $('setTimer').value=String(setup.turnSecs||0);$('setSpeed').value=setup.botSpeed||'normal';
   $('setTheme').value=setup.theme||'classic';
   const rt=$('ruleToggles');rt.innerHTML='';
-  RULE_DEFS.forEach(r=>{const lab=document.createElement('label');lab.className='tog'+(r.house?' house':'');
+  RULE_DEFS.forEach(r=>{const cell=document.createElement('div');cell.className='rule-cell';
+    const lab=document.createElement('label');lab.className='tog'+(r.house?' house':'');
     const cb=document.createElement('input');cb.type='checkbox';cb.id='rule-'+r.k;cb.checked=!!setup.rules[r.k];
-    cb.addEventListener('change',()=>{setup.rules[r.k]=cb.checked;saveSetup();});
-    const tx=document.createElement('div');tx.innerHTML=`<b>${r.label}</b><span>${r.sub}</span>`;lab.append(cb,tx);rt.appendChild(lab);});
+    cb.addEventListener('change',()=>{setup.rules[r.k]=cb.checked;saveSetup();renderRuleCount();});
+    const tx=document.createElement('div');tx.innerHTML=`<b>${r.label}</b><span>${r.sub}</span>`;lab.append(cb,tx);cell.appendChild(lab);
+    if(RULE_DIAG[r.k]){const d=document.createElement('details');d.className='rdiag-d';d.innerHTML=`<summary>See how</summary>${ruleDiagram(r.k)}`;cell.appendChild(d);}
+    rt.appendChild(cell);});
+  renderRuleCount();renderRulesFold();
 }
 $('addHuman').onclick=()=>{if(setup.players.length>=maxPlayers())return;setup.players.push({name:'Player '+(setup.players.length+1),c:freeColor(),type:'human',ball:themeBall(setup.theme)});saveSetup();renderLobby();};
 $('addBot').onclick=()=>{if(setup.players.length>=maxPlayers())return;const c=freeColor();setup.players.push({name:botName(c),c,type:'medium',ball:themeBall(setup.theme)});saveSetup();renderLobby();};
-$('startBtn').onclick=()=>{ac();startGame();};
+$('startBtn').onclick=$('startBtnTop').onclick=()=>{ac();startGame();};
+// shuffle seats: everyone keeps their name, type and marble but sits in a random seat (and takes that seat's color)
+$('shuffleSeats').onclick=()=>{
+  const cols=setup.players.map(p=>p.c);for(let i=cols.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cols[i],cols[j]]=[cols[j],cols[i]];}
+  setup.players.forEach((p,i)=>{p.c=cols[i];syncBotName(p);});
+  const secs=assignSectors(makeBoard(setup.board),setup.players.map(p=>p.c)),order=setup.players.map((p,i)=>[p,secs[i]]);
+  setup.players=order.sort((a,b)=>a[1]-b[1]).map(x=>x[0]);saveSetup();renderLobby();
+};
+$('resetSetup').onclick=()=>{try{localStorage.removeItem('aggravation-setup');}catch(e){}setup=defaultSetup();renderLobby();};
+// rules card: shows how many are on, folds away once you've played a game before
+let RULES_OPEN=safeGet('ra-played')!=='1';
+function renderRuleCount(){const n=RULE_DEFS.filter(r=>setup.rules[r.k]).length;$('ruleCount').textContent=`· ${n} of ${RULE_DEFS.length} active`;}
+function renderRulesFold(){$('ruleToggles').hidden=!RULES_OPEN;$('rulesToggle').textContent=RULES_OPEN?'Hide':'Show';$('rulesToggle').setAttribute('aria-expanded',String(RULES_OPEN));}
+$('rulesToggle').onclick=()=>{RULES_OPEN=!RULES_OPEN;renderRulesFold();};
 $('setTimer').onchange=()=>{setup.turnSecs=+$('setTimer').value;saveSetup();};
 $('setSpeed').onchange=()=>{setBotSpeed($('setSpeed').value);};
 [['setTheme',THEMES],['roomTheme',THEMES]].forEach(([id,list])=>Object.entries(list).forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;$(id).appendChild(o);}));
 $('setTheme').onchange=()=>{setup.theme=$('setTheme').value;setup.players.forEach(p=>p.ball=themeBall(setup.theme));saveSetup();renderLobby();};
+// theme preview: the page accents and the mini boards take on the chosen theme straight away
+function applyThemeUI(t){t=THEMES[t]?t:'classic';document.documentElement.dataset.bt=t;
+  const hb=$('heroBoard');if(hb&&hb.dataset.bt!==t){hb.dataset.bt=t;buildBoard(hb,'M',makeBoard('hex'),{mini:true,theme:t});}}
 $('roomTheme').onchange=()=>lobbyEdit(L=>{L.theme=$('roomTheme').value;L.seats.forEach(x=>x.ball=themeBall(L.theme));});
 
 function showLobby(){
@@ -1609,7 +1714,7 @@ function newGameState(){
 }
 function resetHeader(){$('btnRestart').hidden=false;$('roomChip').hidden=true;$('btnLobby').querySelector('span').textContent='Players';$('turnTimer').textContent='';$('backBtn').hidden=true;}
 function startGame(){
-  saveSetup();G=newGameState();resetCoach(G.players.length);resetHeader();$('room').hidden=true;
+  safeSet('ra-played','1');RULES_OPEN=false;saveSetup();G=newGameState();applyThemeUI(G.look.theme);resetCoach(G.players.length);resetHeader();$('room').hidden=true;
   $('lobby').hidden=true;$('game').hidden=false;$('tools').hidden=false;$('winModal').hidden=true;
   buildBoard($('boardStatic'),'S',B);
   buildLive();addLog(null,'New game: '+G.players.map(p=>p.name).join(', '));
@@ -2449,6 +2554,7 @@ $('chatForm').addEventListener('submit',async e=>{e.preventDefault();const inp=$
 
 // ================= HEADER TOOLS =================
 $('btnRules').onclick=()=>{$('rulesModal').hidden=false;$('rulesClose').focus();};
+document.querySelectorAll('.rdiag-slot').forEach(d=>{d.innerHTML=ruleDiagram(d.dataset.diag);});
 $('lobbyRules').onclick=()=>{$('rulesModal').hidden=false;$('rulesClose').focus();};
 $('rulesClose').onclick=()=>{$('rulesModal').hidden=true;};
 $('rulesModal').addEventListener('click',e=>{if(e.target.id==='rulesModal')$('rulesModal').hidden=true;});
@@ -2699,7 +2805,7 @@ function showGameScreen(){
 }
 function setRoomNote(t,err){const n=$('roomNote');n.textContent=t;n.classList.toggle('err',!!err);}
 function renderRoom(){
-  const L=ON.lobby;if(!L||!ON.net)return;const me=ON.net.uid,host=ON.isHost;
+  const L=ON.lobby;if(!L||!ON.net)return;const me=ON.net.uid,host=ON.isHost;applyThemeUI(L.theme);
   $('roomCode').textContent=ON.code;
   $('roomLink').value=location.origin+location.pathname+'?room='+ON.code+(ONLINE_LOCAL?'&net=local':'');
   const bp=$('roomBoard');bp.innerHTML='';
@@ -2722,8 +2828,8 @@ function renderRoom(){
     const cs=document.createElement('select');cs.className='cl';cs.id='rcolor-'+i;cs.setAttribute('aria-label','Color');cs.disabled=!(mine||(host&&isBot));
     al.forEach(ci=>{const o=document.createElement('option');o.value=ci;o.textContent=COLORS[ci].name;o.selected=ci===st.c;cs.appendChild(o);});
     cs.onchange=()=>lobbyEdit(L2=>{const s2=L2.seats[i];if(!s2||s2.uid!==st.uid||s2.c!==st.c)return false;const nc=+cs.value;const other=L2.seats.find(x=>x!==s2&&x.c===nc);
-      if(other){if(other.type!=='human'&&other.name===botName(other.c))other.name=botName(s2.c);other.c=s2.c;}
-      if(s2.type!=='human'&&s2.name===botName(s2.c))s2.name=botName(nc);s2.c=nc;});
+      if(other){other.c=s2.c;syncBotName(other);}
+      s2.c=nc;syncBotName(s2);});
     row.appendChild(cs);
     row.appendChild(ballSelect('rball-'+i,st.ball,v=>lobbyEdit(L2=>{const s2=L2.seats[i];if(!s2||s2.uid!==st.uid||s2.c!==st.c)return false;s2.ball=v;}),!(mine||(host&&isBot))));
     const ts=document.createElement('select');ts.className='ty';ts.id='rtype-'+i;ts.setAttribute('aria-label','Seat type');
@@ -2753,7 +2859,7 @@ $('copyLink').onclick=()=>{const inp=$('roomLink');const done=()=>{$('copyLink')
   try{navigator.clipboard.writeText(inp.value).then(done,()=>{inp.select();});}catch(e){inp.select();}};
 
 async function startOnlineGame(){
-  if(!ON.isHost||!ON.lobby)return;
+  if(!ON.isHost||!ON.lobby)return;safeSet('ra-played','1');
   const L=ON.lobby,bd=makeBoard(L.board);
   if(L.seats.length<2){setRoomNote('Add at least one more player or bot.',true);return;}
   const seatS=assignSectors(bd,L.seats.map(x=>x.c)),s0=seatS[0];
@@ -2795,7 +2901,7 @@ async function processQueue(){
   drive();
 }
 function installState(ns,fresh){
-  if(fresh){setBoard(ns.board);applySeatColors(ns.players);}
+  if(fresh){setBoard(ns.board);applySeatColors(ns.players);applyThemeUI((ns.look||{}).theme);}
   G=Object.assign(ns,{online:true,token:-1,moves:[],sel:null,msg:''});ON.gid=ns.gid;
   if(fresh){buildBoard($('boardStatic'),'S',B);buildLive();ON.winShown=false;$('winModal').hidden=true;}
   G.moves=G.phase==='move'&&G.roll?legalMoves(G,G.turn,G.roll):[];
@@ -2930,7 +3036,7 @@ function start(data){
   data=data||{};
   setup=data.setup||loadSetup();
   setSound(safeGet('aggravation-sound')!=='0');renderSpeed();
-  buildBoard($('heroBoard'),'M',makeBoard('hex'),{mini:true});
+  applyThemeUI(setup.theme);
   const g=data.game;
   if(g&&g.winner===null&&g.board&&g.stats&&g.players.every(p=>typeof p.s==='number')){
     G=Object.assign(newGameState(),{board:g.board,rules:g.rules,players:g.players,stats:g.stats,turn:g.turn,log:g.log||[],started:g.started||Date.now()});resetCoach(G.players.length);
