@@ -225,7 +225,11 @@ table.stats td.top{color:var(--warn);font-weight:800}
 .rv-grades{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 4px}
 .rv-g{font-size:11.5px;border-radius:999px;padding:1px 8px;border:1px solid var(--line);background:var(--surface)}
 .rv-g b{font-variant-numeric:tabular-nums}
-.rv-best,.rv-good{border-color:#3FB37A}.rv-inacc{border-color:#C9A500}.rv-mistake{border-color:#F0A020}.rv-blunder{border-color:var(--danger);color:var(--danger);font-weight:700}
+.rv-good{border-color:#3FB37A}.rv-misstep{border-color:#F0A020}.rv-blunder{border-color:var(--danger);color:var(--danger);font-weight:700}
+.rv-cost{font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.rv-idea{font-weight:700;font-size:13px;margin:1px 0 2px}
+.rv-sub{margin:10px 0 0;font-size:12.5px;color:var(--muted)}
+.rv-list{max-height:340px;overflow:auto}
 .rv-v{margin:6px 0 2px;font-size:13.5px}
 .rv-split{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
 .rv-split b{color:var(--fg);font-variant-numeric:tabular-nums}
@@ -516,6 +520,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
           <li>Roll a <b>6</b>.</li>
           <li>Get a <b>kill</b>.</li>
           <li>End a move on an <b>outside corner</b>: the corner holes on the board's edge, on either side of any home column. Your own start hole counts when you back onto it with a 4, not when a marble comes out of base.</li>
+          <li><b>Claim it:</b> you have <b>5 seconds</b> to roll again. Nothing reminds you. Miss it and your turn passes (it shows in the feed and your stats).</li>
         </ul>
       </section>
       <section>
@@ -537,7 +542,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
         </ul>
       </section>
     </div>
-    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Turn timer:</b> human players have 30 seconds (change it or turn it off on the setup screen) to roll and to move, then the game plays for them. <b>Bot speed</b> (under the die) only changes how fast bots play. <b>Chance to win</b> (the pill next to each base on the board) comes from playing the rest of the game out 300 times with medium-strength bots after every move. <b>Move review:</b> whenever a human player has a real choice, each option is played out hundreds of times on the same dice and compared with the best one. A move that gives up under 1 point of chance to win is <b>Best</b>, under 3 <b>Good</b>, under 6 an <b>Inaccuracy</b>, under 12 a <b>Mistake</b>, and 12 or more a <b>Blunder</b>. Accuracy is the share of Best and Good moves. The end-of-game review shows each player's costliest moves and the better play. See <a href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">what's new</a> for every change.</p>
+    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Turn timer:</b> human players have 30 seconds (change it or turn it off on the setup screen) to roll and to move, then the game plays for them. <b>Bot speed</b> (under the die) only changes how fast bots play. <b>Chance to win</b> (the pill next to each base on the board) comes from playing the rest of the game out 300 times with medium-strength bots after every move. <b>Move review:</b> whenever a human player has a real choice, each option is played out hundreds of times on the same dice and compared with the best one. A move that gives up under 3 points of chance to win is <b>Good</b>, 3 to 10 is a <b>Misstep</b>, and 10 or more is a <b>Blunder</b>. Accuracy is the share of Good moves. The end-of-game review lists every misstep and blunder with the better play and what you missed (a kill, a re-roll corner, the back-past-start shortcut, getting home, a marble left in danger…). See <a href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">what's new</a> for every change.</p>
     <div class="actions"><button class="btn primary" id="rulesClose" type="button">Got it</button></div>
   </div>
 </div>
@@ -837,7 +842,7 @@ function botChoose(S,pi,moves,level){
 
 // ================= PURE TURN REDUCERS (used by online play) =================
 // State = {board,rules,players,stats,turn,phase,roll,log,winner,again,ev,turnSecs,deadline,gid}
-const STATE_KEYS=['gid','board','rules','players','stats','turn','phase','roll','log','winner','again','ev','turnSecs','deadline','started'];
+const STATE_KEYS=['gid','board','rules','players','stats','turn','phase','roll','log','winner','again','ev','turnSecs','deadline','started','claim'];
 function cleanState(S){const o={};STATE_KEYS.forEach(k=>{o[k]=S[k]===undefined?null:S[k];});return JSON.parse(JSON.stringify(o));}
 function describePure(S,pi,mv,roll){
   const P=S.players[pi];let t;
@@ -874,15 +879,21 @@ function bonusRoll(rules,n,corner,kill){
   const list=why.length===1?why[0]:why.slice(0,-1).join(', ')+' and '+why[why.length-1];
   return {again:list.charAt(0).toUpperCase()+list.slice(1)+', roll again!',log:list};
 }
+// Claim rule: a human who earns a re-roll gets 5 seconds to roll again, with no reminder.
+const CLAIM_MS=5000;
 function endTurnPure(S,n,corner,kill){
-  const b=bonusRoll(S.rules,n,corner,kill);S.again='';
-  if(b){S.again=b.again;logPure(S,S.turn,`${S.players[S.turn].name} ${b.log}: another roll`);}
+  const b=bonusRoll(S.rules,n,corner,kill);S.again='';S.claim=null;const P=S.players[S.turn];
+  if(b&&S.rules.claimRolls&&P.type==='human'&&!P.away){
+    S.claim={log:b.log,until:((typeof globalThis!=='undefined'&&globalThis.RA_CLOCK)?globalThis.RA_CLOCK():Date.now())+CLAIM_MS};
+  }
+  else if(b){S.again=b.again;logPure(S,S.turn,`${S.players[S.turn].name} ${b.log}: another roll`);}
   else{S.stats[S.turn].run=0;S.turn=(S.turn+1)%S.players.length;}
   S.phase='roll';S.roll=null;
 }
 // o.manual: the seat's own player acted. o.timeout: the turn timer ran out and the host auto-played it.
 function reduceRoll(S0,n,o={}){
   const S=cleanState(S0),pi=S.turn,P=S.players[pi],st=S.stats[pi];
+  if(S.claim){logPure(S,pi,`${P.name} ${S.claim.log}: another roll`);S.claim=null;}
   st.rolls++;st.run++;st.streak=Math.max(st.streak,st.run);if(n===6)st.sixes++;if(n===4)st.fours++;if(n===1)st.ones++;
   if(o.manual){P.missed=0;P.away=false;}
   if(o.timeout){P.missed=(P.missed||0)+1;if(P.missed>=2&&!P.away){P.away=true;logPure(S,pi,`${P.name} is away, so their turns are auto-played until they tap I'm back`,'note');}}
@@ -890,6 +901,12 @@ function reduceRoll(S0,n,o={}){
   const moves=legalMoves(S,pi,n);
   if(!moves.length){st.passes++;S.ev.pass=true;logPure(S,pi,`${P.name} rolled ${n}, no move`);endTurnPure(S,n,false);}
   else{S.phase='move';S.roll=n;}
+  return S;
+}
+function missClaimPure(S0){
+  const S=cleanState(S0),pi=S.turn,P=S.players[pi],st=S.stats[pi];if(!S.claim)return S;
+  logPure(S,pi,`${P.name} didn't roll again in time and missed the re-roll (${S.claim.log})`,'note');
+  st.missedRe=(st.missedRe||0)+1;st.run=0;S.claim=null;S.turn=(S.turn+1)%S.players.length;S.phase='roll';S.roll=null;S.ev={t:'miss',pi};
   return S;
 }
 function reduceMove(S0,mv,o={}){
@@ -985,17 +1002,24 @@ function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.i
 let WOOD=null;
 function woodTexture(){
   if(WOOD)return WOOD;
-  // dark walnut: chocolate base, darker streaks and fine grain, a few warm highlights, light lacquer sheen
-  const r=rng(1977),cv=document.createElement('canvas');cv.width=cv.height=900;const x=cv.getContext('2d');
-  x.fillStyle='#4B2E1B';x.fillRect(0,0,900,900);
-  for(let i=0;i<52;i++){const gx=r()*900,w=16+r()*120,a=r()*.22;const gr=x.createLinearGradient(gx-w,0,gx+w,0);
-    gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(.5,r()<.6?`rgba(28,15,8,${a})`:`rgba(122,78,44,${a*.8})`);gr.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=gr;x.fillRect(gx-w,0,2*w,900);}
-  for(let i=0;i<340;i++){let gx=r()*900;x.beginPath();x.lineWidth=.5+r()*1.8;
-    const lite=r()<.18;x.strokeStyle=lite?`rgba(${140+r()*30|0},${92+r()*22|0},${55+r()*16|0},${.05+r()*.12})`:`rgba(${16+r()*18|0},${8+r()*10|0},${4+r()*6|0},${.08+r()*.26})`;
-    const amp=2+r()*9,fr=.003+r()*.009,ph=r()*6;for(let y=0;y<=900;y+=12){const xx=gx+Math.sin(y*fr+ph)*amp+Math.sin(y*fr*3.1+ph)*amp*.25;y?x.lineTo(xx,y):x.moveTo(xx,y);}x.stroke();}
-  for(let k=0;k<3;k++){const kx=r()*900,ky=r()*900;for(let j=0;j<8;j++){x.beginPath();x.ellipse(kx,ky,4+j*5,14+j*12,0,0,Math.PI*2);x.strokeStyle=`rgba(18,9,4,${.22-j*.024})`;x.lineWidth=1.3;x.stroke();}}
-  const sh=x.createLinearGradient(0,0,900,900);sh.addColorStop(0,'rgba(255,225,190,.10)');sh.addColorStop(.45,'rgba(255,225,190,0)');sh.addColorStop(1,'rgba(0,0,0,.18)');x.fillStyle=sh;x.fillRect(0,0,900,900);
-  WOOD=cv.toDataURL('image/jpeg',.86);return WOOD;
+  // natural black walnut: warm chocolate base, darker and honey-toned bands, fine wavy grain,
+  // a couple of cathedral arches and a light satin finish
+  const r=rng(1977),W=1000,cv=document.createElement('canvas');cv.width=cv.height=W;const x=cv.getContext('2d');
+  const base=x.createLinearGradient(0,0,W,0);base.addColorStop(0,'#5B371F');base.addColorStop(.5,'#64402A');base.addColorStop(1,'#573420');
+  x.fillStyle=base;x.fillRect(0,0,W,W);
+  for(let i=0;i<60;i++){const gx=r()*W,w=14+r()*130,a=.05+r()*.2,t=r();const gr=x.createLinearGradient(gx-w,0,gx+w,0);
+    const col=t<.5?`rgba(38,20,9,${a})`:t<.85?`rgba(128,80,44,${a*.9})`:`rgba(170,110,58,${a*.6})`;
+    gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(.5,col);gr.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=gr;x.fillRect(gx-w,0,2*w,W);}
+  const wavy=(gx,amp,fr,ph,col,lw)=>{x.beginPath();x.lineWidth=lw;x.strokeStyle=col;for(let y=0;y<=W;y+=10){const xx=gx+Math.sin(y*fr+ph)*amp+Math.sin(y*fr*2.7+ph*1.3)*amp*.3;y?x.lineTo(xx,y):x.moveTo(xx,y);}x.stroke();};
+  for(let i=0;i<420;i++){const lite=r()<.22;
+    wavy(r()*W,2+r()*10,.002+r()*.008,r()*6,lite?`rgba(${150+r()*30|0},${96+r()*24|0},${56+r()*16|0},${.05+r()*.12})`:`rgba(${26+r()*16|0},${13+r()*8|0},${6+r()*5|0},${.07+r()*.22})`,.4+r()*1.6);}
+  // cathedral arches
+  for(let k=0;k<3;k++){const cx=120+r()*760,top=r()*W,wd=60+r()*90;
+    for(let j=0;j<11;j++){const s=wd*(.25+j*.18),h=180+j*55;x.beginPath();x.lineWidth=.9+r()*.9;x.strokeStyle=j%3?`rgba(30,15,6,${.18-j*.011})`:`rgba(160,104,58,${.12-j*.008})`;
+      for(let t=-1;t<=1.001;t+=.04){const xx=cx+t*s+Math.sin(t*5+j)*3,yy=top+h*(1-Math.pow(Math.abs(t),1.7))*-1+h;t>-1?x.lineTo(xx,yy):x.moveTo(xx,yy);}x.stroke();}}
+  for(let i=0;i<2600;i++){x.fillStyle=`rgba(20,10,4,${.05+r()*.12})`;x.fillRect(r()*W,r()*W,.8+r()*1.4,2+r()*7);} // pores
+  const sh=x.createLinearGradient(0,0,W,W);sh.addColorStop(0,'rgba(255,214,160,.12)');sh.addColorStop(.5,'rgba(255,214,160,0)');sh.addColorStop(1,'rgba(0,0,0,.14)');x.fillStyle=sh;x.fillRect(0,0,W,W);
+  WOOD=cv.toDataURL('image/jpeg',.88);return WOOD;
 }
 
 // ================= STATIC BOARD =================
@@ -1026,6 +1050,26 @@ function defsCommon(svg,prefix,bd){
   });
   const sp=el('radialGradient',{id:prefix+'spec',cx:'.5',cy:'.5',r:'.5'},defs);
   [['0','#FFFFFF','.95'],['.6','#FFFFFF','.45'],['1','#FFFFFF','0']].forEach(([o,cc,op])=>el('stop',{offset:o,'stop-color':cc,'stop-opacity':op},sp));
+  // etched inlay: the shape is stained into the wood (grain shows through) with a carved inner shadow
+  const ef=el('filter',{id:prefix+'etch',x:'-5%',y:'-5%',width:'110%',height:'110%','color-interpolation-filters':'sRGB'},defs);
+  el('feComponentTransfer',{in:'SourceAlpha',result:'inv'},ef).appendChild(Object.assign(document.createElementNS(NS,'feFuncA'),{}));
+  ef.lastChild.lastChild.setAttribute('type','table');ef.lastChild.lastChild.setAttribute('tableValues','1 0');
+  el('feOffset',{in:'inv',dx:'.045',dy:'.06',result:'off'},ef);
+  el('feGaussianBlur',{in:'off',stdDeviation:'.035',result:'blur'},ef);
+  el('feFlood',{'flood-color':'#140802','flood-opacity':'.85',result:'ink'},ef);
+  el('feComposite',{in:'ink',in2:'blur',operator:'in',result:'sh'},ef);
+  el('feComposite',{in:'sh',in2:'SourceAlpha',operator:'in',result:'inner'},ef);
+  el('feOffset',{in:'inv',dx:'-.03',dy:'-.04',result:'off2'},ef);
+  el('feFlood',{'flood-color':'#FFE2BC','flood-opacity':'.28',result:'lite'},ef);
+  el('feComposite',{in:'lite',in2:'off2',operator:'in',result:'l2'},ef);
+  el('feComposite',{in:'l2',in2:'SourceAlpha',operator:'in',result:'lip'},ef);
+  const mg=el('feMerge',null,ef);['SourceGraphic','inner','lip'].forEach(n=>el('feMergeNode',{in:n},mg));
+  el('clipPath',{id:prefix+'mclip'},defs).appendChild(Object.assign(document.createElementNS(NS,'circle'),{}));
+  defs.lastChild.lastChild.setAttribute('r','.405');
+  const sg=el('radialGradient',{id:prefix+'msh',cx:'.5',cy:'.5',r:'.5'},defs);
+  [['0','#000','.55'],['.6','#000','.3'],['1','#000','0']].forEach(([o,cc,op])=>el('stop',{offset:o,'stop-color':cc,'stop-opacity':op},sg));
+  const fr=el('radialGradient',{id:prefix+'mfr',cx:'.5',cy:'.5',r:'.5'},defs);
+  [['0','#fff','0'],['.82','#fff','0'],['.95','#fff','.22'],['1','#fff','0']].forEach(([o,cc,op])=>el('stop',{offset:o,'stop-color':cc,'stop-opacity':op},fr));
   const etch=el('filter',{id:prefix+'cream','color-interpolation-filters':'sRGB'},defs);
   el('feColorMatrix',{type:'matrix',values:'0 0 0 0 0.95  0 0 0 0 0.86  0 0 0 0 0.72  0 0 0 1 0'},etch);
   el('path',{d:outline(bd)},el('clipPath',{id:prefix+'clip'},defs));
@@ -1054,7 +1098,7 @@ function buildBoard(svg,prefix,bd,opts={}){
   svg.innerHTML='';setViewBox(svg,bd);
   defsCommon(svg,prefix,bd);
   const A=bd.A,BL=bd.base,op=outline(bd);
-  el('path',{d:op,fill:'#4B2E1B'},svg);
+  el('path',{d:op,fill:'#5E3A22'},svg);
   el('image',{href:woodTexture(),x:-11,y:-11,width:22,height:22,preserveAspectRatio:'none','clip-path':`url(#${prefix}clip)`},svg);
   el('path',{d:outline(bd,.18,.5),fill:'none',stroke:'rgba(255,214,170,.22)','stroke-width':.08},svg);
   el('path',{d:op,fill:'none',stroke:'rgba(15,7,2,.85)','stroke-width':.1},svg);
@@ -1065,7 +1109,7 @@ function buildBoard(svg,prefix,bd,opts={}){
     bd.TRACK.forEach(p=>el('circle',{cx:f(p.x),cy:f(p.y),r:.36,fill:`url(#${prefix}hole)`},svg));
     return;
   }
-  const deco=el('g',null,svg),y0=-(A+1); // y0 = innermost home hole
+  const deco=el('g',{filter:`url(#${prefix}etch)`,opacity:.78},svg),y0=-(A+1); // y0 = innermost home hole
   for(let k=0;k<bd.N;k++){
     const C=COLORS[bd.sectorColors[k]],g=el('g',{transform:`rotate(${k*bd.step})`},deco);
     el('polygon',{points:starPts(-2,-A,.74,.31),fill:C.hex,opacity:.92},g);
@@ -1088,8 +1132,9 @@ function buildBoard(svg,prefix,bd,opts={}){
   hole(CENTER,.42);
   for(let k=0;k<bd.N;k++){
     const C=COLORS[bd.sectorColors[k]];
-    bd.HOMEPOS[k].forEach(p=>el('circle',{cx:f(p.x),cy:f(p.y),r:.5,fill:'none',stroke:C.hex,'stroke-width':.11},holes));
-    const s=bd.TRACK[startG(k)];el('circle',{cx:f(s.x),cy:f(s.y),r:.5,fill:'none',stroke:C.hex,'stroke-width':.11},holes);
+    const rg=el('g',{filter:`url(#${prefix}etch)`,opacity:.8},holes);
+    bd.HOMEPOS[k].forEach(p=>el('circle',{cx:f(p.x),cy:f(p.y),r:.5,fill:'none',stroke:C.hex,'stroke-width':.11},rg));
+    const s=bd.TRACK[startG(k)];el('circle',{cx:f(s.x),cy:f(s.y),r:.5,fill:'none',stroke:C.hex,'stroke-width':.11},rg);
   }
 }
 
@@ -1121,6 +1166,7 @@ const RULE_DEFS=[
   {k:'corners',label:'Outside corners: roll again',sub:'End a move on an outside corner hole to roll again, backward moves included. Coming out of base onto your start doesn\'t count.',def:true},
   {k:'homeRaid',label:'Raid homes',sub:'Turn into (or back into) another player\'s home to kill a marble that isn\'t locked in. You stay there until you back out with a 4.',def:true},
   {k:'killAgain',label:'Kill: roll again',sub:'Aggravate an opponent (send them back to base) and you roll again.',def:true},
+  {k:'claimRolls',label:'Claim your re-rolls',sub:'After a 6, a kill or an outside corner you have 5 seconds to roll again. No reminder: miss it and your turn passes. (Human players.)',def:true},
   {k:'autoSingle',label:'Auto-play forced moves',sub:'If only one move is possible, make it automatically.',def:true},
 ];
 const TYPE_LABEL={human:'Human',easy:'Bot · Easy',medium:'Bot · Medium',hard:'Bot · Hard'};
@@ -1224,13 +1270,14 @@ const STAT_COLS=[
   {k:'dist',label:'Holes moved',short:'Holes'},
   {k:'passes',label:'Turns with no move',short:'No move'},
   {k:'streak',label:'Longest turn (rolls in a row)',short:'Best streak'},
-  {k:'acc',label:'Move accuracy: share of real choices played best or close to best (human players)',short:'Acc',rail:true,review:true},
-  {k:'blunders',label:'Blunders: moves that gave up 12%+ chance to win',short:'Blunders',review:true},
-  {k:'mistakes',label:'Mistakes: moves that gave up 6-12% chance to win',short:'Mistakes',review:true},
+  {k:'acc',label:'Move accuracy: share of real choices graded Good, within 3 points of the best move (human players)',short:'Acc',rail:true,review:true},
+  {k:'missteps',label:'Missteps: moves that gave up 3 to 10 points of chance to win',short:'Missteps',review:true},
+  {k:'blunders',label:'Blunders: moves that gave up 10+ points of chance to win',short:'Blunders',review:true},
+  {k:'missedRe',label:'Re-rolls not claimed within 5 seconds',short:'Missed re-rolls'},
   {k:'missed',label:'Missed kills: a kill was the better move but was not taken',short:'Missed kills',review:true},
   {k:'wlost',label:'Chance to win given up by moves that cost 3+ points, added up (points, not a %)',short:'Lost to moves',review:true},
 ];
-const blankStats=()=>({rolls:0,sixes:0,fours:0,ones:0,kills:0,lost:0,back:0,corners:0,shortcuts:0,dist:0,passes:0,streak:0,run:0});
+const blankStats=()=>({missedRe:0,rolls:0,sixes:0,fours:0,ones:0,kills:0,lost:0,back:0,corners:0,shortcuts:0,dist:0,passes:0,streak:0,run:0});
 function loadRecords(){try{return JSON.parse(safeGet('aggravation-records')||'{}')||{};}catch(e){return {};}}
 function saveRecords(winnerPi){
   const rec=loadRecords();
@@ -1247,7 +1294,7 @@ function newGameState(){
   const players=setup.players.map(p=>({name:(p.name||'').trim()||COLORS[p.c].name,c:p.c,s:sec(p.c),type:p.type,marbles:[0,1,2,3].map(()=>({d:null}))}))
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
   const r=setup.rules;
-  return {token:++tokenSeq,board:bd.kind,rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle},
+  return {token:++tokenSeq,board:bd.kind,rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle,claimRolls:r.claimRolls!==false},
     players,stats:players.map(blankStats),turn:0,phase:'roll',roll:null,moves:[],sel:null,log:[],winner:null,again:'',msg:'',
     turnSecs:setup.turnSecs||0,deadline:0,tseq:0,started:Date.now()};
 }
@@ -1308,6 +1355,7 @@ function setDie(n,animate){
 }
 async function doRoll(timedOut){
   if(!G||G.phase!=='roll')return;const tok=G.token,sp=speedFor(cur());
+  if(G.claim){addLog(G.turn,`${cur().name} ${G.claim.log}: another roll`);G.claim=null;G.tseq++;clearTimeout(LTIMER);}
   G.phase='rolling';G.deadline=0;renderPanel();
   const n=1+Math.floor(Math.random()*6);
   $('die').style.transitionDuration=sp<1?(.8*sp).toFixed(2)+'s':'';
@@ -1343,6 +1391,15 @@ async function doRoll(timedOut){
   if(mis.length===1||(mis.length===baseMis.length))G.sel=mis[0];
   setStatus(msg);renderPanel();renderLive();armTimer();
 }
+// ---- claim window: the Roll button just stays live for 5 seconds, nothing announces it
+function startClaim(b){
+  const tok=G.token,k=++G.tseq;G.claim={log:b.log,until:Date.now()+CLAIM_MS};
+  G.phase='roll';G.roll=null;G.moves=[];G.sel=null;G.deadline=0;clearTimeout(LTIMER);
+  renderPanel();renderLive();setStatus(esc(G.log[0]?G.log[0].text:''));
+  LTIMER=setTimeout(()=>{if(!G||G.token!==tok||G.tseq!==k||!G.claim)return;
+    const P=cur(),st=G.stats[G.turn];addLog(G.turn,`${P.name} didn't roll again in time and missed the re-roll (${G.claim.log})`,'note');
+    st.missedRe=(st.missedRe||0)+1;st.run=0;G.claim=null;G.turn=(G.turn+1)%G.players.length;beginTurn();},CLAIM_MS);
+}
 // ---- local turn timer for human players: roll or move for them when it runs out
 let LTIMER=null;
 function armTimer(){
@@ -1357,6 +1414,7 @@ function armTimer(){
 function endTurn(n,corner,kill){
   if(!G)return;
   const b=bonusRoll(G.rules,n,corner,kill);G.again='';
+  if(b&&G.rules.claimRolls&&isHuman(cur())){startClaim(b);return;}
   if(b){G.again=b.again;addLog(G.turn,`${cur().name} ${b.log}: another roll`);}
   else{G.stats[G.turn].run=0;G.turn=(G.turn+1)%G.players.length;}
   beginTurn();
@@ -1379,7 +1437,7 @@ async function localExecute(mv,auto){
   if(tok!==G?.token)return;
   if(mv.kind==='home'){sfx.home();burst(posOf(pi,mv.mi),COLORS[P.c].hex);}
   if(mv.kind==='leave')sfx.out();
-  if(corner){sfx.home();burst(posOf(pi,mv.mi),COLORS[P.c].hex);}
+  if(corner&&!(G.rules.claimRolls&&isHuman(P))){sfx.home();burst(posOf(pi,mv.mi),COLORS[P.c].hex);}
   const st=G.stats[pi];st.dist+=mv.path.length;
   if(mv.victim){st.kills++;G.stats[mv.victim.pi].lost++;}
   if(mv.dir==='back')st.back++;
@@ -1409,13 +1467,20 @@ function buildLive(){
     const g=el('g',{class:'marble','data-pi':pi,'data-mi':mi},LAYERS.marbles);
     el('circle',{class:'pulse',r:.5,fill:'none',stroke:'#FFFFFF','stroke-width':.12,visibility:'hidden','pointer-events':'none'},g);
     el('circle',{class:'selring',r:.56,fill:'none',stroke:'#FFFFFF','stroke-width':.12,opacity:0},g);
-    el('ellipse',{cx:.08,cy:.15,rx:.42,ry:.36,fill:'rgba(0,0,0,.45)'},g);
+    const C=COLORS[P.c],tw=(mi*37+pi*61)%360; // each marble's swirl sits at its own angle
+    el('ellipse',{cx:.1,cy:.17,rx:.5,ry:.42,fill:'url(#Lmsh)'},g);
     el('circle',{r:.42,fill:`url(#Lm${P.c})`},g);
+    const sw=el('g',{'clip-path':'url(#Lmclip)'},g),swr=el('g',{transform:`rotate(${tw})`},sw);
+    el('path',{d:'M -.46 .12 C -.2 -.3 .08 .38 .46 -.1',fill:'none',stroke:C.light,'stroke-width':.13,'stroke-linecap':'round',opacity:.5},swr);
+    el('path',{d:'M -.46 .16 C -.18 -.22 .1 .44 .46 -.04',fill:'none',stroke:'#FFFFFF','stroke-width':.025,opacity:.55},swr);
+    el('path',{d:'M -.4 -.28 C -.1 .02 .02 -.4 .4 .22',fill:'none',stroke:C.dark,'stroke-width':.07,opacity:.45},swr);
     el('circle',{r:.42,fill:`url(#Lmc${P.c})`},g);
-    el('circle',{r:.41,fill:'none',stroke:'rgba(0,0,0,.35)','stroke-width':.025},g);
-    el('ellipse',{cx:-.12,cy:-.19,rx:.21,ry:.11,fill:'url(#Lspec)',transform:'rotate(-28 -.12 -.19)'},g);
-    el('circle',{cx:-.2,cy:-.2,r:.045,fill:'#FFFFFF',opacity:.95},g);
-    el('path',{d:'M .2 .27 A .34 .34 0 0 0 .33 .08',fill:'none',stroke:'rgba(255,255,255,.45)','stroke-width':.035,'stroke-linecap':'round'},g);
+    el('circle',{r:.42,fill:'url(#Lmfr)'},g);
+    el('circle',{r:.415,fill:'none',stroke:'rgba(0,0,0,.45)','stroke-width':.022},g);
+    el('ellipse',{cx:-.12,cy:-.2,rx:.22,ry:.12,fill:'url(#Lspec)',transform:'rotate(-30 -.12 -.2)'},g);
+    el('circle',{cx:-.21,cy:-.21,r:.04,fill:'#FFFFFF'},g);
+    el('circle',{cx:-.06,cy:-.27,r:.018,fill:'#FFFFFF',opacity:.8},g);
+    el('path',{d:'M .17 .29 A .34 .34 0 0 0 .33 .06',fill:'none',stroke:'rgba(255,255,255,.5)','stroke-width':.03,'stroke-linecap':'round'},g);
     el('circle',{r:.62,fill:'transparent'},g); // generous hit area
     return g;
   }));
@@ -1555,7 +1620,7 @@ function statsTable(cols,withRecords){
   const th=document.createElement('thead');th.appendChild(hr);t.appendChild(th);
   const tb=document.createElement('tbody');
   const rec=withRecords?loadRecords():{};
-  const val=(c,qi)=>c.review?coachStat(c.k,qi):{v:G.stats[qi][c.k],text:String(G.stats[qi][c.k])};
+  const val=(c,qi)=>c.review?coachStat(c.k,qi):{v:G.stats[qi][c.k]||0,text:String(G.stats[qi][c.k]||0)};
   const best={};cols.forEach(c=>{const vs=G.players.map((_,qi)=>val(c,qi).v).filter(v=>v!==null);best[c.k]=vs.length?Math.max(...vs):null;});
   const hi=c=>!c.review||c.k==='acc';
   G.players.forEach((Q,qi)=>{const tr=document.createElement('tr');if(qi===G.turn&&G.winner===null)tr.className='active';
@@ -1637,7 +1702,7 @@ function runOdds(tok,key){
 // the rest out from each option (same dice for each, see evalState) and compares the player's win
 // chance after their pick with the best option. The gap is what the move cost. Runs on background
 // workers when the browser allows it, otherwise in small slices between frames.
-const GRADES=[{k:'best',label:'Best',max:1},{k:'good',label:'Good',max:3},{k:'inacc',label:'Inaccuracy',max:6},{k:'mistake',label:'Mistake',max:12},{k:'blunder',label:'Blunder',max:1e9}];
+const GRADES=[{k:'good',label:'Good',max:3},{k:'misstep',label:'Misstep',max:10},{k:'blunder',label:'Blunder',max:1e9}];
 function gradeOf(loss){return GRADES.find(g=>loss<g.max).k;}
 let COACH=null;
 function resetCoach(n){COACH={gen:(COACH?COACH.gen:0)+1,turns:new Array(n).fill(0),decisions:[],queue:[],busy:false,hist:[],lastPi:null,view:null};}
@@ -1650,7 +1715,9 @@ function coachDecision(S,pi,n,moves,chosen){
   const opts=optionResults(S,pi,n,moves);if(opts.length<2)return;
   const ci=moves.findIndex(m=>sameMove(m,chosen));if(ci<0)return;
   const d={pi,n,turn:COACH.turns[pi]||1,board:B.kind,rules:S.rules,players:snapPlayers(S.players),
-    opts:opts.map(o=>({S:o.S,won:o.won,idxs:o.idxs,mv:moves[o.idxs[0]],kill:o.idxs.some(i=>moves[i].victim),text:moveText(S,pi,moves[o.idxs[0]],n)})),
+    opts:opts.map(o=>{const mv=moves[o.idxs[0]];return {S:o.S,won:o.won,idxs:o.idxs,mv,kill:o.idxs.some(i=>moves[i].victim),text:moveText(S,pi,mv,n),
+      corner:earnsCorner(S,pi,mv),danger:onTrack(mv.to)?danger(o.S,pi,mv.to):0,
+      startBlocked:o.S.players[pi].marbles.some(m=>m.d===0)&&o.S.players[pi].marbles.some(m=>m.d===null)};}),
     chosen:opts.findIndex(o=>o.idxs.includes(ci)),done:false};
   // seed from the position itself, so every device in an online game grades a move the same way
   const key=pi+'|'+n+'|'+d.players.map(p=>p.marbles.map(m=>m.d).join(',')).join(';');let h=2166136261;
@@ -1717,9 +1784,24 @@ async function evalDecision(d,gen){
     if(K>=200)active=active.filter(i=>i===c||i===b||means[i]>means[b]-.12);
     if((K>=300&&se<=.015)||K>=1200||active.every(i=>R[i].won)){
       d.vals=means;d.best=b;d.loss=Math.max(0,(means[b]-means[c])*100);d.grade=gradeOf(d.loss);
-      d.missedKill=d.opts[b].kill&&!d.opts[c].kill&&d.loss>=3;d.done=true;return true;
+      d.missedKill=d.opts[b].kill&&!d.opts[c].kill&&d.loss>=3;d.idea=d.loss>=3?missedIdea(d):'';d.done=true;return true;
     }
   }
+}
+// Name what the better move had that yours didn't, when it's one of the common patterns.
+function missedIdea(d){
+  const b=d.opts[d.best],c=d.opts[d.chosen],bm=b.mv,cm=c.mv;
+  if(b.won)return 'Missed the win';
+  if(b.kill&&!c.kill)return 'Missed a kill';
+  if(bm.kind==='home'&&cm.kind!=='home')return 'Missed getting home';
+  if(bm.dir==='back'&&typeof bm.from==='number'&&typeof bm.to==='number'&&bm.from<14&&bm.to>B.L/2)return b.corner&&!c.corner?'Missed the back-past-start shortcut and re-roll corner':'Missed the back-past-start shortcut';
+  if(b.corner&&!c.corner)return 'Missed a re-roll corner';
+  if(bm.kind==='leave'&&cm.kind!=='leave')return 'Missed getting a marble out';
+  if(c.startBlocked&&!b.startBlocked)return 'Left your start hole blocked (no room to bring out the next marble)';
+  if(c.danger>=14&&b.danger<c.danger)return 'Left a marble in danger';
+  if(bm.to==='C'&&cm.to!=='C')return 'Missed the center';
+  if(bm.kind==='stars'||bm.kind==='backStars')return 'Missed an inside-corner hop';
+  return '';
 }
 async function pumpCoach(){
   if(!COACH||COACH.busy)return;COACH.busy=true;const gen=COACH.gen;
@@ -1741,15 +1823,15 @@ function coachSummary(qi){
   // near-equal choices doesn't pile up
   const lost=done.reduce((s,d)=>s+(d.loss>=3?d.loss:0),0);
   return {graded:done.length,pending:ds.length-done.length,cnt,lost,
-    acc:done.length?Math.round(100*(cnt.best+cnt.good)/done.length):null,
+    acc:done.length?Math.round(100*cnt.good/done.length):null,
     missed:done.filter(d=>d.missedKill).length,
-    worst:done.filter(d=>d.loss>=3).sort((a,b)=>b.loss-a.loss).slice(0,3)};
+    worst:done.filter(d=>d.loss>=3).sort((a,b)=>a.turn-b.turn||a.n-b.n)};
 }
 function coachStat(k,qi){
   const s=coachSummary(qi);if(!s)return {v:null,text:'–'};
   if(k==='acc')return s.acc===null?{v:null,text:s.pending?'…':'–'}:{v:s.acc,text:s.acc+'%'};
   if(k==='blunders')return {v:s.cnt.blunder,text:String(s.cnt.blunder)};
-  if(k==='mistakes')return {v:s.cnt.mistake,text:String(s.cnt.mistake)};
+  if(k==='missteps')return {v:s.cnt.misstep,text:String(s.cnt.misstep)};
   if(k==='missed')return {v:s.missed,text:String(s.missed)};
   if(k==='wlost')return {v:Math.round(s.lost),text:Math.round(s.lost)+' pts'};
   return {v:null,text:'–'};
@@ -1813,13 +1895,14 @@ function renderReview(){
     else{
       html+=`<div class="rv-grades">`+GRADES.map(g=>`<span class="rv-g rv-${g.k}">${g.label} <b>${s.cnt[g.k]}</b></span>`).join('')+`</div>`;
       html+=`<p class="rv-v">${esc(vd.v)}</p><p class="rv-split" title="Points of chance to win, added up over the game">Moves gave away <b>${vd.lost} pts</b> · Dice &amp; other players <b>${vd.rivals>0?'+':vd.rivals<0?'−':''}${Math.abs(vd.rivals)} pts</b></p>`;
-      if(s.worst.length){html+=`<ol class="rv-list">`;s.worst.forEach(d=>{const di=COACH.decisions.indexOf(d),c=d.opts[d.chosen],b=d.opts[d.best];
-        html+=`<li><div class="rv-when">Turn ${d.turn} · rolled ${d.n} · <span class="rv-g rv-${d.grade}">${GRADES.find(g=>g.k===d.grade).label}</span></div>`+
+      if(s.worst.length){html+=`<p class="rv-sub">Every misstep and blunder, in order:</p><ol class="rv-list">`;s.worst.forEach(d=>{const di=COACH.decisions.indexOf(d),c=d.opts[d.chosen],b=d.opts[d.best];
+        html+=`<li><div class="rv-when">Turn ${d.turn} · rolled ${d.n} · <span class="rv-g rv-${d.grade}">${GRADES.find(g=>g.k===d.grade).label}</span> <span class="rv-cost">−${Math.round(d.loss)} pts</span></div>`+(d.idea?`<div class="rv-idea">${esc(d.idea)}</div>`:'')+
           `<div>You: ${esc(c.text)} <span class="rv-pct">${pctTxt(d.vals[d.chosen])}</span></div>`+
           `<div class="rv-better">Better: ${esc(b.text)} <span class="rv-pct">${pctTxt(d.vals[d.best])}</span></div>`+
           `<button class="btn rv-show" type="button" data-d="${di}">Show on board</button></li>`;});html+=`</ol>`;}
-      else if(s.graded)html+=`<p class="fine">No moves cost more than 3%. Nothing to fix.</p>`;
-      if(s.missed)html+=`<p class="fine">Missed ${s.missed} kill${s.missed>1?'s':''} that would have been the better move.</p>`;
+      else if(s.graded)html+=`<p class="fine">No missteps: every choice was within 3 points of the best move.</p>`;
+      const mr=(G.stats[qi]&&G.stats[qi].missedRe)||0;
+      if(mr)html+=`<p class="fine">Missed claiming ${mr} re-roll${mr>1?'s':''} (didn't roll again within 5 seconds).</p>`;
     }
     card.innerHTML=html;box.appendChild(card);
   });
@@ -2183,7 +2266,7 @@ async function startOnlineGame(){
   const r=L.rules,secs=L.turnSecs||30;
   const ro=r.rollOff!==false?rollOff(players.map(p=>p.name)):null;
   const S={gid:Math.random().toString(36).slice(2,10),board:L.board,
-    rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle},
+    rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle,claimRolls:r.claimRolls!==false},
     players,stats:players.map(blankStats),turn:ro?ro.first:0,phase:'roll',roll:null,
     log:(ro?ro.lines.slice().reverse().map(t=>({c:null,text:t,cls:''})):[]).concat([{c:null,text:'New online game: '+players.map(p=>p.name).join(', '),cls:''}]),winner:null,again:'',ev:null,turnSecs:secs,deadline:ON.net.now()+secs*1000,started:ON.net.now()};
   await ON.net.txn(`rooms/${ON.code}/game`,cur=>({seq:((cur&&cur.seq)||0)+1,g:JSON.stringify(S)}));
@@ -2239,7 +2322,7 @@ async function presentTransition(ns,fast){
   await animPath(node,pts,{speed:sp});
   if(mv.victim){const vn=MARBLE_NODES[mv.victim.pi][mv.victim.mi],vp=posOf(mv.victim.pi,mv.victim.mi);sfx.thud();burst(vp,'#E5262E');
     await animPath(vn,[vp,B.BASEPOS[ns.players[mv.victim.pi].s][mv.victim.mi]],{dur:420*Math.max(.35,sp),arc:true});}
-  if(mv.kind==='home'||ev.corner){sfx.home();const d=destPos(pi,mv);burst(d,COLORS[G.players[pi].c].hex);}
+  if(mv.kind==='home'||(ev.corner&&!(G.rules.claimRolls&&G.players[pi].type==='human'))){sfx.home();const d=destPos(pi,mv);burst(d,COLORS[G.players[pi].c].hex);}
   if(mv.kind==='leave')sfx.out();
 }
 function canAct(){
@@ -2271,6 +2354,7 @@ function drive(){
   clearDrive();
   if(!G||!G.online||G.winner!==null||!ON.meta||ON.meta.status!=='playing'||ON.processing||G.phase==='anim')return;
   const P=cur(),auto=P.type!=='human'||P.away||!isOnline(P.uid);
+  if(G.claim){if(ON.isHost)later(()=>commit(missClaimPure(G),ON.seq),Math.max(0,G.claim.until-ON.net.now())+250);return;}
   if(auto){if(ON.isHost)later(()=>botAct(),Math.round((G.phase==='roll'?(P.type==='human'?450:800):650)*speedFor(P)));return;}
   if(P.uid===ON.net.uid&&G.phase==='move'&&G.moves.length===1&&G.rules.autoSingle)later(()=>onlineMove(G.moves[0],false),700);
   if(ON.isHost)later(()=>botAct({timeout:true}),Math.max(0,(G.deadline||0)-ON.net.now())+300);
@@ -2281,6 +2365,7 @@ function onlineStatus(){
   $('backBtn').hidden=!(me&&me.away&&G.winner===null);
   let msg;
   if(G.winner!==null)msg=`<b>${esc(G.players[G.winner].name)}</b> wins!`;
+  else if(G.claim)msg=esc(G.log&&G.log[0]?G.log[0].text:'');
   else if(me&&me.away)msg="You missed two turns, so your marbles are being auto-played. Tap <b>I'm back</b> to take over.";
   else if(mine){
     if(G.phase==='roll')msg=G.again?`${G.again} Roll the die.`:'Your turn. Roll the die.';
@@ -2320,7 +2405,7 @@ function updateTimer(){
     const left=Math.max(0,Math.ceil((G.deadline-Date.now())/1000)),many=G.players.filter(isHuman).length>1;boardTimer(left,G.turnSecs,P.c);
     t.textContent=`Auto-play in ${left}s`;t.title=`If ${many?P.name:'you'} don't move in time, the game rolls and moves for ${many?'them':'you'}.`;t.className='timer'+(left<=10?' warn':'');return;}
   const t=$('turnTimer'),P=cur();
-  if(G.winner!==null){t.textContent='';return;}
+  if(G.winner!==null||G.claim){t.textContent='';t.className='timer';return;}
   const auto=P.type!=='human'||P.away||!isOnline(P.uid);
   if(auto){t.textContent=P.type!=='human'?'':P.uid===ON.net.uid?'Auto-playing your turn':'Auto-playing '+P.name;t.className='timer';return;}
   const left=Math.max(0,Math.ceil(((G.deadline||0)-ON.net.now())/1000));
