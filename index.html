@@ -542,7 +542,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
         </ul>
       </section>
     </div>
-    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Turn timer:</b> human players have 30 seconds (change it or turn it off on the setup screen) to roll and to move, then the game plays for them. <b>Bot speed</b> (under the die) only changes how fast bots play. <b>Chance to win</b> (the pill next to each base on the board) comes from playing the rest of the game out 300 times with medium-strength bots after every move. <b>Move review:</b> whenever a human player has a real choice, each option is played out hundreds of times on the same dice and compared with the best one. A move that gives up under 3 points of chance to win is <b>Good</b>, 3 to 10 is a <b>Misstep</b>, and 10 or more is a <b>Blunder</b>. Accuracy is the share of Good moves. The end-of-game review lists every misstep and blunder with the better play and what you missed (a kill, a re-roll corner, the back-past-start shortcut, getting home, a marble left in danger…). See <a href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">what's new</a> for every change.</p>
+    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Turn timer:</b> human players have 30 seconds (change it or turn it off on the setup screen) to roll and to move, then the game plays for them. <b>Bot speed</b> (under the die) only changes how fast bots play. <b>Chance to win</b> (the pill next to each base on the board) comes from playing the rest of the game out 300 times with medium-strength bots after every move. <b>Move review:</b> whenever a human player has a real choice, each option is played out hundreds of times on the same dice and compared with the best one. A move that gives up under 3 points of chance to win is <b>Good</b>, 3 to 10 is a <b>Misstep</b>, and 10 or more is a <b>Blunder</b>. Close calls get extra playouts, and moves are graded on the cautious end of the estimate, so a move is only flagged when it clearly cost something. Accuracy is the share of Good moves. The end-of-game review lists every misstep and blunder with the better play and what you missed (a kill, a re-roll corner, the back-past-start shortcut, getting home, a marble left in danger…). See <a href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">what's new</a> for every change.</p>
     <div class="actions"><button class="btn primary" id="rulesClose" type="button">Got it</button></div>
   </div>
 </div>
@@ -790,7 +790,9 @@ function danger(S,pi,d){
         const og=gOf(p.s,m.d);const behind=mod(g-og,B.L);
         if(behind>=1&&behind<=6&&m.d+behind<=B.ENTRY)risk+=14;
         if(S.rules.back&&mod(og-g,B.L)===4)risk+=7;
-      }else if(m.d==='C'&&isStar(g))risk+=5;
+        // inside-corner hop: an opponent on a star can hop clockwise onto this star (1 to 6 hops)
+        if(S.rules.stars&&isStar(g)&&isStar(og)){const k=mod(g-og,B.L)/14;if(k>=1&&k<=6&&m.d+14*k<=B.OWNSTAR)risk+=12;}
+      }else if(m.d==='C'&&isStar(g))risk+=8;
     });
     if(g===startG(p.s)&&p.marbles.some(m=>m.d===null))risk+=12;
   });
@@ -1708,14 +1710,33 @@ let COACH=null;
 function resetCoach(n){COACH={gen:(COACH?COACH.gen:0)+1,turns:new Array(n).fill(0),decisions:[],queue:[],busy:false,hist:[],lastPi:null,view:null};}
 function coachTurn(pi){if(!COACH)return;COACH.turns[pi]=(COACH.turns[pi]||0)+1;}
 function sameMove(a,b){return a.mi===b.mi&&a.to===b.to&&a.kind===b.kind&&a.dir===b.dir;}
+// Where a move ends, in words, from the mover's point of view.
+function spotName(S,pi,mv){
+  const P=S.players[pi],to=mv.to,own=s=>s===P.s;
+  const sectorName=s=>{const q=S.players.find(x=>x.s===s);return own(s)?'your':(q?q.name+"'s":COLORS[B.sectorColors[s]].name+"'s");};
+  if(to==='C')return 'the center';
+  if(isFH(to)){const [sx,j]=parseFH(to);return `${sectorName(sx)} home, slot ${j+1}`;}
+  if(typeof to!=='number')return '';
+  if(to>=B.H0)return `your home, slot ${to-B.H0+1}`;
+  const g=gOf(P.s,to),s=Math.floor(g/14),r=g%14;
+  if(r===0)return own(s)?'your home corner':`${sectorName(s)} inside corner`;
+  if(r===9)return own(s)?'your start hole':`${sectorName(s)} start hole`;
+  if(r===5)return `${sectorName(s)} outside corner`;
+  if(r===7)return own(s)?'your home entry':`${sectorName(s)} home entry`;
+  const left=B.ENTRY-to;return left>=0?`${left} hole${left===1?'':'s'} from your home entry`:'';
+}
 function moveText(S,pi,mv,n){const t=describePure(S,pi,mv,n),nm=S.players[pi].name;return (t.startsWith(nm+' ')?t.slice(nm.length+1):t).replace(/!$/,'');}
 // S: the position just before the move (with real player names), pi: mover, n: roll
 function coachDecision(S,pi,n,moves,chosen){
   if(!COACH||!moves||moves.length<2)return;
   const opts=optionResults(S,pi,n,moves);if(opts.length<2)return;
   const ci=moves.findIndex(m=>sameMove(m,chosen));if(ci<0)return;
+  // name the destination whenever two options would otherwise read the same, and for hops/center exits
+  const txt=opts.map(o=>moveText(S,pi,moves[o.idxs[0]],n)),dup=t=>txt.filter(x=>x===t).length>1;
+  opts.forEach((o,k)=>{const mv=moves[o.idxs[0]],sp=spotName(S,pi,mv);
+    if(sp&&(dup(txt[k])||['exitCenter','stars','backStars'].includes(mv.kind)))o.label=txt[k].replace(/( and aggravated .*)?$/,m=>` to ${sp}${m}`);});
   const d={pi,n,turn:COACH.turns[pi]||1,board:B.kind,rules:S.rules,players:snapPlayers(S.players),
-    opts:opts.map(o=>{const mv=moves[o.idxs[0]];return {S:o.S,won:o.won,idxs:o.idxs,mv,kill:o.idxs.some(i=>moves[i].victim),text:moveText(S,pi,mv,n),
+    opts:opts.map(o=>{const mv=moves[o.idxs[0]];return {S:o.S,won:o.won,idxs:o.idxs,mv,kill:o.idxs.some(i=>moves[i].victim),text:o.label||moveText(S,pi,mv,n),
       corner:earnsCorner(S,pi,mv),danger:onTrack(mv.to)?danger(o.S,pi,mv.to):0,
       startBlocked:o.S.players[pi].marbles.some(m=>m.d===0)&&o.S.players[pi].marbles.some(m=>m.d===null)};}),
     chosen:opts.findIndex(o=>o.idxs.includes(ci)),done:false};
@@ -1782,8 +1803,11 @@ async function evalDecision(d,gen){
     const c=d.chosen;let se=0;
     if(b!==c){let s=0,s2=0;for(let k=0;k<K;k++){const x=win(b,k)-win(c,k);s+=x;s2+=x*x;}const m=s/K;se=Math.sqrt(Math.max(0,s2/K-m*m)/K);}
     if(K>=200)active=active.filter(i=>i===c||i===b||means[i]>means[b]-.12);
-    if((K>=300&&se<=.015)||K>=1200||active.every(i=>R[i].won)){
-      d.vals=means;d.best=b;d.loss=Math.max(0,(means[b]-means[c])*100);d.grade=gradeOf(d.loss);
+    // Keep playing out until the gap is clearly on one side of the grade lines (3 and 10 points),
+    // or it's measured very tightly, then grade on the cautious end of the estimate.
+    const gap=means[b]-means[c],clear=Math.abs(gap-.03)>2*se&&Math.abs(gap-.10)>2*se;
+    if((K>=300&&se<=.015&&clear)||(K>=300&&se<=.007)||K>=2400||active.every(i=>R[i].won)){
+      d.vals=means;d.best=b;d.gap=gap*100;d.se=se*100;d.loss=Math.max(0,(gap-1.64*se)*100);d.grade=gradeOf(d.loss);
       d.missedKill=d.opts[b].kill&&!d.opts[c].kill&&d.loss>=3;d.idea=d.loss>=3?missedIdea(d):'';d.done=true;return true;
     }
   }
