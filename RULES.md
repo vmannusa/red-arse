@@ -99,9 +99,11 @@ After every move the game plays the rest of the match out 300 times with medium-
 - **Danger glow:** your marbles that an opponent could hit with their next roll (1–6 holes behind, a 4 back, an inside-corner hop, coming out of base onto them, or out of the center) pulse with a red ring. In online games you only see it on your own marbles.
 - **Banners** flash over the board (everyone in an online room sees them):
   - "**X** aggravated **Y**" when someone gets sent home.
+  - "**Nice One**" whenever someone rolls a 1.
+  - "**COCKED**" once or twice a game, right after a roll picked at random.
   - "**Back it up Terry**" when someone moves backward on a 4.
-  - "**X** is rolling crazy" when someone earns a 3rd re-roll in one turn (6s, kills and outside corners all count).
-  - "**X** had Phil luck" after 3 rolls in a row with no move at all (and again at 6, 9…).
+  - "**X** is rolling crazy" when someone earns a 3rd re-roll in one turn, and again on every re-roll after that in the same turn (6s, kills and outside corners all count).
+  - "**X** had Phil luck" or "**X** is sitting at home on the couch" (picked at random each time) on the 3rd roll in a row with no move at all, and again on every roll after that until they make a move.
 - **Stuck in base:** rolls made with nothing on the board that weren't a 1 or 6, and the **longest wait** to get out (also the "Most patient" award).
 - **Rivalries:** who aggravated whom and how often, with grudge matches when it went both ways (Stats window and the winner screen).
 - **Rematch:** same players, colors and seats; the roll for first decides who starts. Online, the host starts it and anyone else can ask for one (it posts "Rematch?" in the chat).
@@ -113,7 +115,7 @@ After every move the game plays the rest of the match out 300 times with medium-
   - **Cougar Red:** white board with scarlet lettering and trim, white-ringed bases, paw prints, HOUSTON along the bottom, a GO COOGS pennant and a football.
   - **Christmas:** evergreen board with a candy-cane rim, string lights, snow along the top, a Christmas tree for each base, holly, snowflakes in the logo, and a little tree and snowflakes around the board.
   - Each theme has its own **sounds** for the dice, moves, kills, getting home, coming out and winning: bones and a ghostly wail for Halloween; drumline, whistles, crowd and a charge for Cougar Red; sleigh bells, chimes and Jingle Bells for Christmas.
-- **Marbles:** each player picks their own next to their color: Glass, Golf, Basketball, Tennis or Baseball (online, everyone picks their own and the host picks for bots). Every style is drawn in the player's color.
+- **Marbles:** Glass, Golf, Basketball, Tennis, Baseball, Pumpkin or Ornament, drawn in the player's color. Picking a theme sets everyone to its marble (Halloween: pumpkins, Cougar Red: basketballs, Christmas: ornaments, Classic: glass); after that each player can change their own next to their color (online, everyone picks their own and the host picks for bots). The turn panel, player list and review show each player's marble.
 
 ## On your phone
 - **Add to Home Screen** (setup screen, next to How to play) puts Red Arse on your home screen with its own icon, and it opens full screen like an app. On Android and desktop Chrome it installs straight from the button; on iPhone it shows the steps (Share, then Add to Home Screen), since iPhones only allow that from the Share menu.
