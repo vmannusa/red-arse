@@ -108,6 +108,21 @@ After every move the game plays the rest of the match out 300 times with medium-
 - **Rivalries:** who aggravated whom and how often, with grudge matches when it went both ways (Stats window and the winner screen).
 - **Rematch:** same players, colors and seats; the roll for first decides who starts. Online, the host starts it and anyone else can ask for one (it posts "Rematch?" in the chat).
 
+## Partners mode
+- Choose **Game mode: Partners** under Game settings (or in an online room, the host picks it). It needs 4 or 6 players.
+- Partners sit **opposite** each other: seats 1 & 3 vs 2 & 4 on the 4-player board; 1 & 4, 2 & 5 and 3 & 6 on the 6-player board. Team tags on the player list show who's with whom.
+- A team wins together when **both** homes are full (all 8 marbles). The winner screen celebrates both partners.
+- Once all 4 of your marbles are locked in home, your rolls move your **partner's** marbles.
+- Even before that, any roll that gives your own marbles **no legal move** moves your partner's marbles instead, if they have one. Their marbles light up for you to pick, and a single forced move still auto-plays.
+- Re-rolls you earn (6s, kills, outside corners) are still yours: you claim them and roll again.
+- Landing on your partner still sends them home. Bots only do it when it's their only move.
+- Chance-to-win pills and the move review count your **team's** chance.
+
+## Reactions
+- Under the die are 4 quick reactions: 😂 Laughing, 😬 Oof, 😡 Mad and 🙄 Eye roll. Tap one and it floats up from your base on the board with your name, with a little pop sound.
+- Online, everyone in the room sees it come from your seat. On one device, it comes from whoever's turn it is (or the first human player during a bot's turn).
+- Each player can send one every 2 seconds.
+
 ## Setup screen
 - **Play online:** type your name once, then either **Create room** (host a game and share the link or code) or enter a code and **Join**.
 - **Start game** is at the top of the Players list as well as at the bottom of the page.
@@ -124,7 +139,7 @@ After every move the game plays the rest of the match out 300 times with medium-
   - **Cougar Red:** white board with scarlet lettering and trim, white-ringed bases, paw prints, HOUSTON along the bottom, a GO COOGS pennant and a football.
   - **Christmas:** evergreen board with a candy-cane rim, string lights, snow along the top, a Christmas tree for each base, holly, snowflakes in the logo, and a little tree and snowflakes around the board.
   - Each theme has its own **sounds** for the dice, moves, kills, getting home, coming out and winning: bones and a ghostly wail for Halloween; drumline, whistles, crowd and a charge for Cougar Red; sleigh bells, chimes and Jingle Bells for Christmas.
-- **Marbles:** Glass, Golf, Basketball, Tennis, Baseball, Pumpkin or Ornament, drawn in the player's color. Picking a theme sets everyone to its marble (Halloween: pumpkins, Cougar Red: basketballs, Christmas: ornaments, Classic: glass); after that each player can change their own next to their color (online, everyone picks their own and the host picks for bots). The turn panel, player list and review show each player's marble.
+- **Marbles:** Glass, Golf, Basketball, Tennis, Baseball, Pumpkin, Ornament or Cougar paw (the hand sign: index, middle and pinky up, thumb and ring finger touching), drawn in the player's color. Picking a theme sets everyone to its marble (Halloween: pumpkins, Cougar Red: Cougar paws, Christmas: ornaments, Classic: glass); after that each player can change their own next to their color (online, everyone picks their own and the host picks for bots). The turn panel, player list and review show each player's marble.
 
 ## On your phone
 - **Add to Home Screen** (setup screen, next to How to play) puts Red Arse on your home screen with its own icon, and it opens full screen like an app. On Android and desktop Chrome it installs straight from the button; on iPhone it shows the steps (Share, then Add to Home Screen), since iPhones only allow that from the Share menu.
