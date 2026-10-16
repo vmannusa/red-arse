@@ -93,6 +93,13 @@ After every move the game plays the rest of the match out 300 times with medium-
 - Bots aren't graded. Moves auto-played for an away player online aren't graded either. In online games every device grades the same moves the same way.
 - The review runs in the background, so it never slows the game down.
 
+## Helpers on the board and in the stats
+- **Danger glow:** your marbles that an opponent could hit with their next roll (1–6 holes behind, a 4 back, an inside-corner hop, coming out of base onto them, or out of the center) pulse with a red ring. In online games you only see it on your own marbles.
+- **Kill banner:** "X aggravated Y" flashes over the board when someone gets sent home.
+- **Stuck in base:** rolls made with nothing on the board that weren't a 1 or 6, and the **longest wait** to get out (also the "Most patient" award).
+- **Rivalries:** who aggravated whom and how often, with grudge matches when it went both ways (Stats window and the winner screen).
+- **Rematch:** same players, colors and seats; the roll for first decides who starts. Online, the host starts it and anyone else can ask for one (it posts "Rematch?" in the chat).
+
 ## Online rooms
 - **Game feed and chat:** moves, kills, rolls for first, and players going away or coming back all show in the game feed. In online games the feed also has a chat bar and quick-chat buttons (COCKED, Nice roll, GG, plus "Back it up Terry" after a 4 and "Nice 1" after a 1). Messages are up to 200 characters, a few per few seconds, and stay with the room.
 - Create a room for a 4-letter code and invite link; the host picks the board, adds bots and sets the turn timer.
