@@ -125,6 +125,18 @@ button,input,select{font:inherit;color:inherit}
 .who-name{font-family:var(--font-display);font-weight:800;font-size:20px;line-height:1.1}
 .who-sub{color:var(--muted);font-size:13px}
 .dice-row{display:flex;align-items:center;gap:16px;margin-top:16px}
+/* quick reactions */
+.emote-bar{display:flex;gap:6px;margin-top:10px;align-items:center}
+.emote-bar .eb-who{font-size:11px;color:var(--muted);margin-right:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px}
+.emote-bar button{position:relative;height:34px;min-width:44px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:18px;line-height:1;cursor:pointer;padding:0 10px;transition:transform .12s,opacity .2s}
+.emote-bar button:hover:not(:disabled){transform:translateY(-1px);background:var(--surface-2)}
+.emote-bar button:disabled{opacity:.4;cursor:default}
+.emote-bar .oof,.emote-pop .oof{position:absolute;right:-4px;top:-6px;font:800 8px/1 var(--font-display);letter-spacing:.04em;background:#E5262E;color:#fff;border-radius:6px;padding:2px 3px}
+.emote-pop{position:absolute;z-index:4;pointer-events:none;transform:translate(-50%,-50%);font-size:clamp(26px,5.5vmin,44px);line-height:1;
+  filter:drop-shadow(0 4px 6px rgba(0,0,0,.35));animation:emoteRise 1.7s ease-out forwards}
+.emote-pop .who{display:block;font:700 10px/1.2 var(--font-body);text-align:center;color:#fff;background:rgba(0,0,0,.55);border-radius:6px;padding:1px 5px;margin-top:2px;white-space:nowrap}
+@keyframes emoteRise{0%{opacity:0;transform:translate(-50%,-30%) scale(.5)}15%{opacity:1;transform:translate(-50%,-60%) scale(1.15)}30%{transform:translate(-50%,-75%) scale(1)}100%{opacity:0;transform:translate(-50%,-210%) scale(.95)}}
+@media (prefers-reduced-motion: reduce){.emote-pop{animation:emoteFade 1.4s ease-out forwards}@keyframes emoteFade{0%,70%{opacity:1}100%{opacity:0}}}
 .roll-btn{flex:1;min-height:64px;border:none;border-radius:12px;font-family:var(--font-display);font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
   background:var(--accent);color:var(--accent-fg);box-shadow:0 3px 0 rgba(0,0,0,.25);transition:transform .08s,filter .15s}
 .roll-btn:hover:not(:disabled){filter:brightness(1.06)}
@@ -222,6 +234,11 @@ button,input,select{font:inherit;color:inherit}
 .btn.xs{height:30px;padding:0 12px;font-size:12px;letter-spacing:0;text-transform:none;border-radius:8px}
 .btn.ghost{background:transparent}
 .sec-actions{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.partners-rules{border:1px solid var(--accent);border-radius:10px;padding:10px 12px;margin:0 0 12px;font-size:13.5px;line-height:1.45;background:var(--surface-2)}
+.partners-rules b:first-child{display:block;font-family:var(--font-display);text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:var(--accent);margin-bottom:2px}
+.team-tag{position:absolute;top:-9px;right:14px;font:700 10.5px/1 var(--font-body);padding:3px 8px;border-radius:999px;color:#fff;letter-spacing:.02em;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.slot{position:relative}
+.mode-note.err{color:var(--danger);font-weight:600}
 .rule-count{font-weight:600;letter-spacing:.06em;opacity:.85}
 .rule-cell{display:flex;flex-direction:column;gap:2px;min-width:0}
 .rdiag-d{margin:0 0 4px 28px;font-size:12px;color:var(--muted)}
@@ -465,7 +482,9 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
         </div>
         <div class="set-row">
           <label class="fld inline"><span>Board theme</span><select id="setTheme"></select></label>
+          <label class="fld inline"><span>Game mode</span><select id="setMode"><option value="ffa">Free-for-All</option><option value="partners">Partners</option></select></label>
         </div>
+        <p class="fine mode-note" id="modeNote" hidden></p>
         <p class="fine">When a human player's timer runs out, the game rolls and moves for them. Bot speed can also be changed during a game.</p>
       </section>
       <section class="card">
@@ -478,6 +497,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
       </section>
       <section class="card">
         <h2 class="sec-title"><span>Rules <span id="ruleCount" class="rule-count"></span></span><button class="btn xs ghost" id="rulesToggle" type="button" aria-controls="ruleToggles" aria-expanded="true">Hide</button></h2>
+        <div class="partners-rules" id="partnersRules" hidden><b>Partners mode</b> Partners sit opposite each other and win together when <b>both</b> homes are full (all 8 marbles). Once your 4 marbles are locked in home, your rolls move your partner's marbles. Before that, any roll that gives your own marbles <b>no legal move</b> moves your partner's marbles instead, if they have one. Re-rolls you earn are still yours to roll. Landing on your partner still sends them home, so watch out.</div>
         <div class="rules-grid" id="ruleToggles"></div>
       </section>
       <div class="start-row">
@@ -506,6 +526,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
           <label class="fld inline"><span>Turn timer</span>
             <select id="roomTimer"><option value="20">20 seconds</option><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option></select></label>
           <label class="fld inline"><span>Board theme</span><select id="roomTheme"></select></label>
+          <label class="fld inline"><span>Game mode</span><select id="roomMode"><option value="ffa">Free-for-All</option><option value="partners">Partners</option></select></label>
         </div>
         <p class="fine">If the timer runs out, that turn is auto-played. Miss two turns in a row and you're auto-played until you tap "I'm back". The game uses the host's rule settings.</p>
       </section>
@@ -539,6 +560,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
           <div class="die-scene" aria-hidden="true"><div class="die" id="die"></div></div>
           <button class="roll-btn" id="rollBtn" type="button">Roll<small>or press Space</small></button>
         </div>
+        <div class="emote-bar" id="emoteBar" role="group" aria-label="Reactions" hidden></div>
         <p class="status" id="status"></p>
         <div class="timer" id="turnTimer" aria-live="off"></div>
         <button class="btn" id="backBtn" type="button" hidden>I'm back</button>
@@ -617,6 +639,17 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
           <li><b>Center hole:</b> a roll that passes over an inside corner with one step left can finish in the center. A 6 from your start hole goes straight in, and so does a 1 from an inside corner. Leave the center on a <b>1</b> or a <b>6</b>, to any inside corner.</li>
         </ul>
         <div class="rdiag-slot" data-diag="stars"></div><div class="rdiag-slot" data-diag="center"></div>
+      </section>
+      <section>
+        <h3>Partners mode</h3>
+        <ul>
+          <li>Pick <b>Partners</b> under Game mode (4 or 6 players). Partners sit <b>opposite</b> each other: seats 1 &amp; 3 vs 2 &amp; 4 on the 4-player board; 1 &amp; 4, 2 &amp; 5, 3 &amp; 6 on the 6-player board.</li>
+          <li>A team wins together when <b>both</b> homes are full (all 8 marbles).</li>
+          <li>Once all 4 of your marbles are locked in home, your rolls move your <b>partner's</b> marbles.</li>
+          <li>Even before that, any roll that gives your own marbles <b>no legal move</b> moves your partner's marbles instead, if they have one. Forced moves still auto-play.</li>
+          <li>Re-rolls you earn (6s, kills, outside corners) are still yours to claim and roll.</li>
+          <li>Landing on your partner sends them home, so bots only do it when they have no other move.</li>
+        </ul>
       </section>
       <section>
         <h3>Backward 4</h3>
@@ -887,13 +920,27 @@ function earnsCorner(S,pi,mv){
 }
 const homeCount=p=>p.marbles.filter(m=>inHome(m.d)).length;
 const hasWon=p=>homeCount(p)===4;
+// ---- Partners mode: seats pair up across the table (seat i with seat i + n/2, in turn order).
+const isTeams=S=>!!(S&&S.rules&&S.rules.partners)&&S.players.length>=4&&S.players.length%2===0;
+function partnerOf(S,pi){return isTeams(S)?(pi+S.players.length/2)%S.players.length:-1;}
+function sameTeam(S,a,b){return a===b||(isTeams(S)&&partnerOf(S,a)===b);}
+// a team wins when both partners have all 4 home; in free-for-all it's just you
+function teamWon(S,pi){if(!hasWon(S.players[pi]))return false;const q=partnerOf(S,pi);return q<0||hasWon(S.players[q]);}
+const ownerOf=(pi,mv)=>mv&&typeof mv.owner==='number'?mv.owner:pi;
+// The moves a roll gives the player whose turn it is. Partners: once your 4 are home, or whenever the roll
+// gives your own marbles nothing to do, it moves your partner's marbles instead (mv.owner = partner).
+function turnMoves(S,pi,n){
+  const q=partnerOf(S,pi);if(q<0)return legalMoves(S,pi,n);
+  const own=hasWon(S.players[pi])?[]:legalMoves(S,pi,n);if(own.length)return own;
+  return legalMoves(S,q,n).map(m=>Object.assign(m,{owner:q}));
+}
 
 // ================= BOTS =================
 function danger(S,pi,d){
   if(!onTrack(d))return 0;
   const g=gOf(S.players[pi].s,d);let risk=0;
   S.players.forEach((p,qi)=>{
-    if(qi===pi)return;
+    if(qi===pi||sameTeam(S,pi,qi))return;
     p.marbles.forEach(m=>{
       if(onTrack(m.d)){
         const og=gOf(p.s,m.d);const behind=mod(g-og,B.L);
@@ -921,16 +968,18 @@ function threatShare(S){
 function leaderPressure(S,pi,mv,level){
   if(level==='easy')return 0;
   const th=threatShare(S),N=S.players.length,even=1/N;let s=0;
-  if(mv.victim&&mv.victim.pi!==pi){const lead=th[mv.victim.pi]-Math.max(even,th[pi]);if(lead>0)s+=lead*(level==='hard'?260:180);}
+  if(mv.victim&&!sameTeam(S,pi,mv.victim.pi)){const lead=th[mv.victim.pi]-Math.max(even,th[pi]);if(lead>0)s+=lead*(level==='hard'?260:180);}
   if(level==='hard'&&onTrack(mv.to)){
     const g=gOf(S.players[pi].s,mv.to);
-    S.players.forEach((q,qi)=>{if(qi===pi)return;const lead=th[qi]-Math.max(even,th[pi]);if(lead<=0)return;
+    S.players.forEach((q,qi)=>{if(sameTeam(S,pi,qi))return;const lead=th[qi]-Math.max(even,th[pi]);if(lead<=0)return;
       q.marbles.forEach(m=>{if(!onTrack(m.d))return;const ahead=mod(gOf(q.s,m.d)-g,B.L);if(ahead>=1&&ahead<=6)s+=lead*30;});});
   }
   return s;
 }
-function scoreMove(S,pi,mv,level){
-  let s=0;const {from,to}=mv;
+function scoreMove(S,pi0,mv,level){
+  // scored from the point of view of whoever owns the marble; hitting your own partner is a big minus
+  const pi=ownerOf(pi0,mv);
+  let s=isTeams(S)&&mv.victim&&sameTeam(S,pi,mv.victim.pi)?-400:0;const {from,to}=mv;
   s+=leaderPressure(S,pi,mv,level);
   if(mv.victim){const vm=S.players[mv.victim.pi].marbles[mv.victim.mi];s+=40+(onTrack(vm.d)?Math.max(0,vm.d)*.45*84/B.L:inHome(vm.d)?45:12);}
   if(mv.kind==='backOut')s-=35;
@@ -946,6 +995,7 @@ function scoreMove(S,pi,mv,level){
   return s;
 }
 function botChoose(S,pi,moves,level){
+  if(isTeams(S)){const ok=moves.filter(m=>!(m.victim&&sameTeam(S,ownerOf(pi,m),m.victim.pi)));if(ok.length)moves=ok;} // no friendly kills unless forced
   if(level==='easy'){const caps=moves.filter(m=>m.victim);if(caps.length&&Math.random()<.4)return caps[0];return moves[Math.floor(Math.random()*moves.length)];}
   let best=null,bs=-1e9;for(const mv of moves){const s=scoreMove(S,pi,mv,level);if(s>bs){bs=s;best=mv;}}
   return best;
@@ -956,6 +1006,8 @@ function botChoose(S,pi,moves,level){
 const STATE_KEYS=['gid','board','look','cockAt','rules','players','stats','turn','phase','roll','log','winner','again','ev','turnSecs','deadline','started','claim'];
 function cleanState(S){const o={};STATE_KEYS.forEach(k=>{o[k]=S[k]===undefined?null:S[k];});return JSON.parse(JSON.stringify(o));}
 function describePure(S,pi,mv,roll){
+  const ow=ownerOf(pi,mv);
+  if(ow!==pi){const Q=S.players[ow],t=describePure(S,ow,Object.assign({},mv,{owner:undefined}),roll);return `${S.players[pi].name} played for ${Q.name}: `+t.slice(Q.name.length+1);}
   const P=S.players[pi];let t;
   if(mv.kind==='leave')t=`${P.name} brought a marble out`;
   else if(mv.kind==='exitCenter')t=`${P.name} left the center`;
@@ -1011,7 +1063,7 @@ function reduceRoll(S0,n,o={}){
   if(o.manual){P.missed=0;P.away=false;}
   if(o.timeout){P.missed=(P.missed||0)+1;if(P.missed>=2&&!P.away){P.away=true;logPure(S,pi,`${P.name} is away, so their turns are auto-played until they tap I'm back`,'note');}}
   S.ev={t:'roll',n,pi};rollFx(S,pi,n,(k,q)=>addFx(S,k,q));
-  const moves=legalMoves(S,pi,n);
+  const moves=turnMoves(S,pi,n);
   if(!moves.length){st.passes++;S.ev.pass=true;if(noteNoMove(st))addFx(S,'phil',pi);logPure(S,pi,`${P.name} rolled ${n}, no move`);endTurnPure(S,n,false);}
   else{S.phase='move';S.roll=n;}
   return S;
@@ -1039,10 +1091,10 @@ function missClaimPure(S0){
   return S;
 }
 function reduceMove(S0,mv,o={}){
-  const S=cleanState(S0),pi=S.turn,P=S.players[pi],st=S.stats[pi],n=S.roll;
-  const corner=earnsCorner(S,pi,mv);
+  const S=cleanState(S0),pi=S.turn,P=S.players[pi],st=S.stats[pi],n=S.roll,ow=ownerOf(pi,mv);
+  const corner=earnsCorner(S,ow,mv);
   logPure(S,pi,describePure(S,pi,mv,n),mv.victim?'cap':'');
-  applyMove(S,pi,mv);
+  applyMove(S,ow,mv);
   st.dist+=mv.path.length;
   if(mv.victim){st.kills++;S.stats[mv.victim.pi].lost++;noteKill(S.stats,pi,mv.victim.pi);}
   if(mv.dir==='back')st.back++;
@@ -1051,7 +1103,7 @@ function reduceMove(S0,mv,o={}){
   if(o.manual){P.missed=0;P.away=false;}
   S.ev={t:'move',pi,mv,n,corner,auto:!o.manual};st.noMove=0;
   if(mv.dir==='back')addFx(S,'terry',pi);
-  if(hasWon(S.players[pi])){S.winner=pi;S.phase='over';}
+  if(teamWon(S,ow)){S.winner=pi;S.phase='over';}
   else endTurnPure(S,n,corner,!!mv.victim);
   return S;
 }
@@ -1063,14 +1115,15 @@ function rolloutWinner(S0,maxRolls,dice){
   const S={rules:S0.rules,players:S0.players.map(p=>({s:p.s,c:p.c,marbles:p.marbles.map(m=>({d:m.d,dx:m.dx}))}))};
   const N=S.players.length;let turn=S0.turn;
   for(let k=0;k<maxRolls;k++){
-    const n=1+Math.floor((dice||Math.random)()*6),mv=legalMoves(S,turn,n);let bonus=n===6&&S.rules.rollAgain;
+    const n=1+Math.floor((dice||Math.random)()*6),mv=turnMoves(S,turn,n);let bonus=n===6&&S.rules.rollAgain;
     if(mv.length){
       let best=mv[0];
       if(mv.length>1){let bs=-1e9;for(const m of mv){const sc=scoreMove(S,turn,m,'medium');if(sc>bs){bs=sc;best=m;}}}
-      if(earnsCorner(S,turn,best))bonus=true;
+      const ow=ownerOf(turn,best);
+      if(earnsCorner(S,ow,best))bonus=true;
       if(best.victim&&S.rules.killAgain)bonus=true;
-      applyMove(S,turn,best);
-      if(hasWon(S.players[turn]))return turn;
+      applyMove(S,ow,best);
+      if(teamWon(S,ow))return turn;
     }
     if(!bonus)turn=(turn+1)%N;
   }
@@ -1085,8 +1138,8 @@ function optionResults(S,pi,n,moves){
   const out=[],seen={},N=S.players.length;
   moves.forEach((mv,idx)=>{
     const T={rules:S.rules,players:snapPlayers(S.players)};
-    const corner=earnsCorner(T,pi,mv);applyMove(T,pi,mv);
-    const won=hasWon(T.players[pi]);
+    const ow=ownerOf(pi,mv),corner=earnsCorner(T,ow,mv);applyMove(T,ow,mv);
+    const won=teamWon(T,ow);
     T.turn=bonusRoll(S.rules,n,corner,!!mv.victim)?pi:(pi+1)%N;
     const key=T.turn+'|'+T.players.map(p=>p.marbles.map(m=>m.d).sort().join(',')).join(';');
     if(seen[key]!==undefined){out[seen[key]].idxs.push(idx);return;}
@@ -1145,9 +1198,9 @@ const TH={
   christmas:{fill:'#173F25',rim:'rgba(255,255,255,.8)',candy:true,hole:'rgba(255,226,170,.38)',label:'#FFF3DC',ink:'#E9C46A',deco:.86,glow:'rgba(255,210,120,.3)',
     tex:{seed:1225,base:'#1B4A2C',dark:'6,26,12',mid:'40,96,56',lite:'150,200,140',glow:'255,220,150',center:.12,edge:.38}}
 };
-const BALLS={glass:'Glass',golf:'Golf',basket:'Basketball',tennis:'Tennis',baseball:'Baseball',pumpkin:'Pumpkin',ornament:'Ornament'};
+const BALLS={glass:'Glass',golf:'Golf',basket:'Basketball',tennis:'Tennis',baseball:'Baseball',pumpkin:'Pumpkin',ornament:'Ornament',paw:'Cougar paw'};
 // picking a board theme sets everyone to its marble; players can still change their own afterwards
-const THEME_BALL={classic:'glass',halloween:'pumpkin',coogs:'basket',christmas:'ornament'};
+const THEME_BALL={classic:'glass',halloween:'pumpkin',coogs:'paw',christmas:'ornament'};
 const themeBall=t=>THEME_BALL[t]||'glass';
 function ballSelect(id,val,onch,disabled){const bs=document.createElement('select');bs.className='bl';bs.id=id;bs.setAttribute('aria-label','Marble');bs.disabled=!!disabled;
   Object.entries(BALLS).forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;o.selected=v===(val||'glass');bs.appendChild(o);});bs.onchange=()=>onch(bs.value);return bs;}
@@ -1598,6 +1651,22 @@ function renderBoardPick(){
     box.appendChild(btn);
   });
 }
+// Partners: work out who sits across from whom the same way the game does (clockwise seat order)
+const TEAM_COLS=['#B8860B','#0E7C86','#B03A8C'];
+function teamLayout(board,players){
+  const n=players.length;if(n<4||n%2)return null;const bd=makeBoard(board),secs=assignSectors(bd,players.map(p=>p.c)),s0=secs[0];
+  const order=players.map((p,i)=>i).sort((a,b)=>mod(secs[a]-s0,bd.N)-mod(secs[b]-s0,bd.N)),pos=[];order.forEach((pi,k)=>pos[pi]=k);
+  return players.map((p,i)=>{const k=pos[i],t=k%(n/2),mate=order[(k+n/2)%n];return {team:t,mate};});
+}
+function teamTag(row,lay,i,players){if(!lay)return;const t=lay[i],tg=document.createElement('span');tg.className='team-tag';tg.style.background=TEAM_COLS[t.team%3];
+  tg.textContent=`Team ${t.team+1} · with ${players[t.mate].name||COLORS[players[t.mate].c].name}`;row.appendChild(tg);}
+const partnersOK=n=>n===4||n===6;
+function renderMode(){
+  const on=!!setup.rules.partners,n=setup.players.length;$('setMode').value=on?'partners':'ffa';$('partnersRules').hidden=!on;
+  const note=$('modeNote');note.hidden=!on;note.classList.toggle('err',on&&!partnersOK(n));
+  note.textContent=!on?'':partnersOK(n)?'Partners: teammates sit across the board from each other (team tags on the players below).':`Partners needs 4 or 6 players (you have ${n}).`;
+  $('startBtn').disabled=$('startBtnTop').disabled=on&&!partnersOK(n);
+}
 function renderLobby(){
   applyThemeUI(setup.theme);renderBoardPick();
   const box=$('slots');box.innerHTML='';const al=allowedColors();
@@ -1622,6 +1691,8 @@ function renderLobby(){
     rm.addEventListener('click',()=>{setup.players.splice(i,1);saveSetup();renderLobby();});row.appendChild(rm);
     box.appendChild(row);
   });
+  if(setup.rules.partners&&partnersOK(setup.players.length)){const lay=teamLayout(setup.board,setup.players);[...box.children].forEach((row,i)=>teamTag(row,lay,i,setup.players));}
+  renderMode();
   const mx=maxPlayers();
   $('slotCount').textContent=setup.players.length+' of '+mx;
   $('addHuman').disabled=$('addBot').disabled=setup.players.length>=mx;
@@ -1656,6 +1727,8 @@ $('rulesToggle').onclick=()=>{RULES_OPEN=!RULES_OPEN;renderRulesFold();};
 $('setTimer').onchange=()=>{setup.turnSecs=+$('setTimer').value;saveSetup();};
 $('setSpeed').onchange=()=>{setBotSpeed($('setSpeed').value);};
 [['setTheme',THEMES],['roomTheme',THEMES]].forEach(([id,list])=>Object.entries(list).forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;$(id).appendChild(o);}));
+$('setMode').onchange=()=>{setup.rules.partners=$('setMode').value==='partners';saveSetup();renderLobby();};
+$('roomMode').onchange=()=>lobbyEdit(L=>{L.rules=L.rules||{};L.rules.partners=$('roomMode').value==='partners';});
 $('setTheme').onchange=()=>{setup.theme=$('setTheme').value;setup.players.forEach(p=>p.ball=themeBall(setup.theme));saveSetup();renderLobby();};
 // theme preview: the page accents and the mini boards take on the chosen theme straight away
 function applyThemeUI(t){t=THEMES[t]?t:'classic';document.documentElement.dataset.bt=t;
@@ -1696,7 +1769,7 @@ function loadRecords(){try{return JSON.parse(safeGet('aggravation-records')||'{}
 function saveRecords(winnerPi){
   const rec=loadRecords();
   G.players.forEach((P,i)=>{const k=P.name;const r=rec[k]||(rec[k]={games:0,wins:0,kills:0,sixes:0,lost:0});const st=G.stats[i];
-    r.games++;if(i===winnerPi)r.wins++;r.kills+=st.kills;r.sixes+=st.sixes;r.lost+=st.lost;r.c=P.c;});
+    r.games++;if(i===winnerPi||(isTeams(G)&&i===partnerOf(G,winnerPi)))r.wins++;r.kills+=st.kills;r.sixes+=st.sixes;r.lost+=st.lost;r.c=P.c;});
   safeSet('aggravation-records',JSON.stringify(rec));
 }
 
@@ -1708,12 +1781,13 @@ function newGameState(){
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
   applySeatColors(players);
   const r=setup.rules;
-  return {token:++tokenSeq,board:bd.kind,cockAt:pickCocked(),look:{theme:setup.theme||'classic'},rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle,claimRolls:r.claimRolls!==false},
+  return {token:++tokenSeq,board:bd.kind,cockAt:pickCocked(),look:{theme:setup.theme||'classic'},rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle,claimRolls:r.claimRolls!==false,partners:!!r.partners},
     players,stats:players.map(blankStats),turn:0,phase:'roll',roll:null,moves:[],sel:null,log:[],winner:null,again:'',msg:'',
     turnSecs:setup.turnSecs||0,deadline:0,tseq:0,started:Date.now()};
 }
 function resetHeader(){$('btnRestart').hidden=false;$('roomChip').hidden=true;$('btnLobby').querySelector('span').textContent='Players';$('turnTimer').textContent='';$('backBtn').hidden=true;}
 function startGame(){
+  if(setup.rules.partners&&!partnersOK(setup.players.length)){renderMode();$('modeNote').scrollIntoView({block:'center'});return;}
   safeSet('ra-played','1');RULES_OPEN=false;saveSetup();G=newGameState();applyThemeUI(G.look.theme);resetCoach(G.players.length);resetHeader();$('room').hidden=true;
   $('lobby').hidden=true;$('game').hidden=false;$('tools').hidden=false;$('winModal').hidden=true;
   buildBoard($('boardStatic'),'S',B);
@@ -1777,7 +1851,9 @@ async function doRoll(timedOut){
   G.roll=n;const P=cur(),pi=G.turn;
   const st=G.stats[pi];st.rolls++;st.run++;st.streak=Math.max(st.streak,st.run);if(n===6)st.sixes++;if(n===4)st.fours++;if(n===1)st.ones++;
   baseWait(G.rules,P,st,n);rollFx(G,pi,n,fxFlash);
-  const moves=legalMoves(G,pi,n);G.moves=moves;
+  const moves=turnMoves(G,pi,n);G.moves=moves;
+  const forPartner=moves.length&&ownerOf(pi,moves[0])!==pi,MP=G.players[moves.length?ownerOf(pi,moves[0]):pi];
+  const partNote=forPartner?(hasWon(P)?`Your marbles are all home, so this roll moves <b>${esc(MP.name)}</b>'s. `:`No move for your marbles, so this roll moves <b>${esc(MP.name)}</b>'s. `):'';
   if(!moves.length){st.passes++;renderStats();if(noteNoMove(st))fxFlash('phil',pi);
     setStatus(`Rolled <b>${n}</b>. No legal moves, so the turn passes.`);addLog(pi,`${P.name} rolled ${n}, no move`);
     G.phase='pass';renderPanel();await wait(Math.max(250,1150*sp));if(tok!==G?.token)return;endTurn(n);return;
@@ -1785,7 +1861,7 @@ async function doRoll(timedOut){
   G.phase='move';
   const hasF=moves.some(m=>m.dir==='fwd'),hasB=moves.some(m=>m.dir==='back');
   if(!isHuman(P)){
-    setStatus(`<b>${esc(P.name)}</b> rolled <b>${n}</b>.`);renderPanel();renderLive();
+    setStatus(`<b>${esc(P.name)}</b> rolled <b>${n}</b>.`+(forPartner?` Playing it for <b>${esc(MP.name)}</b>.`:''));renderPanel();renderLive();
     await wait((reduced?200:600)*sp);if(tok!==G?.token)return;
     G.odds=currentOdds();await localExecute(botChoose(G,pi,moves,P.type));return;
   }
@@ -1795,14 +1871,15 @@ async function doRoll(timedOut){
   }
   if(moves.length===1&&G.rules.autoSingle){
     const mv=moves[0];
-    setStatus(`Rolled <b>${n}</b>. Only one move${mv.dir==='back'?' (backward)':''}, playing it.`);renderPanel();renderLive();
+    setStatus(partNote+`Rolled <b>${n}</b>. Only one move${mv.dir==='back'?' (backward)':''}, playing it.`);renderPanel();renderLive();
     await wait(reduced?200:650);if(tok!==G?.token)return;await localExecute(mv);return;
   }
   let msg=`Rolled <b>${n}</b>. Dotted arrows show each marble's moves. Tap a marble or a landing spot.`;
   if(n===4&&hasB&&!hasF)msg=`Rolled <b>4</b>. No forward moves, so you must move a marble <b>backward</b>.`;
   else if(n===4&&hasB)msg=`Rolled <b>4</b>. Green arrows go forward, amber go back 4. Tap a marble or a landing spot.`;
+  msg=partNote+msg;
   const mis=[...new Set(moves.map(m=>m.mi))];
-  const baseMis=mis.filter(mi=>P.marbles[mi].d===null);
+  const baseMis=mis.filter(mi=>MP.marbles[mi].d===null);
   if(mis.length===1||(mis.length===baseMis.length))G.sel=mis[0];
   setStatus(msg);renderPanel();renderLive();armTimer();
 }
@@ -1841,19 +1918,20 @@ async function localExecute(mv,auto){
   G.deadline=0;G.tseq++;clearTimeout(LTIMER);
   if(isHuman(P)&&!auto)coachDecision(G,pi,G.roll,G.moves,mv);
   G.phase='anim';G.sel=null;renderPanel();renderLive();
-  const corner=earnsCorner(G,pi,mv);
-  const node=MARBLE_NODES[pi][mv.mi];node.parentNode.appendChild(node);
-  const pts=[posOf(pi,mv.mi)].concat(mv.path.map(s=>Object.assign(stepPos(s),{hop:!!s.hop})));
+  const ow=ownerOf(pi,mv),OP=G.players[ow]; // Partners: the roll may move your partner's marble
+  const corner=earnsCorner(G,ow,mv);
+  const node=MARBLE_NODES[ow][mv.mi];node.parentNode.appendChild(node);
+  const pts=[posOf(ow,mv.mi)].concat(mv.path.map(s=>Object.assign(stepPos(s),{hop:!!s.hop})));
   await animPath(node,pts,{speed:sp});if(tok!==G?.token)return;
   if(mv.victim){
     const vn=MARBLE_NODES[mv.victim.pi][mv.victim.mi],vp=posOf(mv.victim.pi,mv.victim.mi);
-    applyMove(G,pi,mv);sfx.thud();burst(vp,'#E5262E');killFlash(pi,mv.victim.pi);
+    applyMove(G,ow,mv);sfx.thud();burst(vp,'#E5262E');killFlash(pi,mv.victim.pi);
     const to=posOf(mv.victim.pi,mv.victim.mi);await animPath(vn,[vp,to],{dur:420*Math.max(.35,sp),arc:true});
-  }else applyMove(G,pi,mv);
+  }else applyMove(G,ow,mv);
   if(tok!==G?.token)return;
-  if(mv.kind==='home'){sfx.home();burst(posOf(pi,mv.mi),COLORS[P.c].hex);}
+  if(mv.kind==='home'){sfx.home();burst(posOf(ow,mv.mi),COLORS[OP.c].hex);}
   if(mv.kind==='leave')sfx.out();
-  if(corner&&!(G.rules.claimRolls&&isHuman(P))){sfx.home();burst(posOf(pi,mv.mi),COLORS[P.c].hex);}
+  if(corner&&!(G.rules.claimRolls&&isHuman(P))){sfx.home();burst(posOf(ow,mv.mi),COLORS[OP.c].hex);}
   const st=G.stats[pi];st.dist+=mv.path.length;st.noMove=0;
   if(mv.dir==='back')fxFlash('terry',pi);
   if(mv.victim){st.kills++;G.stats[mv.victim.pi].lost++;noteKill(G.stats,pi,mv.victim.pi);}
@@ -1862,7 +1940,7 @@ async function localExecute(mv,auto){
   if(corner)st.corners++;
   addLog(pi,describe(pi,mv),mv.victim?'cap':'');
   renderLive();renderPanel();
-  if(hasWon(P)){G.winner=pi;G.phase='over';G.ended=Date.now();saveRecords(pi);trackEnd();renderPanel();showWin(pi);return;}
+  if(teamWon(G,ow)){G.winner=pi;G.phase='over';G.ended=Date.now();saveRecords(pi);trackEnd();renderPanel();showWin(pi);return;}
   await wait((reduced?120:280)*sp);if(tok!==G?.token)return;
   endTurn(G.roll,corner,!!mv.victim);
 }
@@ -1909,6 +1987,21 @@ function drawBall(g,P,pi,mi,style,pf='L'){
     el('path',{d:'M-.2 -.06 L-.12 -.18 L-.05 -.06 Z M.05 -.06 L.12 -.18 L.2 -.06 Z',fill:face},g);
     el('path',{d:'M-.24 .08 Q0 .3 .24 .08 L.16 .12 L.12 .06 L.06 .14 L0 .08 L-.06 .14 L-.12 .06 L-.16 .12 Z',fill:face},g);
     el('ellipse',{cx:-.16,cy:-.2,rx:.08,ry:.04,fill:'#fff',opacity:.35,transform:'rotate(-30 -.16 -.2)'},g);
+    return;
+  }
+  if(style==='paw'){ // Cougar paw hand sign: index, middle and pinky up; thumb and ring finger touching
+    el('ellipse',{cx:.1,cy:.17,rx:.5,ry:.42,fill:`url(#${pf}msh)`},g);
+    el('circle',{r:.42,fill:`url(#${pf}m${P.c})`},g);
+    el('circle',{r:.415,fill:'none',stroke:'rgba(0,0,0,.45)','stroke-width':.022},g);
+    const ink=P.c===7?'#C8102E':'#FFFFFF',edge='rgba(0,0,0,.55)',hand=el('g',{transform:'translate(.0 .04) scale(1.08)'},g);
+    const ln=(d,w,c)=>el('path',{d,fill:'none',stroke:c,'stroke-width':w,'stroke-linecap':'round','stroke-linejoin':'round'},hand);
+    const up=['M-.145 .04 L-.155 -.27','M-.05 .03 L-.05 -.31','M.16 .05 L.185 -.2']; // index, middle, pinky stand up
+    const palm='M-.19 .05 L.2 .05 L.17 .2 Q0 .27 -.17 .2 Z';
+    el('path',{d:palm,fill:'none',stroke:edge,'stroke-width':.05,'stroke-linejoin':'round'},hand);up.forEach(d=>ln(d,.11,edge));
+    el('path',{d:palm,fill:ink},hand);up.forEach(d=>ln(d,.075,ink));
+    const thumb='M-.21 .19 Q-.12 .02 .02 -.03',ring='M.075 .05 Q.1 -.08 .03 -.05'; // thumb and ring finger meet in a loop
+    ln(thumb,.105,edge);ln(thumb,.07,ink);ln(ring,.1,edge);ln(ring,.066,ink);
+    el('ellipse',{cx:-.16,cy:-.22,rx:.1,ry:.05,fill:'#fff',opacity:.35,transform:'rotate(-30 -.16 -.22)'},g);
     return;
   }
   if(style==='ornament'){
@@ -1973,6 +2066,7 @@ function buildLive(){
     return g;
   }));
 }
+const moveOwner=()=>G&&G.moves&&G.moves.length?ownerOf(G.turn,G.moves[0]):(G?G.turn:0);
 function renderLive(){
   if(!G)return;
   const svg=$('boardLive');
@@ -1982,12 +2076,13 @@ function renderLive(){
   const bc=B.BASECENTER[P.s];
   el('circle',{class:'glow',cx:f(bc.x),cy:f(bc.y),r:1.46,fill:'none',stroke:COLORS[P.c].hex,'stroke-width':.14},LAYERS.glow);
   el('circle',{class:'glow',cx:f(bc.x),cy:f(bc.y),r:1.46,fill:'none',stroke:'#FFFFFF','stroke-width':.05},LAYERS.glow);
+  const mo=moveOwner(),MP=G.players[mo]; // whose marbles this roll moves (your partner's in Partners mode, sometimes)
   const movable=new Set(human?G.moves.map(m=>m.mi):[]);
   const leaveMove=human&&G.moves.find(m=>m.kind==='leave');
   G.players.forEach((Q,qi)=>Q.marbles.forEach((m,mi)=>{
     const node=MARBLE_NODES[qi][mi],p=posOf(qi,mi);
     if(G.phase!=='anim')node.setAttribute('transform',`translate(${f(p.x)} ${f(p.y)})`);
-    const can=qi===pi&&(movable.has(mi)||(leaveMove&&m.d===null));
+    const can=qi===mo&&(movable.has(mi)||(leaveMove&&m.d===null));
     node.classList.toggle('can',!!can);
     const pulse=node.querySelector('.pulse'),selr=node.querySelector('.selring'),dr=node.querySelector('.dring');
     // danger glow: your marbles an opponent could hit with their next roll (1-6 behind, a 4 back, a hop, coming out of base)
@@ -1995,20 +2090,20 @@ function renderLive(){
     if(dr)dr.setAttribute('visibility',mine&&G.phase!=='review'&&G.winner===null&&onTrack(m.d)&&danger(G,qi,m.d)>0?'visible':'hidden');
     pulse.setAttribute('visibility',can&&G.sel===null?'visible':'hidden');
     pulse.setAttribute('stroke',Q.c===3?'#FFFFFF':COLORS[Q.c].light);
-    const isSel=qi===pi&&human&&(G.sel===mi||(G.sel!==null&&m.d===null&&P.marbles[G.sel]?.d===null));
+    const isSel=qi===mo&&human&&(G.sel===mi||(G.sel!==null&&m.d===null&&MP.marbles[G.sel]?.d===null));
     selr.setAttribute('opacity',isSel?1:0);
   }));
   // Move previews: a dotted path with an arrow from each playable marble to where it would land.
   // With nothing selected, every option shows faintly (hover a marble to single it out) and an
   // unambiguous landing spot can be tapped directly. With a marble selected, only its paths show.
   if(human&&(G.moves.length>1||G.sel!==null)){
-    const selBase=G.sel!==null&&P.marbles[G.sel].d===null;
-    const count={};G.moves.forEach(mv=>{const d=destPos(pi,mv),k=f(d.x)+','+f(d.y);count[k]=(count[k]||0)+1;});
+    const selBase=G.sel!==null&&MP.marbles[G.sel].d===null;
+    const count={};G.moves.forEach(mv=>{const d=destPos(mo,mv),k=f(d.x)+','+f(d.y);count[k]=(count[k]||0)+1;});
     G.moves.forEach((mv,idx)=>{
       const mine=G.sel!==null&&(mv.mi===G.sel||(selBase&&mv.kind==='leave'));
       if(G.sel!==null&&!mine)return;
       const col=mv.victim?'#E5262E':mv.dir==='back'?'#F0A020':'#3FB37A';
-      const pts=[posOf(pi,mv.mi)].concat(mv.path.map(stepPos));
+      const pts=[posOf(mo,mv.mi)].concat(mv.path.map(stepPos));
       const end=pts[pts.length-1],prev=pts[pts.length-2]||end,len=Math.hypot(end.x-prev.x,end.y-prev.y)||1,cut=G.sel===null?.5:.62;
       const tip={x:end.x-(end.x-prev.x)/len*cut,y:end.y-(end.y-prev.y)/len*cut};
       const line=pts.slice(0,-1).concat([tip]).map(p=>f(p.x)+','+f(p.y)).join(' ');
@@ -2023,10 +2118,10 @@ function renderLive(){
     });
   }
   if(human&&G.sel!==null){
-    const selIsBase=P.marbles[G.sel].d===null;
+    const selIsBase=MP.marbles[G.sel].d===null;
     G.moves.forEach((mv,idx)=>{
       if(!(mv.mi===G.sel||(selIsBase&&mv.kind==='leave')))return;
-      const d=destPos(pi,mv),g=el('g',{class:'target','data-move':idx,transform:`translate(${f(d.x)} ${f(d.y)})`},LAYERS.targets);
+      const d=destPos(mo,mv),g=el('g',{class:'target','data-move':idx,transform:`translate(${f(d.x)} ${f(d.y)})`},LAYERS.targets);
       const col=mv.victim?'#E5262E':mv.dir==='back'?'#F0A020':'#3FB37A';
       el('circle',{r:.6,fill:'rgba(255,255,255,.18)'},g);
       el('circle',{class:'ring',r:.55,fill:'none',stroke:col,'stroke-width':.16},g);
@@ -2087,8 +2182,8 @@ $('boardLive').addEventListener('click',e=>{
   const t=e.target.closest('[data-move]');
   if(t){execute(G.moves[+t.getAttribute('data-move')]);return;}
   const mn=e.target.closest('.marble');
-  if(mn&&+mn.getAttribute('data-pi')===G.turn&&mn.classList.contains('can')){
-    let mi=+mn.getAttribute('data-mi');const P=cur();
+  if(mn&&+mn.getAttribute('data-pi')===moveOwner()&&mn.classList.contains('can')){
+    let mi=+mn.getAttribute('data-mi');const P=G.players[moveOwner()];
     let opts=G.moves.filter(m=>m.mi===mi);
     if(P.marbles[mi].d===null){opts=G.moves.filter(m=>m.kind==='leave');if(opts.length)mi=opts[0].mi;}
     if(opts.length===1&&G.sel!==mi){execute(opts[0]);return;}
@@ -2102,6 +2197,7 @@ $('boardLive').addEventListener('click',e=>{
 
 // ================= PANEL =================
 function renderPanel(){
+  renderEmoteBar();
   if(!G)return;const P=cur(),C=COLORS[P.c];
   paintBall($('whoChip'),P.c,P.ball);
   // the die takes the colour of whoever is rolling
@@ -2225,7 +2321,9 @@ function runOdds(tok,key){
     const t0=performance.now();
     while(done<total&&performance.now()-t0<12){const w=rolloutWinner(snap,4000);if(w>=0)wins[w]++;done++;}
     if(done<total){setTimeout(step,0);return;}
-    const sum=wins.reduce((a,b)=>a+b,0)||1;ODDS.pct=wins.map(w=>Math.round(100*w/sum));ODDS.shown=key;oddsHistory(ODDS.pct);renderOdds();
+    const sum=wins.reduce((a,b)=>a+b,0)||1;
+    const tw=isTeams(G)?wins.map((w,i)=>w+wins[partnerOf(G,i)]):wins; // Partners: each pill shows the team's chance
+    ODDS.pct=tw.map(w=>Math.round(100*w/sum));ODDS.shown=key;oddsHistory(ODDS.pct);renderOdds();
   };
   step();
 }
@@ -2264,11 +2362,11 @@ function coachDecision(S,pi,n,moves,chosen){
   const ci=moves.findIndex(m=>sameMove(m,chosen));if(ci<0)return;
   // name the destination whenever two options would otherwise read the same, and for hops/center exits
   const txt=opts.map(o=>moveText(S,pi,moves[o.idxs[0]],n)),dup=t=>txt.filter(x=>x===t).length>1;
-  opts.forEach((o,k)=>{const mv=moves[o.idxs[0]],sp=spotName(S,pi,mv);
+  opts.forEach((o,k)=>{const mv=moves[o.idxs[0]],sp=spotName(S,ownerOf(pi,mv),mv);
     if(sp&&(dup(txt[k])||['exitCenter','stars','backStars'].includes(mv.kind)))o.label=txt[k].replace(/( and aggravated .*)?$/,m=>` to ${sp}${m}`);});
   const d={pi,n,turn:COACH.turns[pi]||1,board:B.kind,rules:S.rules,players:snapPlayers(S.players),
     opts:opts.map(o=>{const mv=moves[o.idxs[0]];return {S:o.S,won:o.won,idxs:o.idxs,mv,kill:o.idxs.some(i=>moves[i].victim),text:o.label||moveText(S,pi,mv,n),
-      corner:earnsCorner(S,pi,mv),danger:onTrack(mv.to)?danger(o.S,pi,mv.to):0,
+      corner:earnsCorner(S,ownerOf(pi,mv),mv),danger:onTrack(mv.to)?danger(o.S,ownerOf(pi,mv),mv.to):0,
       startBlocked:o.S.players[pi].marbles.some(m=>m.d===0)&&o.S.players[pi].marbles.some(m=>m.d===null),
       locks:o.S.players[pi].marbles.filter((m,mi)=>marbleLocked(o.S,pi,mi)).length};}),
     startWas:S.players[pi].marbles.some(m=>m.d===0),
@@ -2329,7 +2427,8 @@ async function evalDecision(d,gen){
     const batch=active.filter(i=>!R[i].won).map(i=>runBatch({board:d.board,S:{rules:clean,turn:d.opts[i].S.turn,players:d.opts[i].S.players},from:K,count:100,seed:d.seed}).then(w=>{R[i].w.push(...w);}));
     await Promise.all(batch);if(!COACH||COACH.gen!==gen)return false;
     K+=100;
-    const win=(i,k)=>R[i].won?1:(R[i].w[k]===d.pi?1:0);
+    const tm=d.rules&&d.rules.partners&&d.players.length>=4&&d.players.length%2===0?(d.pi+d.players.length/2)%d.players.length:-1; // Partners: your team's chance
+    const win=(i,k)=>R[i].won?1:(R[i].w[k]===d.pi||R[i].w[k]===tm?1:0);
     const mean=i=>{let s=0;for(let k=0;k<K;k++)s+=win(i,k);return s/K;};
     const means=d.opts.map((_,i)=>active.includes(i)?mean(i):-1);
     let b=active[0];active.forEach(i=>{if(means[i]>means[b])b=i;});
@@ -2538,6 +2637,55 @@ async function sendChat(text){
   try{await ON.net.push(`rooms/${ON.code}/chat`,{uid:ON.net.uid,name:String(name).slice(0,24),c,text,t:ON.net.now()});return true;}
   catch(e){console.warn(e);setStatusFlash('Message not sent. Check your connection.');return false;}
 }
+// ---- quick reactions: 4 emotes that float up from the sender's base, synced in online rooms, 2-second cooldown per player
+const EMOTES=[{id:'laugh',e:'😂',label:'Laughing'},{id:'oof',e:'😬',label:'Oof',badge:'OOF'},{id:'mad',e:'😡',label:'Mad'},{id:'roll',e:'🙄',label:'Eye roll'}];
+const EMOTE_COOL=2000;
+const EMO={last:{},seen:new Set(),primed:false,timer:null};
+function resetEmotes(){EMO.last={};EMO.seen=new Set();EMO.primed=false;}
+// whose reaction this device sends: online, your own seat; on one device, whoever's turn it is if human, else the first human
+function emoteSeat(){
+  if(!G)return -1;
+  if(G.online){if(!ON.net)return -1;return G.players.findIndex(p=>p.type==='human'&&p.uid===ON.net.uid);}
+  const P=G.players[G.turn];if(P&&isHuman(P))return G.turn;return G.players.findIndex(isHuman);
+}
+function renderEmoteBar(){
+  const bar=$('emoteBar');if(!bar)return;const pi=emoteSeat();bar.hidden=pi<0;
+  if(pi<0)return;
+  if(!bar.childElementCount){
+    EMOTES.forEach(x=>{const b=document.createElement('button');b.type='button';b.dataset.emote=x.id;b.title=x.label;b.setAttribute('aria-label',x.label);
+      b.innerHTML=x.e+(x.badge?`<span class="oof">${x.badge}</span>`:'');b.onclick=()=>sendEmote(x.id);bar.appendChild(b);});
+  }
+  const left=EMOTE_COOL-(Date.now()-(EMO.last[pi]||0));
+  bar.querySelectorAll('button').forEach(b=>b.disabled=left>0);
+  clearTimeout(EMO.timer);if(left>0)EMO.timer=setTimeout(renderEmoteBar,left+30);
+}
+function emotePop(pi,id){
+  const x=EMOTES.find(e=>e.id===id),wrap=$('boardWrap');if(!x||!G||!G.players[pi]||!wrap||!B)return;
+  const P=G.players[pi],bp=B.BASEPOS[P.s],cx=bp.reduce((t,p)=>t+p.x,0)/bp.length,cy=bp.reduce((t,p)=>t+p.y,0)/bp.length,v=B.vb;
+  const d=document.createElement('div');d.className='emote-pop';d.style.left=(100*(cx+v)/(2*v)).toFixed(2)+'%';d.style.top=(100*(cy+v)/(2*v)).toFixed(2)+'%';
+  d.innerHTML=`<span style="position:relative;display:inline-block">${x.e}${x.badge?`<span class="oof">${x.badge}</span>`:''}</span><span class="who">${esc(P.name)}</span>`;
+  wrap.appendChild(d);setTimeout(()=>d.remove(),1800);
+  tone(520,.06,'sine',.07,0,900);tone(1320,.08,'sine',.03,.05);
+}
+async function sendEmote(id){
+  const pi=emoteSeat(),now=Date.now();if(pi<0||!EMOTES.some(e=>e.id===id))return;
+  if(now-(EMO.last[pi]||0)<EMOTE_COOL)return;
+  EMO.last[pi]=now;emotePop(pi,id);renderEmoteBar();
+  if(G.online&&ON.net&&ON.code){
+    try{await ON.net.push(`rooms/${ON.code}/emotes`,{type:'emote',seatIndex:pi,emoteId:id,uid:ON.net.uid,gid:G.gid||null,t:ON.net.now()});}catch(e){console.warn(e);}
+  }
+}
+// online: new reactions from other players pop up from their seat; older ones (already in the room when you joined) are skipped
+function emoteIncoming(v){
+  const list=Object.entries(v||{}).map(([k,m])=>Object.assign({key:k},m)).filter(m=>m&&m.type==='emote').sort((a,b)=>(a.t||0)-(b.t||0));
+  const first=!EMO.primed;EMO.primed=true;
+  list.forEach(m=>{if(EMO.seen.has(m.key))return;EMO.seen.add(m.key);if(first||!G||!G.online)return;
+    if(ON.net&&m.uid===ON.net.uid)return; // already shown when sent
+    const pi=m.seatIndex,P=G.players[pi];if(!P||P.uid!==m.uid||(m.gid&&G.gid&&m.gid!==G.gid))return;
+    if(!EMOTES.some(e=>e.id===m.emoteId))return;
+    const now=Date.now();if(now-(EMO.last[pi]||0)<EMOTE_COOL-250)return; // respect the cooldown on this side too
+    EMO.last[pi]=now;emotePop(pi,m.emoteId);});
+}
 function setStatusFlash(t){const el=$('turnTimer');if(!el)return;el.textContent=t;el.className='timer warn';}
 // quick-chat buttons; a few only show up after the matching roll
 function renderPresets(){
@@ -2593,18 +2741,19 @@ $('btnLobby').onclick=()=>{
 
 // ================= WIN =================
 function showWin(pi){
-  const P=G.players[pi];sfx.win();
-  $('winTitle').textContent=isHuman(P)?'You win!':'Winner';
-  if(isHuman(P)&&G.players.filter(isHuman).length>1)$('winTitle').textContent='Winner';
-  if(G.online)$('winTitle').textContent=P.type==='human'&&P.uid===ON.net.uid?'You win!':'Winner';
+  const P=G.players[pi];sfx.win();const mate=isTeams(G)?partnerOf(G,pi):-1,team=mate>=0?[pi,mate]:[pi];
+  const meIn=G.online?team.some(i=>G.players[i].type==='human'&&G.players[i].uid===ON.net.uid):team.some(i=>isHuman(G.players[i]));
+  $('winTitle').textContent=mate>=0?(meIn&&(G.online||G.players.filter(isHuman).length===1)?'Your team wins!':'Winning partners'):(isHuman(P)?'You win!':'Winner');
+  if(mate<0&&isHuman(P)&&G.players.filter(isHuman).length>1)$('winTitle').textContent='Winner';
+  if(mate<0&&G.online)$('winTitle').textContent=P.type==='human'&&P.uid===ON.net.uid?'You win!':'Winner';
   const wa=$('winAgain'),wl=$('winLobby');
   if(G.online){wa.textContent=ON.isHost?'Rematch':'Ask for a rematch';wa.disabled=false;wl.textContent=ON.isHost?'Back to room':'Leave room';}
   else{wa.textContent='Rematch';wa.disabled=false;wl.textContent='Change players';}
   $('winTime').textContent='Game time '+fmtClock(gameElapsed());
-  const wn=$('winName');wn.textContent=P.name;wn.style.color=COLORS[P.c].hex==='#F6CF00'?'#C9A500':P.c>=6?'var(--fg)':COLORS[P.c].hex;
+  const wn=$('winName');wn.textContent=mate>=0?P.name+' & '+G.players[mate].name:P.name;wn.style.color=COLORS[P.c].hex==='#F6CF00'?'#C9A500':P.c>=6?'var(--fg)':COLORS[P.c].hex;
   const st=$('standings');st.innerHTML='';
   G.players.map((Q,i)=>({Q,i,h:homeCount(Q),prog:Q.marbles.reduce((s,m)=>s+(m.d===null?0:m.d==='C'?40:m.d),0)}))
-    .sort((a,b)=>(b.i===pi)-(a.i===pi)||b.h-a.h||b.prog-a.prog)
+    .sort((a,b)=>(team.includes(b.i))-(team.includes(a.i))||b.h-a.h||b.prog-a.prog)
     .forEach((r,k)=>{const li=document.createElement('li');li.innerHTML=`<span style="width:20px;color:var(--muted)">${k+1}</span><span class="dot" style="width:14px;height:14px;border-radius:50%;background:${COLORS[r.Q.c].hex}"></span><span style="flex:1">${esc(r.Q.name)}</span><span>${r.h}/4 home</span>`;st.appendChild(li);});
   const wb=$('winStats');wb.innerHTML='';const aw=document.createElement('div');aw.className='awards';aw.innerHTML=awards();if(aw.innerHTML)wb.appendChild(aw);
   const rv=rivalries();if(rv)wb.appendChild(rv);
@@ -2763,6 +2912,7 @@ async function enterRoom(code){
   ON.unsubs.push(net.on(`rooms/${code}/presence`,v=>{ON.presence=v||{};presenceChanged();}));
   ON.unsubs.push(net.on(`rooms/${code}/game`,v=>{if(v&&typeof v.seq==='number'){ON.queue.push(v);processQueue();}}));
   resetChat();ON.unsubs.push(net.onLast(`rooms/${code}/chat`,60,chatIncoming));
+  resetEmotes();ON.unsubs.push(net.onLast(`rooms/${code}/emotes`,12,emoteIncoming));
   ON.presIv=setInterval(presenceChanged,2000);
   $('lobby').hidden=true;
 }
@@ -2842,6 +2992,8 @@ function renderRoom(){
     rm.onclick=()=>lobbyEdit(L2=>{const k=L2.seats.findIndex(x=>x.uid===st.uid&&x.c===st.c&&x.name===st.name);if(k<0)return false;L2.seats.splice(k,1);});
     row.appendChild(rm);box.appendChild(row);
   });
+  const rp=!!(L.rules&&L.rules.partners);$('roomMode').value=rp?'partners':'ffa';$('roomMode').disabled=!host;
+  if(rp&&partnersOK(L.seats.length)){const lay=teamLayout(L.board,L.seats);[...box.children].forEach((row,i)=>teamTag(row,lay,i,L.seats));}
   const mx=al.length;
   $('roomCount').textContent=L.seats.length+' of '+mx;
   $('roomAddBot').hidden=!host;$('roomAddBot').disabled=L.seats.length>=mx;
@@ -2862,13 +3014,14 @@ async function startOnlineGame(){
   if(!ON.isHost||!ON.lobby)return;safeSet('ra-played','1');
   const L=ON.lobby,bd=makeBoard(L.board);
   if(L.seats.length<2){setRoomNote('Add at least one more player or bot.',true);return;}
+  if(L.rules&&L.rules.partners&&!partnersOK(L.seats.length)){setRoomNote('Partners needs 4 or 6 players. Add or remove a seat, or switch to Free-for-All.',true);return;}
   const seatS=assignSectors(bd,L.seats.map(x=>x.c)),s0=seatS[0];
   const players=L.seats.map((x,i)=>({uid:x.uid||null,name:x.name,c:x.c,s:seatS[i],type:x.type,ball:BALLS[x.ball]?x.ball:'glass',away:false,missed:0,marbles:[0,1,2,3].map(()=>({d:null}))}))
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
   const r=L.rules,secs=L.turnSecs||30;
   const ro=r.rollOff!==false?rollOff(players.map(p=>p.name)):null;
   const S={gid:Math.random().toString(36).slice(2,10),board:L.board,cockAt:pickCocked(),
-    look:{theme:THEMES[L.theme]?L.theme:(setup.theme||'classic')},rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle,claimRolls:r.claimRolls!==false},
+    look:{theme:THEMES[L.theme]?L.theme:(setup.theme||'classic')},rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle,claimRolls:r.claimRolls!==false,partners:!!r.partners},
     players,stats:players.map(blankStats),turn:ro?ro.first:0,phase:'roll',roll:null,
     log:(ro?ro.lines.slice().reverse().map(t=>({c:null,text:t,cls:''})):[]).concat([{c:null,text:'New online game: '+players.map(p=>p.name).join(', '),cls:''}]),winner:null,again:'',ev:null,turnSecs:secs,deadline:ON.net.now()+secs*1000,started:ON.net.now()};
   await ON.net.txn(`rooms/${ON.code}/game`,cur=>({seq:((cur&&cur.seq)||0)+1,g:JSON.stringify(S)}));
@@ -2890,7 +3043,7 @@ async function processQueue(){
       else{
         const ev=ns.ev;
         if(ev&&ev.t==='move'&&!ev.auto&&G.phase==='move'&&G.turn===ev.pi&&G.roll===ev.n&&G.players[ev.pi].type==='human')
-          try{coachDecision(G,ev.pi,ev.n,legalMoves(G,ev.pi,ev.n),ev.mv);}catch(e){console.warn(e);}
+          try{coachDecision(G,ev.pi,ev.n,turnMoves(G,ev.pi,ev.n),ev.mv);}catch(e){console.warn(e);}
         if(ns.turn!==G.turn)coachTurn(ns.turn);
       }
       if(!fresh&&$('game').hidden===false)await presentTransition(ns,ON.queue.length>0);
@@ -2904,8 +3057,8 @@ function installState(ns,fresh){
   if(fresh){setBoard(ns.board);applySeatColors(ns.players);applyThemeUI((ns.look||{}).theme);}
   G=Object.assign(ns,{online:true,token:-1,moves:[],sel:null,msg:''});ON.gid=ns.gid;
   if(fresh){buildBoard($('boardStatic'),'S',B);buildLive();ON.winShown=false;$('winModal').hidden=true;}
-  G.moves=G.phase==='move'&&G.roll?legalMoves(G,G.turn,G.roll):[];
-  if(canAct()&&G.phase==='move'){const P=cur(),mis=[...new Set(G.moves.map(m=>m.mi))],baseMis=mis.filter(mi=>P.marbles[mi].d===null);
+  G.moves=G.phase==='move'&&G.roll?turnMoves(G,G.turn,G.roll):[];
+  if(canAct()&&G.phase==='move'){const P=G.players[moveOwner()],mis=[...new Set(G.moves.map(m=>m.mi))],baseMis=mis.filter(mi=>P.marbles[mi].d===null);
     if(mis.length===1||mis.length===baseMis.length)G.sel=mis[0];}
   if(G.ev&&G.ev.n)setDie(G.ev.n,false);
   electHost();routeRoom();
@@ -2917,14 +3070,14 @@ async function presentTransition(ns,fast){
   const sp=speedFor(G.players[ev.pi]);
   if(ev.t==='roll'){if(fast){setDie(ev.n,false);return;}$('die').style.transitionDuration=sp<1?(.8*sp).toFixed(2)+'s':'';sfx.dice();setDie(ev.n,true);await wait((reduced?150:800)*sp);showFx(ev);return;}
   if(ev.t!=='move'||fast)return;
-  const pi=ev.pi,mv=ev.mv,node=MARBLE_NODES[pi]&&MARBLE_NODES[pi][mv.mi];if(!node)return;
+  const pi=ev.pi,mv=ev.mv,ow=ownerOf(pi,mv),node=MARBLE_NODES[ow]&&MARBLE_NODES[ow][mv.mi];if(!node)return;
   G.phase='anim';G.sel=null;renderLive();renderPanel();
   node.parentNode.appendChild(node);
-  const pts=[posOf(pi,mv.mi)].concat(mv.path.map(x=>Object.assign(stepPos(x),{hop:!!x.hop})));
+  const pts=[posOf(ow,mv.mi)].concat(mv.path.map(x=>Object.assign(stepPos(x),{hop:!!x.hop})));
   await animPath(node,pts,{speed:sp});
   if(mv.victim){const vn=MARBLE_NODES[mv.victim.pi][mv.victim.mi],vp=posOf(mv.victim.pi,mv.victim.mi);sfx.thud();burst(vp,'#E5262E');killFlash(pi,mv.victim.pi);
     await animPath(vn,[vp,B.BASEPOS[ns.players[mv.victim.pi].s][mv.victim.mi]],{dur:420*Math.max(.35,sp),arc:true});}
-  if(mv.kind==='home'||(ev.corner&&!(G.rules.claimRolls&&G.players[pi].type==='human'))){sfx.home();const d=destPos(pi,mv);burst(d,COLORS[G.players[pi].c].hex);}
+  if(mv.kind==='home'||(ev.corner&&!(G.rules.claimRolls&&G.players[pi].type==='human'))){sfx.home();const d=destPos(ow,mv);burst(d,COLORS[G.players[ow].c].hex);}
   if(mv.kind==='leave')sfx.out();
   showFx(ev);
 }
