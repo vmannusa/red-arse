@@ -1,6 +1,9 @@
 # Red Arse – Change log
 
 ## 2026-10-15
+- **Claim your re-rolls:** after a 6, a kill or an outside corner, human players have 5 seconds to roll again with no reminder; miss it and the turn passes ("missed re-rolls" stat).
+- **Simpler move review:** three grades (Good under 3 points, Misstep 3–10, Blunder 10+), every misstep and blunder listed, each named when it fits a pattern (missed a kill, a re-roll corner, the back-past-start shortcut, getting home, left your start hole blocked, left a marble in danger, and more).
+- **Richer walnut and etched colors:** natural walnut grain with cathedral figure; the colored stars, arrows, bases and rings now look stained and carved into the wood; fancier glass marbles with a swirl inside.
 - **New look:** dark walnut board (cream lettering and etched golfer, red logo), glass marbles with a highlight and glow, and a small countdown ring in the bottom-right corner of the board showing how long the current player has left.
 - **Side panel rearranged:** the game feed and chat now sit right under the dice (where the player list was, since chance to win is on the board). Players & stats comes next with each player's marbles home and online status (you, away, offline), and the bot speed switch moved under it.
 - **Game feed with chat:** the move log is now the game feed. In online games it has a chat bar and quick-chat buttons ("Back it up Terry" after a 4, "Nice 1" after a 1, COCKED, Nice roll, GG), an unread badge when it's collapsed, and it posts when a player goes away or comes back.
