@@ -75,6 +75,9 @@ After every move the game plays the rest of the match out 300 times with medium-
   - **Good:** under 3 points
   - **Misstep:** 3 to under 10
   - **Blunder:** 10 or more
+- Close calls get extra playouts (up to 2,400 per option) until the gap is clearly on one side of a grade line, and moves are graded on the cautious end of the estimate, so a move is only flagged when it clearly cost something.
+- When two choices would read the same ("left the center"), the review names where each one goes ("to your home corner", "to Red's inside corner").
+- "Left a marble in danger" counts opponents who could hop onto that inside corner, as well as ones 1–6 holes behind.
 - **Stats** (Players & stats panel and Stats window):
   - **Acc:** share of Good moves.
   - **Missteps** and **Blunders**.
