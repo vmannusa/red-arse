@@ -1053,7 +1053,8 @@ function defsCommon(svg,prefix,bd){
   const sp=el('radialGradient',{id:prefix+'spec',cx:'.5',cy:'.5',r:'.5'},defs);
   [['0','#FFFFFF','.95'],['.6','#FFFFFF','.45'],['1','#FFFFFF','0']].forEach(([o,cc,op])=>el('stop',{offset:o,'stop-color':cc,'stop-opacity':op},sp));
   // etched inlay: the shape is stained into the wood (grain shows through) with a carved inner shadow
-  const ef=el('filter',{id:prefix+'etch',x:'-5%',y:'-5%',width:'110%',height:'110%','color-interpolation-filters':'sRGB'},defs);
+  // fixed board-sized filter region (not relative to each shape's box) so no browser clips part of a shape
+  const ef=el('filter',{id:prefix+'etch',filterUnits:'userSpaceOnUse',x:-12,y:-12,width:24,height:24,'color-interpolation-filters':'sRGB'},defs);
   el('feComponentTransfer',{in:'SourceAlpha',result:'inv'},ef).appendChild(Object.assign(document.createElementNS(NS,'feFuncA'),{}));
   ef.lastChild.lastChild.setAttribute('type','table');ef.lastChild.lastChild.setAttribute('tableValues','1 0');
   el('feOffset',{in:'inv',dx:'.045',dy:'.06',result:'off'},ef);
@@ -1134,9 +1135,11 @@ function buildBoard(svg,prefix,bd,opts={}){
   hole(CENTER,.42);
   for(let k=0;k<bd.N;k++){
     const C=COLORS[bd.sectorColors[k]];
-    const rg=el('g',{filter:`url(#${prefix}etch)`,opacity:.8},holes);
-    bd.HOMEPOS[k].forEach(p=>el('circle',{cx:f(p.x),cy:f(p.y),r:.5,fill:'none',stroke:C.hex,'stroke-width':.11},rg));
-    const s=bd.TRACK[startG(k)];el('circle',{cx:f(s.x),cy:f(s.y),r:.5,fill:'none',stroke:C.hex,'stroke-width':.11},rg);
+    // home and start rings, carved by hand (groove shadow, stained ring, light lip) rather than through a filter
+    const ring=p=>{el('circle',{cx:f(p.x+.025),cy:f(p.y+.035),r:.5,fill:'none',stroke:'rgba(10,4,1,.55)','stroke-width':.13},holes);
+      el('circle',{cx:f(p.x),cy:f(p.y),r:.5,fill:'none',stroke:C.hex,'stroke-width':.11,opacity:.82},holes);
+      el('circle',{cx:f(p.x-.015),cy:f(p.y-.02),r:.555,fill:'none',stroke:'rgba(255,226,188,.22)','stroke-width':.025},holes);};
+    bd.HOMEPOS[k].forEach(ring);ring(bd.TRACK[startG(k)]);
   }
 }
 
