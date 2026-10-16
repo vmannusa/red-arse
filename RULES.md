@@ -7,6 +7,7 @@ Every rule can be switched on or off on the setup screen. Rules marked *(house r
 ## Boards
 - **6-player hex:** 6 sections, 84-hole track, 2–6 players.
 - **4-player hex:** 4 sections, 56-hole track, 2–4 players. Same rules, shorter race.
+- **Black and White** can be picked as player colors on either board. They take an open seat (the bottom seat first), and that seat's base, home ring, arrow and star are drawn in black or white for the game. Your die and marbles take your color.
 
 ## Who goes first
 - Everyone rolls at the start; the highest roll goes first, and tied players roll again. Play then goes clockwise. (Switch off "Highest roll goes first" to let the first seat start.)
