@@ -38,6 +38,7 @@ Every rule can be switched on or off on the setup screen. Rules marked *(house r
 - Get a **kill**.
 - End a move on an **outside corner**: the corner holes on the board's edge, on either side of any home column. Your own start hole counts when you back onto it with a 4, but not when a marble comes out of base onto it.
 - One extra roll per move, even if more than one of these happens at once.
+- **Claim it** (human players): you have **5 seconds** to roll again. Nothing reminds you; miss it and your turn passes. Missed re-rolls show in the feed and your stats. (Switch off "Claim your re-rolls" to roll again automatically.)
 
 ## Inside corners (the stars)
 - A marble that **starts its turn on an inside corner** may hop clockwise from corner to corner, one corner per pip, instead of moving along the track.
@@ -71,20 +72,20 @@ After every move the game plays the rest of the match out 300 times with medium-
 ## Move review
 - Whenever a human player has a real choice (two or more moves that lead to different positions), the game plays the rest of the match out from every option, hundreds of times each, using the same dice for every option so they're compared fairly. It keeps going until the gap between your move and the best one is known to within about 1.5 points.
 - Each move is graded by how much chance to win it gave up compared with the best option:
-  - **Best:** under 1 point
-  - **Good:** under 3
-  - **Inaccuracy:** under 6
-  - **Mistake:** under 12
-  - **Blunder:** 12 or more
+  - **Good:** under 3 points
+  - **Misstep:** 3 to under 10
+  - **Blunder:** 10 or more
 - **Stats** (Players & stats panel and Stats window):
-  - **Acc:** share of Best and Good moves.
-  - **Blunders** and **Mistakes**.
+  - **Acc:** share of Good moves.
+  - **Missteps** and **Blunders**.
+  - **Missed re-rolls:** re-rolls not claimed within 5 seconds.
   - **Missed kills:** a kill was the better move but wasn't taken.
   - **Lost to moves:** points of chance to win given up by moves that cost 3 or more, added up.
 - **End-of-game review**, for each human player:
   - A chart of every player's chance to win over the game.
   - Grade counts and a one-line verdict: was it the moves, or the dice and the other players?
-  - The 3 costliest moves with the better play, each with **Show on board** to see both moves drawn on the position.
+  - **Every misstep and blunder**, in order, with how many points it cost, the better play, and **what was missed** when it's a known pattern: the win, a kill, getting home, the back-past-start shortcut, a re-roll corner, getting a marble out, the center, an inside-corner hop, leaving your start hole blocked (so the next marble can't come out), or leaving a marble in danger. Each has **Show on board** to see both moves drawn on the position.
+- Moves played by the turn timer aren't graded.
 - Bots aren't graded. Moves auto-played for an away player online aren't graded either. In online games every device grades the same moves the same way.
 - The review runs in the background, so it never slows the game down.
 
