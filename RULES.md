@@ -99,7 +99,7 @@ After every move the game plays the rest of the match out 300 times with medium-
 - **Danger glow:** your marbles that an opponent could hit with their next roll (1–6 holes behind, a 4 back, an inside-corner hop, coming out of base onto them, or out of the center) pulse with a red ring. In online games you only see it on your own marbles.
 - **Banners** flash over the board (everyone in an online room sees them):
   - "**X** aggravated **Y**" when someone gets sent home.
-  - "**Nice One**" now and then when someone rolls a 1 (about 3 in 10), so it stays a surprise.
+  - "**Nice, One**" now and then when someone rolls a 1 (about 3 in 10), so it stays a surprise.
   - "**COCKED**" once or twice a game, right after a roll picked at random.
   - "**Back it up Terry**" when someone moves backward on a 4.
   - "**X** is rolling crazy" when someone earns a 3rd re-roll in one turn, and again on every re-roll after that in the same turn (6s, kills and outside corners all count).
