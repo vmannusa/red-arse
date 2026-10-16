@@ -1,6 +1,12 @@
 # Red Arse – Change log
 
 ## 2026-10-16
+- "**X is sitting at home on the couch**" now takes turns at random with "Phil luck".
+- **Nice One** banner on every roll of 1, and **COCKED** once or twice a game after a random roll.
+- **Theme marbles:** picking a theme sets everyone's marble to match (Halloween pumpkins, Cougar Red basketballs, Christmas ornaments); players can still change their own. New **Pumpkin** and **Ornament** marbles.
+- Each player's marble now shows in the turn panel, player list, stats and review, not just on the board.
+- **Game settings** moved above Players on the setup screen.
+- **Rolling crazy** and **Phil luck** now keep showing on every roll after the 3rd (every extra re-roll in the turn, every extra roll with no move), not just once.
 - **Board themes:** Halloween (black and orange), Cougar Red (white and scarlet, HOUSTON along the bottom) and Christmas (evergreen with a candy-cane rim and Christmas-tree bases), each with its own **sound effects**. Pick one under Game settings; online, the host picks it in the room.
 - **Sports-ball marbles, per player:** each player picks Glass, Golf, Basketball, Tennis or Baseball next to their color (setup screen and online rooms).
 - **More banners:** "Back it up Terry" on a backward 4, "X is rolling crazy" on a 3rd re-roll in one turn, and "X had Phil luck" after 3 rolls in a row with no move. Banners now queue, so two in a row both show.
