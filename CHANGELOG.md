@@ -1,6 +1,7 @@
 # Red Arse – Change log
 
 ## 2026-10-16
+- The 1 banner now reads **"Nice, One"**.
 - **Partners mode** (Game settings, or the host in an online room; 4 or 6 players): partners sit opposite and win together when both homes are full. Once your 4 are home your rolls move your partner's marbles, and any roll with no move for your own marbles moves your partner's instead. Team tags in the player lists, team chance-to-win and review, a shared win screen, and bots that won't hit their partner unless forced.
 - **Cougar paw marble:** the hand sign (thumb and ring finger touching), now the default for the Cougar Red theme.
 - **Quick reactions:** 😂 😬 (OOF) 😡 🙄 under the die. They float up from the sender's base with a pop, show for everyone in online rooms, and have a 2-second cooldown per player.
