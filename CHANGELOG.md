@@ -1,6 +1,8 @@
 # Red Arse – Change log
 
 ## 2026-10-17
+- **Report a bug or idea** (footer, every screen): pick Bug or Idea, type a note, and send. No sign-in needed. Notes go to the developer's Firebase database (the rules let anyone add one but nobody read them back). If it can't send, the form offers a pre-filled GitHub issue instead.
+- **Donate to support the project** link in the footer, opening the developer's PayPal page in a new tab.
 - **BUND marble:** a photo marble (pick it next to your color). The picture sits on glass in your player color, with a color ring so you can still tell whose marble it is.
 - **Google sign-in and all-time stats.** A **Profile** button (top right) shows your lifetime record: games, wins, win rate, kills, times aggravated, average finish, time played, streaks, online and Partners results, and your last 10 games. Finished games are counted on the device; **Continue with Google** saves them to your account so they follow you to any device. The win screen says when your game was saved. Needs the Firebase steps in the README (Part 3) before the Google button works.
 - **Orange** can now be picked on the 4-player board too (it takes an open seat, like Black and White).
