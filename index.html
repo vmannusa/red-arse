@@ -369,6 +369,17 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
 .set-row{display:flex;flex-wrap:wrap;gap:12px 24px}
 .linkbtn{background:none;border:0;padding:0;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline}
 .win-saved{margin:12px 0 0;text-align:center}
+.foot{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-top:auto;padding-top:6px;font-size:13px;color:var(--muted)}
+.foot a,.foot .linkbtn{color:var(--muted);font-weight:600;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.foot .linkbtn{text-decoration:underline}
+.foot a:hover,.foot .linkbtn:hover{color:var(--text)}
+.foot svg{width:15px;height:15px}
+.fb-types{display:flex;gap:8px;margin:2px 0 10px}
+.fb-types button{flex:1;height:40px;border:1px solid var(--line);background:var(--surface);border-radius:10px;font-weight:700;cursor:pointer}
+.fb-types button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:transparent}
+#feedbackModal textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:8px 10px;resize:vertical;font:inherit}
+#feedbackModal .fld{margin-top:10px}
+#feedbackModal .fb-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 #profLabel{max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pf-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
 .pf-av{width:42px;height:42px;border-radius:50%;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font:900 20px var(--font-display);flex:none}
@@ -618,6 +629,11 @@ table.pf-rec td,table.pf-rec th{text-align:left}table.pf-rec td:nth-child(n+4),t
       </section>
     </aside>
   </main>
+  <footer class="foot">
+    <button class="linkbtn" id="btnFeedback" type="button">Report a bug or idea</button>
+    <span aria-hidden="true">·</span>
+    <a id="btnSupport" href="https://www.paypal.me/vmann259" target="_blank" rel="noopener" title="Opens PayPal in a new tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 8a4.2 4.2 0 0 1 7.5 2.5c0 5.4-7.5 10-7.5 10z"/></svg>Donate to support the project</a>
+  </footer>
 </div>
 
 <div class="modal" id="rulesModal" hidden>
@@ -722,6 +738,22 @@ table.pf-rec td,table.pf-rec th{text-align:left}table.pf-rec td:nth-child(n+4),t
     <h2 id="installTitle">Add Red Arse to your Home Screen</h2>
     <div id="installBody"></div>
     <div class="actions"><button class="btn primary" id="installClose" type="button">Got it</button></div>
+  </div>
+</div>
+<div class="modal" id="feedbackModal" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="fbTitle">
+    <h2 id="fbTitle">Bug or idea?</h2>
+    <div class="fb-types" role="group" aria-label="What kind of note is this?">
+      <button type="button" data-ty="bug" aria-pressed="true">Bug</button>
+      <button type="button" data-ty="idea" aria-pressed="false">Idea</button>
+    </div>
+    <textarea id="fbMsg" maxlength="1500" placeholder="What happened, or what would you like to see?" aria-label="Your message"></textarea>
+    <label class="fld"><span>Your name (optional)</span><input id="fbName" maxlength="40" autocomplete="off"></label>
+    <label class="fld"><span>Email, only if you want a reply (optional)</span><input id="fbContact" maxlength="80" type="email" autocomplete="off"></label>
+    <div class="fb-hp" aria-hidden="true"><label>Website<input id="fbWeb" tabindex="-1" autocomplete="off"></label></div>
+    <p class="fine" id="fbHint">No sign-in needed. Your note is sent to the game's developer along with your device type and screen size.</p>
+    <p class="fine pf-msg" id="fbMsgOut" aria-live="polite"></p>
+    <div class="actions"><button class="btn" id="fbCancel" type="button">Cancel</button><button class="btn primary" id="fbSend" type="button">Send</button></div>
   </div>
 </div>
 <div class="modal" id="profileModal" hidden>
@@ -2317,6 +2349,7 @@ function fillStatsModal(){
 $('rollBtn').onclick=()=>{ac();if(G&&G.online)onlineRoll();else doRoll();};
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&!$('installModal').hidden){$('installModal').hidden=true;return;}
+  if(e.key==='Escape'&&!$('feedbackModal').hidden){$('feedbackModal').hidden=true;return;}
   if(e.key==='Escape'&&!$('profileModal').hidden){$('profileModal').hidden=true;return;}
   if(!G)return;const tag=(e.target.tagName||'').toLowerCase();if(tag==='input'||tag==='select'||tag==='textarea')return;
   if((e.code==='Space'||e.key===' ')&&G.phase==='roll'&&canAct()&&$('rulesModal').hidden){e.preventDefault();ac();if(G.online)onlineRoll();else doRoll();}
@@ -3426,6 +3459,53 @@ async function syncGames(manual){
   }catch(e){const c=(e&&e.code)||'';acctMsg(c==='PERMISSION_DENIED'||/permission/i.test(e&&e.message||'')?"Couldn't sync: the database rules for stats haven't been published yet (see the README).":"Couldn't sync right now. Your games are safe on this device and will sync next time.",true);}
   ACC.syncing=false;if(!$('profileModal').hidden)renderProfile();
 }
+
+// ================= FEEDBACK (bug / idea notes) =================
+// Saved to Firebase at feedback/<id> with the player's anonymous sign-in (no account needed). The database rules
+// allow creating a note but never reading one back, so only the owner can read them (Firebase console).
+const FB={ty:'bug',busy:false,last:0};
+function fbSetType(t){FB.ty=t;document.querySelectorAll('#feedbackModal .fb-types button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ty===t?'true':'false'));
+  $('fbMsg').placeholder=t==='bug'?'What went wrong? What were you doing when it happened?':'What would make Red Arse better?';}
+function fbOut(t,err){const el=$('fbMsgOut');el.textContent=t||'';el.classList.toggle('err',!!err);}
+function openFeedback(){
+  fbOut('');$('fbSend').disabled=false;$('fbSend').textContent='Send';
+  const nm=safeGet('ra-online-name')||(ACC.user&&ACC.user.first)||'';if(!$('fbName').value&&nm)$('fbName').value=nm.slice(0,40);
+  $('feedbackModal').hidden=false;$('fbMsg').focus();
+}
+function fbGithubUrl(rec){const t=(rec.ty==='idea'?'Idea: ':'Bug: ')+rec.m.replace(/\s+/g,' ').slice(0,60);
+  return 'https://github.com/vmannusa/red-arse/issues/new?title='+encodeURIComponent(t)+'&body='+encodeURIComponent(rec.m+'\n\n('+rec.ua.slice(0,100)+', '+rec.scr+')');}
+async function sendFeedback(){
+  if(FB.busy)return;
+  const m=$('fbMsg').value.trim();
+  if(m.length<3){fbOut('Write a few words first.',true);$('fbMsg').focus();return;}
+  if($('fbWeb').value){$('feedbackModal').hidden=true;return;} // hidden field filled in: a bot
+  if(Date.now()-FB.last<20000){fbOut('Give it a few seconds before sending another.',true);return;}
+  const g=G?`${G.online?'online':'local'} ${G.board} ${G.players.length}p ${G.winner===null?'live':'done'}`:'lobby';
+  const rec={t:0,ty:FB.ty,m:m.slice(0,1500),n:$('fbName').value.trim().slice(0,40),c:$('fbContact').value.trim().slice(0,80),
+    ua:(navigator.userAgent||'').slice(0,200),scr:innerWidth+'x'+innerHeight,g:g.slice(0,120)};
+  FB.busy=true;$('fbSend').disabled=true;$('fbSend').textContent='Sending…';fbOut('');
+  try{
+    if(!ONLINE_AVAILABLE)throw new Error('offline-build');
+    const net=await getNet();
+    if(net.uid)rec.u=String(net.uid).slice(0,40);
+    rec.t=net.now();
+    if(!rec.n)delete rec.n;if(!rec.c)delete rec.c;
+    await Promise.race([net.push('feedback',rec),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),12000))]);
+    FB.last=Date.now();$('fbMsg').value='';
+    fbOut('Sent. Thank you!');$('fbSend').textContent='Sent';
+    track('feedback_sent',{type:rec.ty});
+    setTimeout(()=>{if(!$('feedbackModal').hidden&&$('fbSend').textContent==='Sent')$('feedbackModal').hidden=true;},1400);
+  }catch(e){
+    const el=$('fbMsgOut');el.classList.add('err');el.textContent="Couldn't send that. ";
+    const a=document.createElement('a');a.href=fbGithubUrl(Object.assign({},rec,{m:m}));a.target='_blank';a.rel='noopener';a.textContent='Post it on GitHub instead (needs a free GitHub account).';el.appendChild(a);
+    $('fbSend').disabled=false;$('fbSend').textContent='Send';
+  }
+  FB.busy=false;
+}
+$('btnFeedback').onclick=openFeedback;
+$('fbCancel').onclick=()=>{$('feedbackModal').hidden=true;};
+$('fbSend').onclick=sendFeedback;
+document.querySelectorAll('#feedbackModal .fb-types button').forEach(b=>b.onclick=()=>fbSetType(b.dataset.ty));
 
 // ================= BOOT =================
 function snapshot(){return {setup,game:G&&!G.online?{board:G.board,rules:G.rules,players:G.players,stats:G.stats,turn:G.turn,log:G.log,winner:G.winner,started:G.started}:null};}
