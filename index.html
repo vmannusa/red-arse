@@ -367,6 +367,34 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
 .set-row{display:flex;flex-wrap:wrap;gap:12px 24px}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline}
+.win-saved{margin:12px 0 0;text-align:center}
+#profLabel{max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.pf-av{width:42px;height:42px;border-radius:50%;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font:900 20px var(--font-display);flex:none}
+.pf-who{display:flex;flex-direction:column;min-width:150px;flex:1}
+.pf-who b{font-family:var(--font-display);font-size:18px;font-weight:800}
+.pf-who small{color:var(--muted);font-size:12.5px}
+.pf-btns{display:flex;gap:6px}
+.pf-cta{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--accent);border-radius:12px;padding:12px 14px;background:var(--surface-2)}
+.pf-cta div{flex:1;min-width:220px}.pf-cta b{font-family:var(--font-display);font-weight:800}
+.pf-cta p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.gbtn{background:#fff;color:#1f1f1f;border:1px solid #dadce0;height:44px;gap:10px;font-weight:700;padding:0 16px}
+.gbtn:hover:not(:disabled){background:#f6f8fb}
+.gbtn svg{width:20px;height:20px}
+.pf-msg{min-height:18px;margin:8px 0 0}
+.pf-empty{margin:14px 0;padding:18px;border:1px dashed var(--line);border-radius:12px;text-align:center;color:var(--muted)}
+.pf-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin:12px 0}
+.pf-tile{border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:10px 12px}
+.pf-tile b{display:block;font:900 26px/1.1 var(--font-display);font-variant-numeric:tabular-nums}
+.pf-tile span{font-size:12px;color:var(--muted)}
+.pf-dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:2px 22px;margin:0 0 6px}
+.pf-dl div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:6px 0;font-size:13.5px}
+.pf-dl dt{color:var(--muted)}.pf-dl dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.pf-dl small{font-weight:500;color:var(--muted)}
+.pf-h{font-family:var(--font-display);font-weight:700;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 4px}
+table.pf-rec td,table.pf-rec th{text-align:left}table.pf-rec td:nth-child(n+4),table.pf-rec thead th:nth-child(n+4){text-align:right}
+.pf-win{color:var(--accent)}
 .win-time{color:var(--muted);font-size:13px;margin-top:4px;font-variant-numeric:tabular-nums}
 #backBtn{margin-top:8px;width:100%}
 @media (max-width:640px){.online-split{grid-template-columns:minmax(0,1fr)}.on-div{height:1px;width:auto}}
@@ -440,6 +468,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
       <button class="tbtn" id="btnRestart" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/></svg><span>Restart</span></button>
       <button class="tbtn" id="btnLobby" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.8-3.3 3.2-5 6-5s5.2 1.7 6 5M17 7v6M14 10h6"/></svg><span>Players</span></button>
     </nav>
+      <button class="tbtn" id="btnProfile" type="button" title="Your all-time stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.9-3.6 3.6-5.4 7-5.4s6.1 1.8 7 5.4"/></svg><span id="profLabel">Profile</span></button>
       <button class="tbtn" id="btnReload" type="button" title="Reload to get the latest version"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg><span>Refresh</span></button>
     </div>
   </header>
@@ -681,6 +710,7 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
     <ol class="standings" id="standings"></ol>
     <div id="winReview" class="win-review"></div>
     <div id="winStats" class="win-stats"></div>
+    <p class="fine win-saved" id="winSaved"></p>
     <div class="actions">
       <button class="btn" id="winLobby" type="button">Change players</button>
       <button class="btn primary" id="winAgain" type="button">Play again</button>
@@ -692,6 +722,13 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
     <h2 id="installTitle">Add Red Arse to your Home Screen</h2>
     <div id="installBody"></div>
     <div class="actions"><button class="btn primary" id="installClose" type="button">Got it</button></div>
+  </div>
+</div>
+<div class="modal" id="profileModal" hidden>
+  <div class="card wide" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+    <h2 id="profileTitle">Your all-time stats</h2>
+    <div id="profileBody"></div>
+    <div class="actions"><button class="btn primary" id="profileClose" type="button">Close</button></div>
   </div>
 </div>
 <div class="modal" id="statsModal" hidden>
@@ -719,7 +756,7 @@ const COLORS = [
 ];
 // Black and White aren't printed on the board; a player who picks one takes an open seat and that
 // seat's base, home ring and star are drawn in black or white for the game.
-const EXTRA_COLORS=[6,7];
+const EXTRA_COLORS=[0,6,7]; // Orange is printed on the 6-player board only; on the 4-player board it takes an open seat like Black and White
 function assignSectors(bd,colors){
   const nat=bd.nativeColors||bd.sectorColors,out=new Array(colors.length).fill(-1),taken=new Set();
   colors.forEach((c,i)=>{const s=nat.indexOf(c);if(s>=0&&!taken.has(s)){out[i]=s;taken.add(s);}});
@@ -1203,7 +1240,7 @@ const TH={
   christmas:{fill:'#173F25',rim:'rgba(255,255,255,.8)',candy:true,hole:'rgba(255,226,170,.38)',label:'#FFF3DC',ink:'#E9C46A',deco:.86,glow:'rgba(255,210,120,.3)',
     tex:{seed:1225,base:'#1B4A2C',dark:'6,26,12',mid:'40,96,56',lite:'150,200,140',glow:'255,220,150',center:.12,edge:.38}}
 };
-const BALLS={glass:'Glass',golf:'Golf',basket:'Basketball',tennis:'Tennis',baseball:'Baseball',pumpkin:'Pumpkin',ornament:'Ornament',paw:'Cougar paw'};
+const BALLS={glass:'Glass',golf:'Golf',basket:'Basketball',tennis:'Tennis',baseball:'Baseball',pumpkin:'Pumpkin',ornament:'Ornament',paw:'Cougar paw',bund:'BUND'};
 // picking a board theme sets everyone to its marble; players can still change their own afterwards
 const THEME_BALL={classic:'glass',halloween:'pumpkin',coogs:'paw',christmas:'ornament'};
 const themeBall=t=>THEME_BALL[t]||'glass';
@@ -1625,7 +1662,10 @@ function loadSetup(){
 function saveSetup(){safeSet('aggravation-setup',JSON.stringify(setup));}
 
 // ================= LOBBY =================
-const allowedColors=st=>BOARDS[(st||setup).board].sectorColors.concat(EXTRA_COLORS);
+const allowedFor=kind=>{const n=BOARDS[kind].sectorColors;return n.concat(EXTRA_COLORS.filter(c=>!n.includes(c)));};
+const allowedColors=st=>allowedFor((st||setup).board);
+// default pick order: the board's own colors first, then Orange, Black and White
+const colorOrder=kind=>{const n=BOARDS[kind].sectorColors;return COLOR_PREF.filter(c=>n.includes(c)).concat(COLOR_PREF.filter(c=>!n.includes(c)));};
 const maxPlayers=st=>BOARDS[(st||setup).board].sectorColors.length;
 const usedColors=()=>setup.players.map(p=>p.c);
 function botName(c){return COLORS[c].name+' Bot';}
@@ -1633,11 +1673,11 @@ function botName(c){return COLORS[c].name+' Bot';}
 const isDefaultBotName=nm=>COLORS.some(C=>nm===C.name+' Bot');
 function syncBotName(p){if(p&&p.type!=='human'&&isDefaultBotName(p.name))p.name=botName(p.c);}
 const COLOR_PREF=[3,0,5,1,4,2,6,7];
-function freeColor(st){st=st||setup;const al=allowedColors(st),u=st.players.map(p=>p.c);return COLOR_PREF.find(c=>al.includes(c)&&!u.includes(c));}
+function freeColor(st){st=st||setup;const al=allowedColors(st),u=st.players.map(p=>p.c);return colorOrder(st.board).find(c=>al.includes(c)&&!u.includes(c));}
 // keep every player on a color that exists on the chosen board
 function fitSetupToBoard(st){
   const al=allowedColors(st);
-  st.players.forEach(p=>{if(!al.includes(p.c)){p.prevC=p.c;const nc=COLOR_PREF.find(c=>al.includes(c)&&!st.players.some(q=>q.c===c));const wasBot=p.type!=='human'&&p.name===botName(p.c);p.c=nc;if(wasBot)p.name=botName(nc);}});
+  st.players.forEach(p=>{if(!al.includes(p.c)){p.prevC=p.c;const nc=colorOrder(st.board).find(c=>al.includes(c)&&!st.players.some(q=>q.c===c));const wasBot=p.type!=='human'&&p.name===botName(p.c);p.c=nc;if(wasBot)p.name=botName(nc);}});
 }
 // going back to the 6-player board gives players back the colors they had before the 4-player board swapped them
 function restoreColors(st){
@@ -1782,11 +1822,11 @@ function saveRecords(winnerPi){
 function newGameState(){
   const bd=setBoard(setup.board);fitSetupToBoard(setup);
   const secs=assignSectors(bd,setup.players.map(p=>p.c)),s0=secs[0];
-  const players=setup.players.map((p,i)=>({name:(p.name||'').trim()||COLORS[p.c].name,c:p.c,s:secs[i],type:p.type,ball:BALLS[p.ball]?p.ball:'glass',marbles:[0,1,2,3].map(()=>({d:null}))}))
+  const players=setup.players.map((p,i)=>({si:i,name:(p.name||'').trim()||COLORS[p.c].name,c:p.c,s:secs[i],type:p.type,ball:BALLS[p.ball]?p.ball:'glass',marbles:[0,1,2,3].map(()=>({d:null}))}))
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
   applySeatColors(players);
   const r=setup.rules;
-  return {token:++tokenSeq,board:bd.kind,cockAt:pickCocked(),look:{theme:setup.theme||'classic'},rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle,claimRolls:r.claimRolls!==false,partners:!!r.partners},
+  return {token:++tokenSeq,rid:Math.random().toString(36).slice(2,10),board:bd.kind,cockAt:pickCocked(),look:{theme:setup.theme||'classic'},rules:{startRolls:r.oneOrSix?[1,6]:[6],rollAgain:r.rollAgain,stars:r.stars,center:r.center,back:r.back,backShortcut:r.backShortcut,corners:r.corners,killAgain:r.killAgain!==false,homeRaid:r.homeRaid!==false,autoSingle:r.autoSingle,claimRolls:r.claimRolls!==false,partners:!!r.partners},
     players,stats:players.map(blankStats),turn:0,phase:'roll',roll:null,moves:[],sel:null,log:[],winner:null,again:'',msg:'',
     turnSecs:setup.turnSecs||0,deadline:0,tseq:0,started:Date.now()};
 }
@@ -1945,7 +1985,7 @@ async function localExecute(mv,auto){
   if(corner)st.corners++;
   addLog(pi,describe(pi,mv),mv.victim?'cap':'');
   renderLive();renderPanel();
-  if(teamWon(G,ow)){G.winner=pi;G.phase='over';G.ended=Date.now();saveRecords(pi);trackEnd();renderPanel();showWin(pi);return;}
+  if(teamWon(G,ow)){G.winner=pi;G.phase='over';G.ended=Date.now();saveRecords(pi);recordProfileGame(pi);trackEnd();renderPanel();showWin(pi);return;}
   await wait((reduced?120:280)*sp);if(tok!==G?.token)return;
   endTurn(G.roll,corner,!!mv.victim);
 }
@@ -1965,6 +2005,7 @@ function ballDefs(defs,pf='L'){
   const mt=el('radialGradient',{id:pf+'matte',cx:'.36',cy:'.3',r:'.75'},defs);
   [['0','#fff','.5'],['.35','#fff','.08'],['.75','#000','0'],['1','#000','.42']].forEach(([o,c,op])=>el('stop',{offset:o,'stop-color':c,'stop-opacity':op},mt));
 }
+const BUND_IMG='data:image/webp;base64,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';
 const PAW_D='M9.4 -112.4 L0.9 -112.4 L0.4 -111.6 L-3.1 -110.4 L-7.9 -106.4 L-9.4 -104.4 L-11.4 -99.6 L-11.9 -22.4 L-12.9 -22.1 L-15.1 -24.6 L-19.4 -27.4 L-24.1 -28.6 L-29.9 -28.4 L-34.6 -26.6 L-38.6 -23.4 L-41.4 -18.9 L-42.4 -15.6 L-42.4 36.6 L-41.4 39.9 L-38.4 44.6 L-35.6 47.1 L-32.1 48.9 L-26.1 49.9 L-25.4 50.9 L-25.4 52.1 L-26.4 53.1 L-32.9 52.1 L-39.1 48.4 L-43.4 43.1 L-45.6 36.6 L-45.6 -15.9 L-43.4 -22.1 L-40.6 -25.9 L-38.6 -27.6 L-38.1 -28.9 L-38.1 -54.9 L-38.6 -58.6 L-39.9 -62.1 L-42.6 -66.1 L-46.9 -69.4 L-52.1 -71.4 L-57.9 -71.4 L-61.4 -70.4 L-66.6 -67.1 L-70.1 -62.6 L-71.9 -57.4 L-71.9 55.6 L-71.1 61.1 L-68.4 71.4 L-64.1 80.4 L-60.1 86.6 L-54.1 93.6 L-49.9 97.6 L-43.9 102.1 L-34.4 107.4 L-26.4 110.1 L-17.9 111.9 L-17.4 111.6 L-17.6 110.4 L-22.4 104.1 L-26.4 96.4 L-29.1 88.4 L-31.1 75.4 L-30.6 67.9 L-29.6 66.6 L-28.4 66.6 L-27.4 67.6 L-27.4 80.6 L-25.6 88.6 L-22.6 96.9 L-19.4 102.9 L-12.1 112.4 L-1.1 112.4 L0.1 111.6 L2.9 111.4 L11.4 109.1 L22.4 104.1 L30.1 98.9 L37.1 92.4 L40.4 88.6 L45.4 81.4 L49.4 73.1 L52.4 63.6 L53.9 51.9 L53.4 50.6 L48.4 47.6 L42.1 44.9 L34.4 42.6 L27.9 41.9 L9.9 42.1 L9.1 41.1 L9.1 17.1 L8.4 13.4 L5.4 7.6 L1.9 4.1 L-0.6 2.6 L-5.6 0.9 L-10.4 0.6 L-15.4 1.6 L-19.6 3.9 L-24.4 8.9 L-26.6 14.1 L-27.1 18.9 L-28.1 19.6 L-29.6 19.6 L-30.6 18.6 L-30.6 17.4 L-28.6 9.9 L-26.1 5.9 L-23.1 2.6 L-16.6 -1.4 L-11.6 -2.6 L-6.6 -2.6 L-0.4 -0.9 L3.1 1.1 L6.4 3.9 L9.1 7.4 L11.1 11.4 L12.4 16.6 L12.4 38.1 L12.9 38.6 L26.6 38.4 L34.6 39.4 L44.6 42.4 L52.9 46.6 L53.9 46.6 L55.4 30.9 L57.4 -1.9 L71.9 -79.6 L71.9 -84.6 L70.1 -89.6 L66.4 -94.4 L61.6 -97.4 L57.6 -98.4 L52.6 -98.4 L49.6 -97.6 L43.9 -94.4 L40.6 -90.4 L38.6 -85.9 L37.4 -76.6 L24.1 -4.9 L22.9 -4.1 L22.1 -5.1 L22.1 -98.1 L21.4 -101.1 L18.6 -106.1 L15.9 -108.9Z';
 function drawBall(g,P,pi,mi,style,pf='L'){
   const C=COLORS[P.c],tw=(mi*37+pi*61)%360; // each ball sits at its own angle
@@ -1993,6 +2034,19 @@ function drawBall(g,P,pi,mi,style,pf='L'){
     el('path',{d:'M-.2 -.06 L-.12 -.18 L-.05 -.06 Z M.05 -.06 L.12 -.18 L.2 -.06 Z',fill:face},g);
     el('path',{d:'M-.24 .08 Q0 .3 .24 .08 L.16 .12 L.12 .06 L.06 .14 L0 .08 L-.06 .14 L-.12 .06 L-.16 .12 Z',fill:face},g);
     el('ellipse',{cx:-.16,cy:-.2,rx:.08,ry:.04,fill:'#fff',opacity:.35,transform:'rotate(-30 -.16 -.2)'},g);
+    return;
+  }
+  if(style==='bund'){ // BUND: a photo marble (cut-out head on the player's color, with a glass sheen over it)
+    el('ellipse',{cx:.1,cy:.17,rx:.5,ry:.42,fill:`url(#${pf}msh)`},g);
+    el('circle',{r:.42,fill:`url(#${pf}m${P.c})`},g);
+    const im=el('image',{x:-.42,y:-.42,width:.84,height:.84,preserveAspectRatio:'xMidYMid slice','clip-path':`url(#${pf}mclip)`},g);
+    im.setAttribute('href',BUND_IMG);im.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href',BUND_IMG);
+    el('circle',{r:.39,fill:'none',stroke:C.hex,'stroke-width':.06,opacity:.95},g); // player-color ring so each marble still reads as its owner
+    el('circle',{r:.42,fill:`url(#${pf}mfr)`,opacity:.7},g);
+    el('circle',{r:.415,fill:'none',stroke:'rgba(0,0,0,.5)','stroke-width':.024},g);
+    el('ellipse',{cx:-.14,cy:-.24,rx:.2,ry:.09,fill:`url(#${pf}spec)`,transform:'rotate(-30 -.14 -.24)'},g);
+    el('circle',{cx:-.24,cy:-.2,r:.035,fill:'#FFFFFF',opacity:.85},g);
+    el('path',{d:'M .17 .29 A .34 .34 0 0 0 .33 .06',fill:'none',stroke:'rgba(255,255,255,.4)','stroke-width':.03,'stroke-linecap':'round'},g);
     return;
   }
   if(style==='paw'){ // Cougar paw: the hand sign traced from the supplied artwork (three fingers up, thumb and ring finger touching)
@@ -2263,6 +2317,7 @@ function fillStatsModal(){
 $('rollBtn').onclick=()=>{ac();if(G&&G.online)onlineRoll();else doRoll();};
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&!$('installModal').hidden){$('installModal').hidden=true;return;}
+  if(e.key==='Escape'&&!$('profileModal').hidden){$('profileModal').hidden=true;return;}
   if(!G)return;const tag=(e.target.tagName||'').toLowerCase();if(tag==='input'||tag==='select'||tag==='textarea')return;
   if((e.code==='Space'||e.key===' ')&&G.phase==='roll'&&canAct()&&$('rulesModal').hidden){e.preventDefault();ac();if(G.online)onlineRoll();else doRoll();}
   if(e.key==='Escape'&&COACH&&COACH.view){closeDecision();return;}
@@ -2761,6 +2816,7 @@ function showWin(pi){
   G.players.map((Q,i)=>({Q,i,h:homeCount(Q),prog:Q.marbles.reduce((s,m)=>s+(m.d===null?0:m.d==='C'?40:m.d),0)}))
     .sort((a,b)=>(team.includes(b.i))-(team.includes(a.i))||b.h-a.h||b.prog-a.prog)
     .forEach((r,k)=>{const li=document.createElement('li');li.innerHTML=`<span style="width:20px;color:var(--muted)">${k+1}</span><span class="dot" style="width:14px;height:14px;border-radius:50%;background:${COLORS[r.Q.c].hex}"></span><span style="flex:1">${esc(r.Q.name)}</span><span>${r.h}/4 home</span>`;st.appendChild(li);});
+  renderWinSaved();
   const wb=$('winStats');wb.innerHTML='';const aw=document.createElement('div');aw.className='awards';aw.innerHTML=awards();if(aw.innerHTML)wb.appendChild(aw);
   const rv=rivalries();if(rv)wb.appendChild(rv);
   const sc=document.createElement('div');sc.className='table-scroll';sc.appendChild(statsTable(STAT_COLS,true));wb.appendChild(sc);
@@ -2819,9 +2875,7 @@ function trackEnd(){if(!G||G.winner===null)return;const W=G.players[G.winner];
   track('game_end',Object.assign(gameParams(),{winner:W.type==='human'?'human':'bot',winner_level:W.type,minutes:Math.round(gameElapsed()/6000)/10,rolls:G.stats.reduce((a,x)=>a+x.rolls,0)}));}
 async function firebaseNet(cfg){
   const base=`https://www.gstatic.com/firebasejs/${FB_VER}/`;
-  await loadScript(base+'firebase-app-compat.js');
-  await Promise.all([loadScript(base+'firebase-auth-compat.js'),loadScript(base+'firebase-database-compat.js')]);
-  if(!firebase.apps.length)firebase.initializeApp(cfg);
+  await fbLoad();
   const auth=firebase.auth();
   const existing=await new Promise(res=>{const un=auth.onAuthStateChanged(u=>{un();res(u);});});
   const user=existing||(await auth.signInAnonymously()).user;
@@ -2874,7 +2928,7 @@ const parseLobby=v=>{try{return v?JSON.parse(v):null;}catch(e){return null;}};
 function lobbyEdit(fn){return ON.net.txn(`rooms/${ON.code}/lobby`,cur=>{if(cur===null)return null;const L=JSON.parse(cur);if(fn(L)===false)return;return JSON.stringify(L);});}
 function setOnMsg(t,err){const m=$('onMsg');m.textContent=t;m.classList.toggle('err',!!err);}
 function onlineName(){const v=$('onName').value.trim();if(!v){setOnMsg('Type your name first.',true);$('onName').focus();return null;}safeSet('ra-online-name',v);return v;}
-function firstColor(board,used){const al=BOARDS[board].sectorColors.concat(EXTRA_COLORS);return COLOR_PREF.find(c=>al.includes(c)&&!used.includes(c));}
+function firstColor(board,used){const al=allowedFor(board);return colorOrder(board).find(c=>al.includes(c)&&!used.includes(c));}
 
 async function createRoom(){
   const name=onlineName();if(!name)return;
@@ -2883,7 +2937,7 @@ async function createRoom(){
     const net=await getNet();let code=null;
     for(let i=0;i<8&&!code;i++){const c=genCode();const r=await net.txn(`rooms/${c}/meta`,cur=>cur===null?{created:net.now(),status:'lobby',creator:net.uid}:undefined);if(r.committed&&r.value)code=c;}
     if(!code)throw new Error('Could not create a room. Try again.');
-    const pref=setup.players[0]&&BOARDS[setup.board].sectorColors.concat(EXTRA_COLORS).includes(setup.players[0].c)?setup.players[0].c:firstColor(setup.board,[]);
+    const pref=setup.players[0]&&allowedFor(setup.board).includes(setup.players[0].c)?setup.players[0].c:firstColor(setup.board,[]);
     const L={board:setup.board,theme:setup.theme||'classic',rules:Object.assign({},setup.rules),turnSecs:30,seats:[{uid:net.uid,name,c:pref,type:'human',ball:(setup.players.find(p=>p.type==='human')||{}).ball||'glass'}]};
     await net.set(`rooms/${code}/lobby`,JSON.stringify(L));
     track('room_create');
@@ -2973,7 +3027,7 @@ function renderRoom(){
     btn.append(sv,tx);btn.onclick=()=>lobbyEdit(L2=>{L2.board=bd.kind;fitSetupToBoard({board:bd.kind,players:L2.seats});});
     bp.appendChild(btn);
   });
-  const box=$('roomSeats');box.innerHTML='';const al=BOARDS[L.board].sectorColors.concat(EXTRA_COLORS);
+  const box=$('roomSeats');box.innerHTML='';const al=allowedFor(L.board);
   L.seats.forEach((st,i)=>{
     const row=document.createElement('div');row.className='slot';const mine=st.uid===me,isBot=st.type!=='human';
     const sw=document.createElement('span');sw.className='sw';paintBall(sw,st.c,st.ball);row.appendChild(sw);
@@ -3069,7 +3123,7 @@ function installState(ns,fresh){
   if(G.ev&&G.ev.n)setDie(G.ev.n,false);
   electHost();routeRoom();
   renderLog();renderLive();renderPanel();onlineStatus();updateTimer();
-  if(G.winner!==null&&!ON.winShown&&!$('game').hidden){ON.winShown=true;saveRecords(G.winner);if(ON.isHost)trackEnd();showWin(G.winner);}
+  if(G.winner!==null&&!ON.winShown&&!$('game').hidden){ON.winShown=true;saveRecords(G.winner);recordProfileGame(G.winner);if(ON.isHost)trackEnd();showWin(G.winner);}
 }
 async function presentTransition(ns,fast){
   const ev=ns.ev;if(!ev||!G)return;
@@ -3189,6 +3243,190 @@ function initOnlineCard(){
     if(saved)joinRoom(q);else{setOnMsg(`You're invited to room ${q.toUpperCase()}. Type your name and tap Join.`);$('onName').focus();}}
 }
 
+// ================= ACCOUNT & ALL-TIME STATS =================
+// Every finished game adds one small record for "you": the seat credited to your profile (online: your own seat;
+// on one device: the human named like your Google first name, else the first human in the player list).
+// Records live on this device and, once you sign in with Google, in Firebase under users/<uid>/games/<id>.
+// Totals are plain sums over the records, so merging devices can never count a game twice.
+const GAMES_KEY='ra-games',GAMES_MAX=1500;
+const ACC={user:null,syncing:false,msg:'',err:false,last:null,lastSaved:null,open:false};
+function loadGames(){try{const a=JSON.parse(safeGet(GAMES_KEY)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function saveGames(a){a.sort((x,y)=>x.t-y.t);if(a.length>GAMES_MAX)a.splice(0,a.length-GAMES_MAX);safeSet(GAMES_KEY,JSON.stringify(a));}
+// games that count for whoever is looking: unsigned ones plus the signed-in account's own
+const myGames=()=>{const u=ACC.user?ACC.user.uid:'';return loadGames().filter(g=>!g.u||g.u===u);};
+
+function profileSeat(){
+  if(!G)return -1;
+  if(G.online)return ON.net?G.players.findIndex(p=>p.type==='human'&&p.uid===ON.net.uid):-1;
+  const f=(ACC.user&&ACC.user.first||'').trim().toLowerCase();
+  if(f){const k=G.players.findIndex(p=>isHuman(p)&&(p.name||'').trim().toLowerCase()===f);if(k>=0)return k;}
+  let best=-1;G.players.forEach((p,i)=>{if(isHuman(p)&&(best<0||(p.si??i)<(G.players[best].si??best)))best=i;});return best;
+}
+function buildGameRecord(winnerPi){
+  const pi=profileSeat();if(pi<0)return null;
+  const P=G.players[pi],st=G.stats[pi]||{},teams=isTeams(G),mate=teams?partnerOf(G,pi):-1;
+  const w=(pi===winnerPi||(teams&&mate===winnerPi))?1:0,hc=homeCount(P);
+  const pl=w?1:1+G.players.filter((q,i)=>i!==pi&&i!==mate&&homeCount(q)>hc).length;
+  return {id:String(G.gid||G.rid||Math.random().toString(36).slice(2,10)),t:Date.now(),w,pl,n:G.players.length,b:G.board,tm:teams?1:0,on:G.online?1:0,
+    hu:G.players.filter(isHuman).length,dur:Math.round(gameElapsed()/1000),c:P.c,h:hc,
+    rolls:st.rolls||0,sixes:st.sixes||0,ones:st.ones||0,fours:st.fours||0,kills:st.kills||0,lost:st.lost||0,back:st.back||0,corners:st.corners||0,shortcuts:st.shortcuts||0,dist:st.dist||0,passes:st.passes||0};
+}
+function recordProfileGame(winnerPi){
+  ACC.lastSaved=null;let rec=null;
+  try{rec=buildGameRecord(winnerPi);}catch(e){console.warn(e);}
+  if(!rec)return;
+  rec.u=ACC.user?ACC.user.uid:'';
+  const a=loadGames();if(a.some(g=>g.id===rec.id&&(g.u||'')===rec.u)){ACC.lastSaved=rec.u?'cloud':'device';return;}
+  a.push(rec);saveGames(a);ACC.lastSaved=rec.u?'cloud':'device';
+  if(ACC.user)pushGames([rec]).catch(e=>console.warn('stats sync',e));
+}
+function renderWinSaved(){
+  const el=$('winSaved');if(!el)return;
+  if(!ACC.lastSaved){el.innerHTML='';return;}
+  el.innerHTML=ACC.lastSaved==='cloud'?'Saved to your profile. <button type="button" class="linkbtn" data-act="open">See all-time stats</button>'
+    :'Counted in your all-time stats on this device. '+(ONLINE_AVAILABLE?'<button type="button" class="linkbtn" data-act="signin">Sign in with Google</button> to keep them on every device.':'<button type="button" class="linkbtn" data-act="open">See all-time stats</button>');
+}
+
+// ----- totals -----
+function careerOf(games){
+  const T={games:0,wins:0,kills:0,lost:0,rolls:0,sixes:0,ones:0,fours:0,corners:0,shortcuts:0,dist:0,secs:0,place:0,onG:0,onW:0,tmG:0,tmW:0,hex:[0,0],square:[0,0],bestKills:0,fastest:null,bestStreak:0,streak:0};
+  games.slice().sort((a,b)=>a.t-b.t).forEach(g=>{
+    T.games++;T.wins+=g.w?1:0;T.place+=g.pl||0;['kills','lost','rolls','sixes','ones','fours','corners','shortcuts','dist'].forEach(k=>T[k]+=g[k]||0);T.secs+=g.dur||0;
+    if(g.on){T.onG++;T.onW+=g.w?1:0;}if(g.tm){T.tmG++;T.tmW+=g.w?1:0;}
+    const bk=g.b==='square'?T.square:T.hex;bk[0]++;bk[1]+=g.w?1:0;
+    if((g.kills||0)>T.bestKills)T.bestKills=g.kills||0;
+    if(g.w&&g.dur&&(T.fastest===null||g.dur<T.fastest))T.fastest=g.dur;
+    if(g.w){T.streak++;if(T.streak>T.bestStreak)T.bestStreak=T.streak;}else T.streak=0;
+  });
+  return T;
+}
+const pct=(a,b)=>b?Math.round(100*a/b)+'%':'–';
+const ordinal=n=>n+(['th','st','nd','rd'][(n%100>10&&n%100<14)?0:Math.min(n%10,4)%4]||'th');
+function fmtSecs(s){s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s/60)%60;return h?`${h}h ${String(m).padStart(2,'0')}m`:`${m}m ${String(s%60).padStart(2,'0')}s`;}
+
+// ----- profile screen -----
+const GLOGO='<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.3-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.3-.4-3.9z"/></svg>';
+function renderProfile(){
+  const body=$('profileBody');if(!body)return;
+  const games=myGames(),T=careerOf(games),u=ACC.user;
+  let h='';
+  if(u){
+    h+=`<div class="pf-head"><span class="pf-av" aria-hidden="true">${esc((u.first||'?').slice(0,1).toUpperCase())}</span><div class="pf-who"><b>${esc(u.name)}</b><small>Signed in with Google. Your stats follow you to any device.</small></div>
+      <span class="pf-btns"><button class="btn xs" type="button" data-act="sync"${ACC.syncing?' disabled':''}>${ACC.syncing?'Syncing…':'Sync now'}</button><button class="btn xs ghost" type="button" data-act="signout">Sign out</button></span></div>`;
+  }else if(ONLINE_AVAILABLE){
+    h+=`<div class="pf-cta"><div><b>Keep your all-time stats on every device</b><p>Your finished games are counted on this device already. Sign in with Google to save them to your account, so they follow you to your phone, tablet or a new browser. Only game stats are stored, never shown to other players.</p></div><button class="btn gbtn" type="button" data-act="signin">${GLOGO}<span>Continue with Google</span></button></div>`;
+  }else h+=`<p class="fine">Your finished games are counted on this device.</p>`;
+  h+=`<p class="fine pf-msg${ACC.err?' err':''}" id="pfMsg" aria-live="polite">${esc(ACC.msg||'')}</p>`;
+  if(!T.games){h+=`<p class="pf-empty">No finished games yet. Finish a game and it shows up here.</p>`;}
+  else{
+    const avgPl=T.games?(T.place/T.games).toFixed(1):'–';
+    const tile=(n,l)=>`<div class="pf-tile"><b>${n}</b><span>${l}</span></div>`;
+    h+=`<div class="pf-tiles">${tile(T.games,'Games')}${tile(T.wins,'Wins')}${tile(pct(T.wins,T.games),'Win rate')}${tile(T.kills,'Kills')}${tile(T.lost,'Times aggravated')}${tile(avgPl,'Average finish')}</div>`;
+    const row=(l,v)=>`<div><dt>${l}</dt><dd>${v}</dd></div>`;
+    h+=`<dl class="pf-dl">${row('Time played',fmtSecs(T.secs))}${row('Best win streak',T.bestStreak)}${row('Fastest win',T.fastest===null?'–':fmtSecs(T.fastest))}${row('Most kills in a game',T.bestKills)}
+      ${row('Online games',`${T.onG} <small>(${T.onW} won)</small>`)}${row('Partners games',`${T.tmG} <small>(${T.tmW} won)</small>`)}
+      ${row('6-player board',`${T.hex[0]} <small>(${T.hex[1]} won)</small>`)}${row('4-player board',`${T.square[0]} <small>(${T.square[1]} won)</small>`)}
+      ${row('Rolls · 6s · 1s',`${T.rolls} · ${T.sixes} · ${T.ones}`)}${row('Corners · shortcuts',`${T.corners} · ${T.shortcuts}`)}</dl>`;
+    const rec=games.slice().sort((a,b)=>b.t-a.t).slice(0,10);
+    h+=`<h3 class="pf-h">Recent games</h3><div class="table-scroll"><table class="stats pf-rec"><thead><tr><th>Date</th><th>Result</th><th>Game</th><th>Kills</th><th>Time</th></tr></thead><tbody>`+
+      rec.map(g=>{const d=new Date(g.t),res=g.w?'<b class="pf-win">Won</b>':`${ordinal(g.pl||g.n)} of ${g.n}`;
+        const tag=[g.b==='square'?'4-player':'6-player',g.on?'online':'',g.tm?'partners':''].filter(Boolean).join(' · ');
+        return `<tr><th><span class="dot" style="background:${COLORS[g.c]?COLORS[g.c].hex:'#888'}"></span>${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}</th><td>${res}</td><td>${tag}</td><td>${g.kills||0}</td><td>${fmtSecs(g.dur||0)}</td></tr>`;}).join('')+`</tbody></table></div>`;
+  }
+  h+=`<p class="fine">${u?'':'Stats on this device are only visible here until you sign in. '}On a shared device, stats go to the human named like your Google first name, or the first human in the player list. Online, they go to your own seat.</p>`;
+  body.innerHTML=h;
+  const lab=$('profLabel');if(lab)lab.textContent=u?u.first.slice(0,12):'Profile';
+}
+function acctMsg(t,err){ACC.msg=t||'';ACC.err=!!err;const m=$('pfMsg');if(m){m.textContent=ACC.msg;m.classList.toggle('err',!!err);}}
+function openProfile(){ACC.msg='';ACC.err=false;renderProfile();$('profileModal').hidden=false;$('profileClose').focus();if(ACC.user)syncGames();}
+$('btnProfile').onclick=openProfile;
+$('profileClose').onclick=()=>{$('profileModal').hidden=true;};
+function acctClick(e){const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
+  if(a==='signin')signInGoogle();else if(a==='signout')signOutGoogle();else if(a==='sync')syncGames(true);else if(a==='open')openProfile();}
+$('profileBody').addEventListener('click',acctClick);$('winSaved').addEventListener('click',acctClick);
+
+// ----- Google sign-in (Firebase Auth) -----
+let FBL=null;
+function fbLoad(){
+  return FBL||(FBL=(async()=>{const base=`https://www.gstatic.com/firebasejs/${FB_VER}/`;
+    await loadScript(base+'firebase-app-compat.js');
+    await Promise.all([loadScript(base+'firebase-auth-compat.js'),loadScript(base+'firebase-database-compat.js')]);
+    if(!firebase.apps.length)firebase.initializeApp(window.RED_ARSE_FIREBASE);return firebase;})().catch(e=>{FBL=null;throw e;}));
+}
+const acctFromUser=u=>u&&!u.isAnonymous?{uid:u.uid,name:u.displayName||'Player',first:((u.displayName||'Player').trim().split(/\s+/)[0]||'Player'),photo:u.photoURL||''}:null;
+function authError(e){const c=(e&&e.code)||'';
+  if(c==='auth/operation-not-allowed')return "Google sign-in isn't switched on for this game yet (Firebase console > Authentication > Sign-in method > Google).";
+  if(c==='auth/unauthorized-domain')return "This web address isn't on the Firebase authorized-domains list yet (Authentication > Settings > Authorized domains).";
+  if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request')return 'Sign-in was cancelled.';
+  if(c==='auth/network-request-failed')return "Couldn't reach Google. Check your connection and try again.";
+  return (e&&e.message)||'Sign-in failed.';}
+function setAccount(u){
+  const was=ACC.user&&ACC.user.uid;ACC.user=u;
+  if((u&&u.uid)!==was&&!ON.code&&ON.net)ON.net=null; // the next online action picks up the new identity
+  if(u){adoptName();}
+  const lab=$('profLabel');if(lab)lab.textContent=u?u.first.slice(0,12):'Profile';
+  if(!$('profileModal').hidden)renderProfile();
+  if(u&&(u.uid!==was))syncGames();
+}
+function adoptName(){
+  const f=ACC.user&&ACC.user.first;if(!f)return;
+  if(!safeGet('ra-online-name')){safeSet('ra-online-name',f);const el=$('onName');if(el&&!el.value)el.value=f;}
+  const p=setup&&setup.players.find(q=>q.type==='human');
+  if(p&&/^(You|Player \d+)$/.test(p.name)){p.name=f.slice(0,18);saveSetup();if(!$('lobby').hidden)renderLobby();}
+}
+async function signInGoogle(){
+  if(ON.code){acctMsg('Leave your online room before signing in.',true);return;}
+  acctMsg('Opening Google…');
+  try{
+    if(ONLINE_LOCAL){const u={uid:'gtest1',name:'Test Player',first:'Test',photo:''};safeSet('ra-fakeacct',JSON.stringify(u));setAccount(u);acctMsg('');return;}
+    const fb=await fbLoad(),auth=fb.auth(),prov=new fb.auth.GoogleAuthProvider();prov.setCustomParameters({prompt:'select_account'});
+    try{const r=await auth.signInWithPopup(prov);safeSet('ra-acct','1');setAccount(acctFromUser(r.user));acctMsg('');}
+    catch(e){
+      if(e&&(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment')){safeSet('ra-redir','1');acctMsg('Taking you to Google…');await auth.signInWithRedirect(prov);return;}
+      throw e;}
+  }catch(e){acctMsg(authError(e),true);}
+}
+async function signOutGoogle(){
+  if(ON.code){acctMsg('Leave your online room before signing out.',true);return;}
+  try{if(ONLINE_LOCAL)safeSet('ra-fakeacct','');else{const fb=await fbLoad();await fb.auth().signOut();}
+    safeSet('ra-acct','0');setAccount(null);acctMsg('Signed out. Games you finish now are saved on this device only.');}
+  catch(e){acctMsg(authError(e),true);}
+}
+async function accountInit(){
+  if(!ONLINE_AVAILABLE)return;
+  if(ONLINE_LOCAL){try{const s=JSON.parse(safeGet('ra-fakeacct')||'null');if(s)setAccount(s);}catch(e){}return;}
+  if(safeGet('ra-acct')!=='1'&&safeGet('ra-redir')!=='1')return; // load the Firebase SDK on startup only for people who signed in before
+  try{const fb=await fbLoad(),auth=fb.auth();
+    if(safeGet('ra-redir')==='1'){safeSet('ra-redir','');try{const r=await auth.getRedirectResult();if(r&&r.user)safeSet('ra-acct','1');}catch(e){acctMsg(authError(e),true);}}
+    auth.onAuthStateChanged(u=>setAccount(acctFromUser(u)));
+  }catch(e){}
+}
+
+// ----- cloud sync (records, keyed by game id) -----
+async function cloudGames(){
+  const u=ACC.user;
+  if(ONLINE_LOCAL){try{return JSON.parse(safeGet('ra-fakecloud-'+u.uid)||'{}')||{};}catch(e){return {};}}
+  const fb=await fbLoad();return (await fb.database().ref('users/'+u.uid+'/games').get()).val()||{};
+}
+async function pushGames(recs){
+  const u=ACC.user;if(!u||!recs.length)return;const upd={};
+  recs.forEach(r=>{const c=Object.assign({},r);delete c.u;upd[r.id]=c;});
+  if(ONLINE_LOCAL){const k='ra-fakecloud-'+u.uid;let cur={};try{cur=JSON.parse(safeGet(k)||'{}')||{};}catch(e){}safeSet(k,JSON.stringify(Object.assign(cur,upd)));return;}
+  const fb=await fbLoad();await fb.database().ref('users/'+u.uid+'/games').update(upd);
+}
+async function syncGames(manual){
+  const u=ACC.user;if(!u||ACC.syncing)return;ACC.syncing=true;if(manual)acctMsg('Syncing…');if(!$('profileModal').hidden)renderProfile();
+  try{
+    const cloud=await cloudGames(),a=loadGames(),mineIds=new Set(),push=[];let pulled=0,claimed=0;
+    a.forEach(g=>{if(!g.u||g.u===u.uid){mineIds.add(g.id);if(g.u!==u.uid){g.u=u.uid;claimed++;}if(!cloud[g.id])push.push(g);}});
+    Object.keys(cloud).forEach(id=>{if(!mineIds.has(id)&&cloud[id]&&typeof cloud[id].t==='number'){a.push(Object.assign({},cloud[id],{id,u:u.uid}));pulled++;}});
+    if(pulled||claimed)saveGames(a);
+    await pushGames(push);
+    ACC.last=Date.now();acctMsg(manual||pulled||push.length?`Synced. ${pulled?pulled+' game'+(pulled===1?'':'s')+' added from your account. ':''}${push.length?push.length+' game'+(push.length===1?'':'s')+' saved to your account.':''}`.trim()||'Everything is up to date.':'',false);
+  }catch(e){const c=(e&&e.code)||'';acctMsg(c==='PERMISSION_DENIED'||/permission/i.test(e&&e.message||'')?"Couldn't sync: the database rules for stats haven't been published yet (see the README).":"Couldn't sync right now. Your games are safe on this device and will sync next time.",true);}
+  ACC.syncing=false;if(!$('profileModal').hidden)renderProfile();
+}
+
 // ================= BOOT =================
 function snapshot(){return {setup,game:G&&!G.online?{board:G.board,rules:G.rules,players:G.players,stats:G.stats,turn:G.turn,log:G.log,winner:G.winner,started:G.started}:null};}
 function start(data){
@@ -3203,6 +3441,7 @@ function start(data){
     $('lobby').hidden=true;$('game').hidden=false;$('tools').hidden=false;buildLive();renderLog();beginTurn();
   }else showLobby();
   initOnlineCard();
+  accountInit();
   setTimeout(initAnalytics,1500);
 }
 window.claude?.hot?.snapshot?.(snapshot);
