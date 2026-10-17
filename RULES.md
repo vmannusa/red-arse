@@ -126,7 +126,7 @@ After every move the game plays the rest of the match out 300 times with medium-
 ## Setup screen
 - **Play online:** type your name once, then either **Create room** (host a game and share the link or code) or enter a code and **Join**.
 - **Start game** is at the top of the Players list as well as at the bottom of the page.
-- **Colors:** picking a color someone else has swaps the two seats. Bots with a default name ("Orange Bot") rename themselves to match their new color; a name you typed stays. New players and bots get the first free color.
+- **Colors:** picking a color someone else has swaps the two seats. Bots with a default name ("Orange Bot") rename themselves to match their new color; a name you typed stays. New players and bots get the first free color. Orange, Black and White can be picked on either board (on the 4-player board they take an open seat, and that seat's base, home and star are drawn in the color).
 - **Shuffle seats** puts everyone in a random seat (and that seat's color).
 - **Rules** shows how many are on and folds away once you've played a game; **See how** opens a small diagram for inside corners, the center hole, the back-past-start shortcut and raiding homes (also in How to play).
 - **Board theme** previews right away on the setup screen: page colors and the little boards change to match.
@@ -139,12 +139,20 @@ After every move the game plays the rest of the match out 300 times with medium-
   - **Cougar Red:** white board with scarlet lettering and trim, white-ringed bases, paw prints, HOUSTON along the bottom, a GO COOGS pennant and a football.
   - **Christmas:** evergreen board with a candy-cane rim, string lights, snow along the top, a Christmas tree for each base, holly, snowflakes in the logo, and a little tree and snowflakes around the board.
   - Each theme has its own **sounds** for the dice, moves, kills, getting home, coming out and winning: bones and a ghostly wail for Halloween; drumline, whistles, crowd and a charge for Cougar Red; sleigh bells, chimes and Jingle Bells for Christmas.
-- **Marbles:** Glass, Golf, Basketball, Tennis, Baseball, Pumpkin, Ornament or Cougar paw (the solid hand sign: index, middle and pinky up, thumb and ring finger touching), drawn in the player's color. Picking a theme sets everyone to its marble (Halloween: pumpkins, Cougar Red: Cougar paws, Christmas: ornaments, Classic: glass); after that each player can change their own next to their color (online, everyone picks their own and the host picks for bots). The turn panel, player list and review show each player's marble.
+- **Marbles:** Glass, Golf, Basketball, Tennis, Baseball, Pumpkin, Ornament, Cougar paw or BUND (a photo marble) (the solid hand sign: index, middle and pinky up, thumb and ring finger touching), drawn in the player's color. Picking a theme sets everyone to its marble (Halloween: pumpkins, Cougar Red: Cougar paws, Christmas: ornaments, Classic: glass); after that each player can change their own next to their color (online, everyone picks their own and the host picks for bots). The turn panel, player list and review show each player's marble.
 
 ## On your phone
 - **Add to Home Screen** (setup screen, next to How to play) puts Red Arse on your home screen with its own icon, and it opens full screen like an app. On Android and desktop Chrome it installs straight from the button; on iPhone it shows the steps (Share, then Add to Home Screen), since iPhones only allow that from the Share menu.
 - **Refresh** (top right on every screen) reloads the page to pick up the latest version, since an app added to the home screen has no browser refresh button. During a game it asks you to tap twice, because refreshing leaves the game.
 - Shared links show the Red Arse picture and title in Messages and other apps.
+
+## All-time stats and Google sign-in
+- The **Profile** button (top right, every screen) shows your all-time record: games, wins, win rate, kills, times aggravated, average finish, time played, best win streak, fastest win, most kills in a game, online and Partners results, the 4- and 6-player boards, and your last 10 games.
+- Only finished games count. Restarting or leaving a game midway doesn't.
+- **Whose stats?** Online, your own seat. On one shared device, the human named like your Google first name, otherwise the first human in the player list.
+- Games are always saved on the device. **Continue with Google** saves them to your account too, so they follow you to any phone or browser. Sign in on a new device and your games come down automatically; games finished while signed out are added to your account the first time you sign in. Sign out any time; your account's games stay in the cloud.
+- You can't sign in or out while you're in an online room.
+- Your Google name is used to fill in your online name and the first human's default name. Only game stats are stored, and other players never see them.
 
 ## Online rooms
 - **Game feed and chat:** moves, kills, rolls for first, and players going away or coming back all show in the game feed. In online games the feed also has a chat bar and quick-chat buttons (COCKED, Nice roll, GG, plus "Back it up Terry" after a 4 and "Nice 1" after a 1). Messages are up to 200 characters, a few per few seconds, and stay with the room.
