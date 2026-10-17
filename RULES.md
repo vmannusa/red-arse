@@ -139,10 +139,11 @@ After every move the game plays the rest of the match out 300 times with medium-
   - **Cougar Red:** white board with scarlet lettering and trim, white-ringed bases, paw prints, HOUSTON along the bottom, a GO COOGS pennant and a football.
   - **Christmas:** evergreen board with a candy-cane rim, string lights, snow along the top, a Christmas tree for each base, holly, snowflakes in the logo, and a little tree and snowflakes around the board.
   - Each theme has its own **sounds** for the dice, moves, kills, getting home, coming out and winning: bones and a ghostly wail for Halloween; drumline, whistles, crowd and a charge for Cougar Red; sleigh bells, chimes and Jingle Bells for Christmas.
-- **Marbles:** Glass, Golf, Basketball, Tennis, Baseball, Pumpkin, Ornament or Cougar paw (the hand sign: index, middle and pinky up, thumb and ring finger touching), drawn in the player's color. Picking a theme sets everyone to its marble (Halloween: pumpkins, Cougar Red: Cougar paws, Christmas: ornaments, Classic: glass); after that each player can change their own next to their color (online, everyone picks their own and the host picks for bots). The turn panel, player list and review show each player's marble.
+- **Marbles:** Glass, Golf, Basketball, Tennis, Baseball, Pumpkin, Ornament or Cougar paw (the solid hand sign: index, middle and pinky up, thumb and ring finger touching), drawn in the player's color. Picking a theme sets everyone to its marble (Halloween: pumpkins, Cougar Red: Cougar paws, Christmas: ornaments, Classic: glass); after that each player can change their own next to their color (online, everyone picks their own and the host picks for bots). The turn panel, player list and review show each player's marble.
 
 ## On your phone
 - **Add to Home Screen** (setup screen, next to How to play) puts Red Arse on your home screen with its own icon, and it opens full screen like an app. On Android and desktop Chrome it installs straight from the button; on iPhone it shows the steps (Share, then Add to Home Screen), since iPhones only allow that from the Share menu.
+- **Refresh** (top right on every screen) reloads the page to pick up the latest version, since an app added to the home screen has no browser refresh button. During a game it asks you to tap twice, because refreshing leaves the game.
 - Shared links show the Red Arse picture and title in Messages and other apps.
 
 ## Online rooms
