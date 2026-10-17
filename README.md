@@ -44,6 +44,14 @@ Bots and pass-and-play work right away. Online rooms stay hidden until Part 2 is
 7. Paste it into `config.js` in place of `null` (keep `window.RED_ARSE_FIREBASE = { ... };`). Make sure it includes `databaseURL`.
 8. Commit `config.js` to the repo. In a minute the setup screen shows **Play online**.
 
+## Part 3: Google sign-in for all-time stats (optional, free)
+
+The **Profile** button (top right) shows your all-time record. Finished games are always counted on the device. Signing in with Google saves them to your account so they follow you to any phone or browser.
+
+**Status: needs these three steps in the Firebase console (project `red-arse`) before the Google button works.** (1) **Build > Authentication > Sign-in method > Add new provider > Google**: switch on **Enable**, pick a support email, Save. (2) **Authentication > Settings > Authorized domains**: make sure `vmannusa.github.io` is in the list (it is if online play already works). (3) **Build > Realtime Database > Rules**: paste the current `database.rules.json` (it adds a `users/<uid>/games` section that only that signed-in Google user can read or write) and **Publish**.
+
+How it works: each finished game adds one small record (result, place, kills, rolls, time, board) under `users/<uid>/games/<game id>`. Totals are sums over those records, so signing in on a second device merges the lists without double counting. Nothing is shown to other players. Anonymous (not signed in) players can't write stats.
+
 ## How online rooms work
 
 - **Create room** gives a 4-letter code and an invite link. Friends open the link, type a name, and join.
