@@ -1,5 +1,9 @@
 # Red Arse – Change log
 
+## 2026-10-17
+- **Refresh button** in the top right of every screen, for phones where the page was added to the Home Screen and there is no browser refresh. In a game or room it takes two taps so you don't leave by accident.
+- **Cougar paw marble redrawn** from the UH hand-sign artwork: a solid hand with three fingers up and the thumb and ring finger meeting in a loop.
+
 ## 2026-10-16
 - The 1 banner now reads **"Nice, One"**.
 - **Partners mode** (Game settings, or the host in an online room; 4 or 6 players): partners sit opposite and win together when both homes are full. Once your 4 are home your rolls move your partner's marbles, and any roll with no move for your own marbles moves your partner's instead. Team tags in the player lists, team chance-to-win and review, a shared win screen, and bots that won't hit their partner unless forced.
