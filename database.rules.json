@@ -20,6 +20,42 @@
           }
         }
       }
+    },
+    "feedback": {
+      "$id": {
+        ".write": "auth != null && !data.exists()",
+        ".validate": "newData.hasChildren(['t', 'ty', 'm'])",
+        "t": {
+          ".validate": "newData.isNumber()"
+        },
+        "ty": {
+          ".validate": "newData.val() === 'bug' || newData.val() === 'idea'"
+        },
+        "m": {
+          ".validate": "newData.isString() && newData.val().length >= 3 && newData.val().length <= 1500"
+        },
+        "n": {
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "c": {
+          ".validate": "newData.isString() && newData.val().length <= 80"
+        },
+        "ua": {
+          ".validate": "newData.isString() && newData.val().length <= 200"
+        },
+        "scr": {
+          ".validate": "newData.isString() && newData.val().length <= 20"
+        },
+        "g": {
+          ".validate": "newData.isString() && newData.val().length <= 120"
+        },
+        "u": {
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
     }
   }
 }
