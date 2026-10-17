@@ -6,6 +6,20 @@
         ".write": "auth != null",
         ".validate": "$code.matches(/^[A-Z]{4}$/)"
       }
+    },
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "games": {
+          ".write": "auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider === 'google.com'",
+          "$gid": {
+            ".validate": "$gid.matches(/^[A-Za-z0-9_-]{4,24}$/) && newData.hasChildren(['t', 'w', 'n'])",
+            "$field": {
+              ".validate": "newData.isNumber() || newData.isString()"
+            }
+          }
+        }
+      }
     }
   }
 }
