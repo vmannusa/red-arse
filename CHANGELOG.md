@@ -1,5 +1,9 @@
 # Red Arse – Change log
 
+## 2026-10-18
+- **Popups on/off button** (top bar, next to Sound) for the banners like "aggravated", "Nice, One" and "COCKED". Your choice is remembered.
+- **Popups keep up on Fast and Turbo:** banners now stay up for a shorter time as the bot speed goes up (about 2 seconds on Normal, 1.2 on Fast, 0.75 on Turbo), and if rolls come in faster than banners can show, the old ones are skipped so the newest one shows instead of trailing behind.
+
 ## 2026-10-17
 - **Report a bug or idea** (footer, every screen): pick Bug or Idea, type a note, and send. No sign-in needed. Notes go to the developer's Firebase database (the rules let anyone add one but nobody read them back). If it can't send, the form offers a pre-filled GitHub issue instead.
 - **Donate to support the project** link in the footer, opening the developer's PayPal page in a new tab.
