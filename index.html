@@ -101,6 +101,7 @@ button,input,select{font:inherit;color:inherit}
 .kill-flash{position:absolute;left:50%;top:13%;transform:translate(-50%,-8px) scale(.96);z-index:3;pointer-events:none;opacity:0;
   background:rgba(20,10,6,.86);color:#F6EAD6;border:1px solid rgba(255,90,90,.6);border-radius:12px;padding:8px 16px;font:800 clamp(14px,2.4vmin,20px)/1.2 var(--font-display);
   text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.35);transition:opacity .25s,transform .25s;width:max-content;max-width:88%;text-wrap:balance}
+.kill-flash.quick{transition-duration:.12s}
 .kill-flash.on{opacity:1;transform:translate(-50%,0) scale(1)}
 .board-wrap.themed #boardStatic{filter:drop-shadow(0 0 14px var(--theme-glow))}
 .kill-flash b{font-weight:900}
@@ -476,6 +477,7 @@ table.pf-rec td,table.pf-rec th{text-align:left}table.pf-rec td:nth-child(n+4),t
       <button class="tbtn" id="btnRules" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/></svg>Rules</button>
       <button class="tbtn" id="btnStats" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>Stats</button>
       <button class="tbtn" id="btnSound" type="button" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path id="sndWave" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg><span>Sound on</span></button>
+      <button class="tbtn" id="btnPopups" type="button" aria-pressed="true" title="Banners like Aggravated and Nice, One"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v10H10l-4 4v-4H4z"/></svg><span>Popups on</span></button>
       <button class="tbtn" id="btnRestart" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/></svg><span>Restart</span></button>
       <button class="tbtn" id="btnLobby" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.8-3.3 3.2-5 6-5s5.2 1.7 6 5M17 7v6M14 10h6"/></svg><span>Players</span></button>
     </nav>
@@ -2238,14 +2240,35 @@ function animPath(node,pts,o={}){
   });
 }
 // Board banners: kills and the fun callouts. They queue up so two in a row both get seen.
-let KFT=null,KFQ=[];
+let KFT=null,KFQ=[],KFS=0,KFSHOW=false;
+const POP={on:true};
 const nameTag=Q=>`<b style="color:${Q.c>=6?(Q.c===7?'#FFFFFF':'#C9C9D2'):COLORS[Q.c].light}">${esc(Q.name)}</b>`;
-function flashMsg(html,tone){if(KFQ.length>=4)return;KFQ.push({html,tone});if(KFQ.length===1)showFlash();}
+// How long a banner stays up follows the game speed, so on Fast and Turbo they keep up with the rolls.
+// Only the newest one waits its turn: if rolls come faster than banners can show, the stale ones are dropped.
+const popScale=()=>reduced?1:(G&&!G.online?({normal:1,fast:.6,turbo:.38}[(setup&&setup.botSpeed)||'normal']||1):1);
+function flashMsg(html,tone){
+  if(!POP.on)return;
+  if(KFQ.length>=2)KFQ.length=1; // drop what's piled up, keep the one on screen
+  KFQ.push({html,tone});
+  if(KFQ.length===1){showFlash();return;}
+  // something is already showing: let it finish its minimum, then move on to the newest
+  const k=popScale(),minShow=Math.round(520*Math.max(.7,k)),since=Date.now()-KFS;
+  clearTimeout(KFT);KFT=setTimeout(endFlash,Math.max(0,minShow-since));
+}
+function endFlash(){
+  const kf=$('killFlash');if(!kf){KFQ=[];return;}
+  kf.classList.remove('on');KFSHOW=false;
+  setTimeout(()=>{KFQ.shift();if(POP.on)showFlash();else KFQ=[];},Math.round(260*Math.max(.5,popScale())));
+}
 function showFlash(){
   const kf=$('killFlash');if(!kf){KFQ=[];return;}const m=KFQ[0];if(!m)return;
-  kf.className='kill-flash t-'+m.tone;kf.innerHTML=m.html;void kf.offsetWidth;kf.classList.add('on');
-  clearTimeout(KFT);KFT=setTimeout(()=>{kf.classList.remove('on');setTimeout(()=>{KFQ.shift();showFlash();},260);},reduced?1400:1900);
+  const k=popScale();
+  kf.className='kill-flash t-'+m.tone+(k<1?' quick':'');kf.innerHTML=m.html;void kf.offsetWidth;kf.classList.add('on');
+  KFS=Date.now();KFSHOW=true;
+  clearTimeout(KFT);KFT=setTimeout(endFlash,Math.round(1900*k));
 }
+function clearFlash(){clearTimeout(KFT);KFQ=[];KFSHOW=false;const kf=$('killFlash');if(kf)kf.classList.remove('on');}
+function setPopups(on){POP.on=!!on;safeSet('ra-popups',on?'1':'0');const b=$('btnPopups');b.setAttribute('aria-pressed',on?'true':'false');b.querySelector('span').textContent=on?'Popups on':'Popups off';if(!on)clearFlash();}
 function killFlash(api,vpi){if(!G)return;const A=G.players[api],V=G.players[vpi];if(!A||!V)return;flashMsg(`${nameTag(A)}<span class="kf-v">aggravated</span>${nameTag(V)}`,'kill');}
 const FX_TEXT={nice1:()=>`<span class="kf-big">Nice, One</span>`,cocked:()=>`<span class="kf-big">COCKED</span>`,terry:()=>`<span class="kf-big">Back it up Terry</span>`,crazy:Q=>`${nameTag(Q)}<span class="kf-v">is rolling crazy</span>`,phil:(Q,v)=>v?`${nameTag(Q)}<span class="kf-v">is sitting at home on the couch</span>`:`${nameTag(Q)}<span class="kf-v">had Phil luck</span>`};
 function fxFlash(k,pi,v){if(!G||!FX_TEXT[k])return;const Q=G.players[pi];if(Q)flashMsg(FX_TEXT[k](Q,v===undefined?(Math.random()<.5?0:1):v),k);}
@@ -2818,6 +2841,7 @@ $('statsModal').addEventListener('click',e=>{if(e.target.id==='statsModal')$('st
 document.querySelectorAll('#speedSeg button').forEach(b=>b.onclick=()=>setBotSpeed(b.dataset.s));
 function setSound(on){SND.on=on;safeSet('aggravation-sound',on?'1':'0');const b=$('btnSound');b.setAttribute('aria-pressed',on);b.querySelector('span').textContent=on?'Sound on':'Sound off';$('sndWave').style.display=on?'':'none';}
 $('btnSound').onclick=()=>setSound(!SND.on);
+$('btnPopups').onclick=()=>setPopups(!POP.on);
 function armButton(btn,label,fn){
   if(btn.classList.contains('armed')){btn.classList.remove('armed');btn.querySelector('span').textContent=btn.dataset.label;fn();return;}
   btn.dataset.label=btn.querySelector('span').textContent;btn.classList.add('armed');btn.querySelector('span').textContent=label;
@@ -3512,7 +3536,7 @@ function snapshot(){return {setup,game:G&&!G.online?{board:G.board,rules:G.rules
 function start(data){
   data=data||{};
   setup=data.setup||loadSetup();
-  setSound(safeGet('aggravation-sound')!=='0');renderSpeed();
+  setSound(safeGet('aggravation-sound')!=='0');setPopups(safeGet('ra-popups')!=='0');renderSpeed();
   applyThemeUI(setup.theme);
   const g=data.game;
   if(g&&g.winner===null&&g.board&&g.stats&&g.players.every(p=>typeof p.s==='number')){
