@@ -3429,6 +3429,7 @@ function recordProfileGame(winnerPi){
   const a=loadGames();if(a.some(g=>g.id===rec.id&&(g.u||'')===rec.u)){ACC.lastSaved=rec.u?'cloud':'device';return;}
   a.push(rec);saveGames(a);ACC.lastSaved=rec.u?'cloud':'device';
   if(ACC.user)pushGames([rec]).then(()=>pushBoard()).catch(e=>console.warn('stats sync',e));
+  else pushBoard();
 }
 function renderWinSaved(){
   const el=$('winSaved');if(!el)return;
@@ -3464,11 +3465,11 @@ function renderProfile(){
     h+=`<div class="pf-head"><span class="pf-av" aria-hidden="true">${esc((u.first||'?').slice(0,1).toUpperCase())}</span><div class="pf-who"><b>${esc(u.name)}</b><small>Signed in with Google. Your stats follow you to any device.</small></div>
       <span class="pf-btns"><button class="btn xs" type="button" data-act="sync"${ACC.syncing?' disabled':''}>${ACC.syncing?'Syncing…':'Sync now'}</button><button class="btn xs ghost" type="button" data-act="signout">Sign out</button></span></div>`;
   }else if(ONLINE_AVAILABLE){
-    h+=`<div class="pf-cta"><div><b>Keep your all-time stats on every device</b><p>Your finished games are counted on this device already. Sign in with Google to save them to your account, so they follow you to your phone, tablet or a new browser. Only game stats are stored. Signed-in players appear on the shared leaderboard under a made-up name (you can use your own name or hide in your Profile).</p></div><button class="btn gbtn" type="button" data-act="signin">${GLOGO}<span>Continue with Google</span></button></div>`;
+    h+=`<div class="pf-cta"><div><b>Keep your all-time stats on every device</b><p>Your finished games are counted on this device already. Sign in with Google to save them to your account, so they follow you to your phone, tablet or a new browser. Only game stats are stored. Everyone who finishes a game, signed in or not, appears on the shared leaderboard under a made-up name; signing in lets you use your own name instead, and you can hide below.</p></div><button class="btn gbtn" type="button" data-act="signin">${GLOGO}<span>Continue with Google</span></button></div>`;
   }else h+=`<p class="fine">Your finished games are counted on this device.</p>`;
-  if(u&&ONLINE_AVAILABLE){const md=lbMode(),opt=(v,t)=>`<label class="pf-lbo"><input type="radio" name="lbMode" value="${v}"${md===v?' checked':''}><span>${t}</span></label>`;
-    h+=`<fieldset class="pf-lb"><legend><b>Your name on the leaderboard</b></legend><p class="fine" style="margin:0 0 6px">Everyone who signs in is listed on the shared leaderboard with their all-time totals. Pick how you appear.</p>`+
-      opt('alias',`A made-up name: <b>${esc(lbAlias(u.uid))}</b>`)+opt('name',`My name: <b>${esc(lbRealName())}</b> <small>(first name and last initial)</small>`)+opt('hide','Hide me from the leaderboard')+`</fieldset>`;}
+  if(ONLINE_AVAILABLE){let md=lbMode();if(!u&&md==='name')md='alias';const opt=(v,t)=>`<label class="pf-lbo"><input type="radio" name="lbMode" value="${v}"${md===v?' checked':''}><span>${t}</span></label>`,kn=lbKnownUid();
+    h+=`<fieldset class="pf-lb"><legend><b>Your name on the leaderboard</b></legend><p class="fine" style="margin:0 0 6px">Everyone who finishes a game is on the shared leaderboard with their all-time totals${u?'':', even without signing in'}. Pick how you appear.</p>`+
+      opt('alias',`A made-up name${kn?`: <b>${esc(lbAlias(kn))}</b>`:' <small>(shown after your first finished game)</small>'}`)+(u?opt('name',`My name: <b>${esc(lbRealName())}</b> <small>(first name and last initial)</small>`):'')+opt('hide','Hide me from the leaderboard')+`</fieldset>`;}
   h+=`<p class="fine pf-msg${ACC.err?' err':''}" id="pfMsg" aria-live="polite">${esc(ACC.msg||'')}</p>`;
   if(!T.games){h+=`<p class="pf-empty">No finished games yet. Finish a game and it shows up here.</p>`;}
   else{
@@ -3532,13 +3533,14 @@ async function signInGoogle(){
   if(ON.code){acctMsg('Leave your online room before signing in.',true);return;}
   acctMsg('Opening Google…');
   try{
-    if(ONLINE_LOCAL){const u={uid:'gtest1',name:'Test Player',first:'Test',photo:''};safeSet('ra-fakeacct',JSON.stringify(u));setAccount(u);acctMsg('');return;}
+    if(ONLINE_LOCAL){const gid=safeGet('ra-guestid');if(gid)await lbWrite(gid,null).catch(()=>{});const u={uid:'gtest1',name:'Test Player',first:'Test',photo:''};safeSet('ra-fakeacct',JSON.stringify(u));setAccount(u);acctMsg('');return;}
     const fb=await fbLoad(),auth=fb.auth(),prov=new fb.auth.GoogleAuthProvider();prov.setCustomParameters({prompt:'select_account'});
+    {const cu=auth.currentUser;if(cu&&cu.isAnonymous)await lbWrite(cu.uid,null).catch(()=>{});} // the games move to the Google account, so drop the device's own line
     try{const r=await auth.signInWithPopup(prov);safeSet('ra-acct','1');setAccount(acctFromUser(r.user));acctMsg('');}
     catch(e){
       if(e&&(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment')){safeSet('ra-redir','1');acctMsg('Taking you to Google…');await auth.signInWithRedirect(prov);return;}
       throw e;}
-  }catch(e){acctMsg(authError(e),true);}
+  }catch(e){acctMsg(authError(e),true);pushBoard();}
 }
 async function signOutGoogle(){
   if(ON.code){acctMsg('Leave your online room before signing out.',true);return;}
@@ -3582,11 +3584,12 @@ async function syncGames(manual){
 }
 
 // ================= LEADERBOARD (everyone's all-time totals) =================
-// Opt-in: a signed-in player who ticks "Show me on the leaderboard" publishes ONE small totals record at leaderboard/<uid>
-// (name, games, wins, kills, ...). Anyone using the game can read the list; only the owner can write their own record.
-const LB={rows:null,sort:'w',loading:false,err:'',at:0};
-// Everyone who is signed in is listed. By default under a made-up name (stable for the account), or under their own
-// first name and last initial if they choose, or not at all.
+// Everyone who finishes a game publishes ONE small totals record at leaderboard/<uid> (made-up name, games, wins, kills, ...).
+// Guests use their anonymous Firebase sign-in as the uid; Google players use their account. Anyone using the game can
+// read the list; only the owner can write their own record.
+const LB={rows:null,sort:'w',loading:false,err:'',at:0,myUid:''};
+// Everybody is listed. By default under a made-up name (stable for the account or device), or, for Google players, under
+// their own first name and last initial if they choose, or not at all.
 const LB_MODES=['alias','name','hide'];
 const lbMode=()=>{const m=safeGet('ra-lbmode');return LB_MODES.includes(m)?m:'alias';};
 const LB_ADJ=['Sneaky','Grumpy','Wobbly','Spicy','Lucky','Dizzy','Cranky','Jolly','Sassy','Salty','Bouncy','Clumsy','Fancy','Mighty','Sleepy','Zesty','Rowdy','Cheeky','Crafty','Dapper','Feisty','Goofy','Plucky','Quirky','Rascal','Snazzy','Soggy','Speedy','Stubborn','Sly','Rusty','Fluffy','Gritty','Hasty','Jazzy','Loud','Nifty','Perky','Peppy','Shady','Silly','Slick','Smug','Snappy','Tipsy','Wacky','Witty','Zippy'];
@@ -3594,25 +3597,45 @@ const LB_ANI=['Walrus','Badger','Llama','Otter','Moose','Pelican','Possum','Goph
 function lbAlias(uid){let h=2166136261;const t=String(uid||'x');for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
   return LB_ADJ[h%LB_ADJ.length]+' '+LB_ANI[Math.floor(h/LB_ADJ.length)%LB_ANI.length];}
 function lbRealName(){const u=ACC.user;if(!u)return '';const p=(u.name||u.first||'Player').trim().split(/\s+/),f=p[0]||'Player',li=p.length>1?p[p.length-1][0].toUpperCase()+'.':'';return (f+(li?' '+li:'')).slice(0,30);}
-function lbName(){const u=ACC.user;if(!u)return '';return lbMode()==='name'?lbRealName():lbAlias(u.uid);}
-function lbRecord(){
+function lbName(uid){return lbMode()==='name'&&ACC.user?lbRealName():lbAlias(uid);}
+function lbRecord(uid){
   const T=careerOf(myGames());if(!T.games)return null;
-  return {n:lbName(),g:T.games,w:T.wins,k:T.kills,l:T.lost,p:T.place,x:T.secs,bs:T.bestStreak,bk:T.bestKills,og:T.onG,ow:T.onW,tg:T.tmG,tw:T.tmW,t:Date.now()};
+  return {n:lbName(uid),g:T.games,w:T.wins,k:T.kills,l:T.lost,p:T.place,x:T.secs,bs:T.bestStreak,bk:T.bestKills,og:T.onG,ow:T.onW,tg:T.tmG,tw:T.tmW,t:Date.now()};
 }
-async function lbWrite(rec){
-  const u=ACC.user;if(!u)return;
-  if(ONLINE_LOCAL){const net=await getNet();if(rec)await net.set('leaderboard/'+u.uid,rec);else await net.remove('leaderboard/'+u.uid);return;}
-  const fb=await fbLoad(),r=fb.database().ref('leaderboard/'+u.uid);if(rec)await r.set(rec);else await r.remove();
+const lbKnownUid=()=>ACC.user?ACC.user.uid:(safeGet('ra-lbuid')||'');
+// The id this player is listed under: the Google account, or (for guests) the device's anonymous sign-in.
+async function lbUid(){
+  let uid='';
+  if(ACC.user)uid=ACC.user.uid;
+  else if(ONLINE_LOCAL){uid=safeGet('ra-guestid');if(!uid){uid='guest'+Math.random().toString(36).slice(2,8);safeSet('ra-guestid',uid);}}
+  else{
+    const fb=await fbLoad(),auth=fb.auth();
+    const cur=await new Promise(res=>{const un=auth.onAuthStateChanged(u=>{un();res(u);});});
+    if(cur&&!cur.isAnonymous)return ''; // a Google sign-in that the page hasn't picked up yet
+    uid=(cur||(await auth.signInAnonymously()).user).uid;
+  }
+  if(!ACC.user)safeSet('ra-lbuid',uid);
+  LB.myUid=uid;return uid;
+}
+async function lbWrite(uid,rec){
+  if(!uid)return;
+  if(ONLINE_LOCAL){const net=await getNet();if(rec)await net.set('leaderboard/'+uid,rec);else await net.remove('leaderboard/'+uid);return;}
+  const fb=await fbLoad(),r=fb.database().ref('leaderboard/'+uid);if(rec)await r.set(rec);else await r.remove();
+}
+async function lbPublish(){
+  if(!careerOf(myGames()).games)return null;
+  const uid=await lbUid();if(!uid)return null;
+  const rec=lbRecord(uid);await lbWrite(uid,rec);return rec;
 }
 async function pushBoard(){
-  if(!ACC.user||!ONLINE_AVAILABLE)return;
-  try{if(lbMode()==='hide'){return;}const rec=lbRecord();if(rec)await lbWrite(rec);}catch(e){console.warn('leaderboard',e);}
+  if(!ONLINE_AVAILABLE||lbMode()==='hide')return;
+  try{await lbPublish();}catch(e){console.warn('leaderboard',e);}
 }
 async function setLbMode(m){
   if(!LB_MODES.includes(m))return;
   safeSet('ra-lbmode',m);
-  try{if(m==='hide'){await lbWrite(null);acctMsg('You are hidden from the leaderboard.');}
-    else{acctMsg('Updating the leaderboard…');const rec=lbRecord();if(rec)await lbWrite(rec);acctMsg(rec?`You appear on the leaderboard as ${lbName()}.`:'You will appear after your first finished game.');}}
+  try{if(m==='hide'){const uid=lbKnownUid();if(uid)await lbWrite(uid,null);acctMsg('You are hidden from the leaderboard.');}
+    else{acctMsg('Updating the leaderboard…');const rec=await lbPublish();acctMsg(rec?`You appear on the leaderboard as ${rec.n}.`:'You will appear after your first finished game.');}}
   catch(e){const c=(e&&e.code)||'';acctMsg(c==='PERMISSION_DENIED'||/permission/i.test(e&&e.message||'')?"Couldn't update the leaderboard: its database rules haven't been published yet (see the README).":"Couldn't update the leaderboard right now. Try again in a moment.",true);}
   if(!$('profileModal').hidden)renderProfile();
   if(!$('boardModal').hidden)loadBoard();
@@ -3632,8 +3655,8 @@ function renderBoard(){
   if(!ONLINE_AVAILABLE){box.innerHTML='<p class="pf-empty">The leaderboard needs the online version of the game.</p>';return;}
   let h='';
   const me=ACC.user;
-  if(!me)h+=`<div class="lb-join"><p><b>Want to be on the board?</b> Sign in with Google and your finished games count automatically, under a made-up name like <b>${esc(LB_ADJ[3]+' '+LB_ANI[2])}</b> (you can switch to your own name, or hide, in your Profile).</p><button class="btn gbtn" type="button" data-act="signin">${GLOGO}<span>Continue with Google</span></button></div>`;
-  else if(lbMode()==='hide')h+=`<div class="lb-join"><p><b>You're hidden.</b> Your games still count on your account, but you're not listed here.</p><button class="btn" type="button" data-act="lbshow">Show me</button></div>`;
+  if(lbMode()==='hide')h+=`<div class="lb-join"><p><b>You're hidden.</b> Your games still count for you, but you're not listed here.</p><button class="btn" type="button" data-act="lbshow">Show me</button></div>`;
+  else if(!me)h+=`<div class="lb-join"><p><b>You're on the board automatically.</b> Every finished game on this device counts under a made-up name like <b>${esc(LB_ADJ[3]+' '+LB_ANI[2])}</b>. Sign in with Google to keep your stats on every device and, if you want, show your own name. You can hide in your Profile.</p><button class="btn gbtn" type="button" data-act="signin">${GLOGO}<span>Continue with Google</span></button></div>`;
   if(LB.loading&&!LB.rows){h+='<p class="pf-empty">Loading…</p>';box.innerHTML=h;return;}
   if(LB.err&&!LB.rows){h+=`<p class="fine err">${esc(LB.err)}</p><button class="btn xs" type="button" data-act="lbreload">Try again</button>`;box.innerHTML=h;return;}
   const rows=lbSorted();
@@ -3647,17 +3670,18 @@ function renderBoard(){
     const v=lbVal(r,col.k),ok=!((col.k==='r'||col.k==='f')&&r.g<LB_MIN),key=ok?String(Math.round(v*1000)):'x'+i;
     if(key!==prev){rk=i+1;prev=key;}
     const cell=(k,txt)=>`<td class="num${k===LB.sort&&ok?' top':''}">${txt}</td>`;
-    h+=`<tr class="${me&&r.uid===me.uid?'me':''}"><td class="rk">${ok?rk:'–'}</td><th scope="row">${esc(r.n)}${me&&r.uid===me.uid?' <small>(you)</small>':''}</th>`+
+    h+=`<tr class="${LB.myUid&&r.uid===LB.myUid?'me':''}"><td class="rk">${ok?rk:'–'}</td><th scope="row">${esc(r.n)}${LB.myUid&&r.uid===LB.myUid?' <small>(you)</small>':''}</th>`+
       cell('w',r.w)+cell('g',r.g)+cell('r',r.g>=LB_MIN?Math.round(100*r.w/r.g)+'%':'–')+cell('k',r.k)+cell('l',r.l)+cell('f',r.g>=LB_MIN?(r.p/r.g).toFixed(1):'–')+cell('x',fmtSecs(r.x))+'</tr>';});
   h+='</tbody></table></div>';
-  h+=`<p class="fine">Players who sign in with Google are listed under made-up names unless they pick their own name; totals come from each player's own account. Updated ${new Date(LB.at||Date.now()).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}.</p>`;
+  h+=`<p class="fine">Everyone who finishes a game is listed under a made-up name (Google players can pick their own name instead, or hide); each device or account counts its own games. Updated ${new Date(LB.at||Date.now()).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}.</p>`;
   box.innerHTML=h;
 }
 async function loadBoard(){
   if(!ONLINE_AVAILABLE){renderBoard();return;}
   LB.loading=true;LB.err='';renderBoard();
   try{
-    if(ACC.user)await pushBoard(); // make sure your own line is current
+    await pushBoard(); // make sure your own line is current
+    if(!LB.myUid||ACC.user)LB.myUid=await lbUid();
     const net=await getNet();
     const v=await Promise.race([net.get('leaderboard'),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),12000))]);
     const num=x=>typeof x==='number'&&isFinite(x)?x:0;
