@@ -56,6 +56,58 @@
           ".validate": false
         }
       }
+    },
+    "leaderboard": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider === 'google.com'",
+        ".validate": "newData.hasChildren(['n', 'g', 'w', 't'])",
+        "n": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30"
+        },
+        "g": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "w": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "k": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "l": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "p": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "x": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "bs": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "bk": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "og": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "ow": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "tg": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "tw": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "t": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
     }
   }
 }
