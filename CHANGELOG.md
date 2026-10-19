@@ -1,6 +1,9 @@
 # Red Arse – Change log
 
 ## 2026-10-18
+- **Teams are marked during the game.** In Partners mode every player now has a **TEAM 1 / 2 / 3** badge on the board (under their name), the same colors as the setup screen; the chance-to-win pills get a ring in the team color; every marble has a thin team-colored ring (solid, dashed or dotted, so it's not only color); the turn panel says **"TEAM 1 with <partner>"**; and the stats table shows T1, T2, T3 beside each name.
+- **Refresh keeps your game.** The Refresh button now saves a game you're playing on this device, reloads to the newest version, and puts you right back in it (marbles, turn, stats and game feed; the move-review history for that game starts over). Online rooms rejoin automatically. No more "tap again to leave".
+- **Sound that doesn't go quiet.** Phones put the audio engine to sleep when you switch apps, lock the screen or get a call, and only wake it from a tap. The game now wakes it on any tap or key press and when you come back to the page, rebuilds it if it was shut down, and no longer queues up a burst of sounds while it's asleep. You shouldn't need the Sound off/on trick anymore.
 - **Popups on/off button** (top bar, next to Sound) for the banners like "aggravated", "Nice, One" and "COCKED". Your choice is remembered.
 - **Popups keep up on Fast and Turbo:** banners now stay up for a shorter time as the bot speed goes up (about 2 seconds on Normal, 1.2 on Fast, 0.75 on Turbo), and if rolls come in faster than banners can show, the old ones are skipped so the newest one shows instead of trailing behind.
 
