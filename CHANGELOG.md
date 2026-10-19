@@ -1,5 +1,8 @@
 # Red Arse – Change log
 
+## 2026-10-19
+- **Everyone is on the leaderboard, no sign-in needed.** Finish a game and your all-time totals are listed automatically under a made-up name like **Sly Pelican**, even if you never signed in (the name is tied to the device, so clearing the browser's data starts a fresh one). Signing in with Google moves your games to your account, keeps your stats on every device, and lets you show your own name instead; your old device line is removed so you're never listed twice. Anyone can pick **Hide me from the leaderboard** in their Profile. **Needs the updated `leaderboard` rules from `database.rules.json` published in Firebase** (anyone signed in, including guests, can write only their own line, and wins can't exceed games).
+
 ## 2026-10-18
 - **Forward / Back buttons on a 4.** Tap a marble that can go either way and two big buttons (green **Forward**, orange **Back**, matching the arrows on the board) take the Roll button's place. One tap makes the move, or press **F** / **B**. If one of them captures, the button says who it aggravates. Tapping the landing spot on the board still works exactly as before, and a marble with only one move still goes right away.
 - **Leaderboard** (trophy button, top right): everyone's all-time stats in one table, sortable by wins, games, win %, kills, times aggravated, average finish or time played, with a totals line for the whole group. Anyone who signs in with Google is listed automatically under a made-up name like **Sly Pelican** (the same name every time for your account), so no real names are shown. In your Profile you can switch to your own name (first name and last initial) or hide yourself. Needs the new `leaderboard` rules from `database.rules.json` published in Firebase.
