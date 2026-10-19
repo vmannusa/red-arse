@@ -142,6 +142,13 @@ button,input,select{font:inherit;color:inherit}
 @media (prefers-reduced-motion: reduce){.emote-pop{animation:emoteFade 1.4s ease-out forwards}@keyframes emoteFade{0%,70%{opacity:1}100%{opacity:0}}}
 .roll-btn{flex:1;min-height:64px;border:none;border-radius:12px;font-family:var(--font-display);font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
   background:var(--accent);color:var(--accent-fg);box-shadow:0 3px 0 rgba(0,0,0,.25);transition:transform .08s,filter .15s}
+.dir-box{flex:1;display:flex;gap:8px}
+.dir-box[hidden]{display:none}
+.dir-btn{flex:1;min-height:64px;border:none;border-radius:12px;font-family:var(--font-display);font-weight:800;font-size:18px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.25);transition:transform .08s,filter .15s}
+.dir-btn small{display:block;font-family:var(--font-body);font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:none;opacity:.9}
+.dir-btn.fwd{background:#2F9E6C}.dir-btn.bwd{background:#D98A12}
+.dir-btn.hit{outline:3px solid #E5262E;outline-offset:-3px}
+.dir-btn:hover{filter:brightness(1.07)}.dir-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.25)}
 .roll-btn:hover:not(:disabled){filter:brightness(1.06)}
 .roll-btn:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.25)}
 .roll-btn:disabled{opacity:.45;cursor:default;box-shadow:none}
@@ -374,6 +381,24 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
 .set-row{display:flex;flex-wrap:wrap;gap:12px 24px}
 .linkbtn{background:none;border:0;padding:0;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline}
 .win-saved{margin:12px 0 0;text-align:center}
+.hide-sm{display:inline}
+@media (max-width:560px){.tbtn .hide-sm{display:none}}
+.lb-sum{margin:0 0 10px;color:var(--muted);font-size:13px}
+.lb-join{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:10px 12px;margin:0 0 12px}
+.lb-join p{margin:0;font-size:13px;flex:1;min-width:200px}
+table.lb th button{all:unset;cursor:pointer;font-weight:700;border-bottom:1px dotted var(--muted)}
+table.lb th button[aria-pressed="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+table.lb td,table.lb th{white-space:nowrap}
+table.lb td.num{text-align:right;font-variant-numeric:tabular-nums}
+table.lb th.num{text-align:right}
+table.lb thead th:nth-child(2),table.lb tbody th{text-align:left}
+table.lb tr.me{background:rgba(31,111,84,.12)}
+table.lb td.rk{width:34px;color:var(--muted);font-weight:700}
+table.lb td.top{font-weight:800;color:var(--accent)}
+.pf-lb{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 12px;font-size:13px}
+.pf-lb legend{padding:0 6px;font-size:13px}
+.pf-lbo{display:flex;gap:8px;align-items:flex-start;margin:5px 0;cursor:pointer}
+.pf-lbo input{margin-top:3px}
 .foot{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-top:auto;padding-top:6px;font-size:13px;color:var(--muted)}
 .foot a,.foot .linkbtn{color:var(--muted);font-weight:600;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
 .foot .linkbtn{text-decoration:underline}
@@ -485,6 +510,7 @@ table.pf-rec td,table.pf-rec th{text-align:left}table.pf-rec td:nth-child(n+4),t
       <button class="tbtn" id="btnRestart" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/></svg><span>Restart</span></button>
       <button class="tbtn" id="btnLobby" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.8-3.3 3.2-5 6-5s5.2 1.7 6 5M17 7v6M14 10h6"/></svg><span>Players</span></button>
     </nav>
+      <button class="tbtn" id="btnBoard" type="button" title="Everyone's all-time stats" aria-label="Leaderboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg><span class="hide-sm">Leaderboard</span></button>
       <button class="tbtn" id="btnProfile" type="button" title="Your all-time stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.9-3.6 3.6-5.4 7-5.4s6.1 1.8 7 5.4"/></svg><span id="profLabel">Profile</span></button>
       <button class="tbtn" id="btnReload" type="button" title="Reload to get the latest version"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg><span>Refresh</span></button>
     </div>
@@ -610,6 +636,7 @@ table.pf-rec td,table.pf-rec th{text-align:left}table.pf-rec td:nth-child(n+4),t
         <div class="dice-row">
           <div class="die-scene" aria-hidden="true"><div class="die" id="die"></div></div>
           <button class="roll-btn" id="rollBtn" type="button">Roll<small>or press Space</small></button>
+          <div class="dir-box" id="dirBox" hidden role="group" aria-label="Which way?"><button class="dir-btn fwd" id="dirFwd" type="button">▶ Forward<small>or press F</small></button><button class="dir-btn bwd" id="dirBack" type="button">◀ Back<small>or press B</small></button></div>
         </div>
         <div class="emote-bar" id="emoteBar" role="group" aria-label="Reactions" hidden></div>
         <p class="status" id="status"></p>
@@ -760,6 +787,13 @@ table.pf-rec td,table.pf-rec th{text-align:left}table.pf-rec td:nth-child(n+4),t
     <p class="fine" id="fbHint">No sign-in needed. Your note is sent to the game's developer along with your device type and screen size.</p>
     <p class="fine pf-msg" id="fbMsgOut" aria-live="polite"></p>
     <div class="actions"><button class="btn" id="fbCancel" type="button">Cancel</button><button class="btn primary" id="fbSend" type="button">Send</button></div>
+  </div>
+</div>
+<div class="modal" id="boardModal" hidden>
+  <div class="card wide" role="dialog" aria-modal="true" aria-labelledby="boardTitle">
+    <h2 id="boardTitle">Leaderboard</h2>
+    <div id="boardBody"></div>
+    <div class="actions"><button class="btn primary" id="boardClose" type="button">Close</button></div>
   </div>
 </div>
 <div class="modal" id="profileModal" hidden>
@@ -2184,6 +2218,7 @@ function buildLive(){
 const moveOwner=()=>G&&G.moves&&G.moves.length?ownerOf(G.turn,G.moves[0]):(G?G.turn:0);
 function renderLive(){
   if(!G)return;
+  renderDir();
   const svg=$('boardLive');
   LAYERS.glow.innerHTML='';LAYERS.targets.innerHTML='';LAYERS.ghostLines.innerHTML='';LAYERS.ghostDest.innerHTML='';
   const P=cur(),pi=G.turn,human=canAct()&&G.phase==='move';
@@ -2351,7 +2386,7 @@ function renderPanel(){
   const mineOnline=G.online&&ON.net&&P.uid===ON.net.uid&&P.type==='human';
   rb.innerHTML=G.phase==='rolling'?'Rolling…':canRoll?'Roll<small>or press Space</small>':G.online?(mineOnline?(G.roll?`Rolled ${G.roll}`:'Roll'):P.type==='human'?'Their turn':'Bot turn'):isHuman(P)?(G.roll?`Rolled ${G.roll}`:'Roll'):'Bot turn';
   scheduleOdds();boardOdds();boardNames();
-  renderStats();renderPresets();
+  renderStats();renderPresets();renderDir();
 }
 // compact table in the rail; full table in the Stats window and the end-of-game window
 function statsTable(cols,withRecords){
@@ -2401,11 +2436,34 @@ function fillStatsModal(){
   const sc=document.createElement('div');sc.className='table-scroll';sc.appendChild(statsTable(STAT_COLS,true));w.appendChild(sc);
 }
 $('rollBtn').onclick=()=>{ac();if(G&&G.online)onlineRoll();else doRoll();};
+// Rolled a 4 and the selected marble can go forward or back: two big buttons take the Roll button's place.
+// Only for a clean forward/back pair; anything else (one move, or three or more options) works by tapping the landing spot.
+function dirChoice(){
+  if(!G||G.phase!=='move'||G.sel===null||!canAct())return null;
+  const MP=G.players[moveOwner()],m=MP&&MP.marbles[G.sel];if(!m)return null;
+  const opts=m.d===null?G.moves.filter(x=>x.kind==='leave'):G.moves.filter(x=>x.mi===G.sel);
+  if(opts.length!==2)return null;
+  const back=opts.find(o=>o.dir==='back'),fwd=opts.find(o=>o.dir!=='back');
+  return back&&fwd?{fwd,back}:null;
+}
+function renderDir(){
+  const box=$('dirBox'),rb=$('rollBtn'),ch=dirChoice();
+  if(!box)return;
+  box.hidden=!ch;rb.style.display=ch?'none':'';
+  if(!ch)return;
+  [['dirFwd',ch.fwd,'▶ Forward','or press F'],['dirBack',ch.back,'◀ Back','or press B']].forEach(([id,mv,lab,hint])=>{
+    const b=$(id),vic=mv.victim?G.players[mv.victim.pi]:null;
+    b.classList.toggle('hit',!!vic);b.innerHTML=lab+'<small>'+(vic?'Aggravates '+esc(vic.name):hint)+'</small>';});
+}
+function pickDir(k){const ch=dirChoice();if(!ch)return;const mv=ch[k];if(G.online)onlineMove(mv);else localExecute(mv);}
+$('dirFwd').onclick=()=>pickDir('fwd');$('dirBack').onclick=()=>pickDir('back');
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&!$('installModal').hidden){$('installModal').hidden=true;return;}
   if(e.key==='Escape'&&!$('feedbackModal').hidden){$('feedbackModal').hidden=true;return;}
+  if(e.key==='Escape'&&!$('boardModal').hidden){$('boardModal').hidden=true;return;}
   if(e.key==='Escape'&&!$('profileModal').hidden){$('profileModal').hidden=true;return;}
   if(!G)return;const tag=(e.target.tagName||'').toLowerCase();if(tag==='input'||tag==='select'||tag==='textarea')return;
+  if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&dirChoice()){const k=e.key.toLowerCase();if(k==='f'){pickDir('fwd');return;}if(k==='b'){pickDir('back');return;}}
   if((e.code==='Space'||e.key===' ')&&G.phase==='roll'&&canAct()&&$('rulesModal').hidden){e.preventDefault();ac();if(G.online)onlineRoll();else doRoll();}
   if(e.key==='Escape'&&COACH&&COACH.view){closeDecision();return;}
   if(e.key==='Escape'){if(!$('rulesModal').hidden){$('rulesModal').hidden=true;return;}if(!$('statsModal').hidden){$('statsModal').hidden=true;return;}if(G.sel!==null){G.sel=null;renderLive();}}
@@ -3370,7 +3428,7 @@ function recordProfileGame(winnerPi){
   rec.u=ACC.user?ACC.user.uid:'';
   const a=loadGames();if(a.some(g=>g.id===rec.id&&(g.u||'')===rec.u)){ACC.lastSaved=rec.u?'cloud':'device';return;}
   a.push(rec);saveGames(a);ACC.lastSaved=rec.u?'cloud':'device';
-  if(ACC.user)pushGames([rec]).catch(e=>console.warn('stats sync',e));
+  if(ACC.user)pushGames([rec]).then(()=>pushBoard()).catch(e=>console.warn('stats sync',e));
 }
 function renderWinSaved(){
   const el=$('winSaved');if(!el)return;
@@ -3406,8 +3464,11 @@ function renderProfile(){
     h+=`<div class="pf-head"><span class="pf-av" aria-hidden="true">${esc((u.first||'?').slice(0,1).toUpperCase())}</span><div class="pf-who"><b>${esc(u.name)}</b><small>Signed in with Google. Your stats follow you to any device.</small></div>
       <span class="pf-btns"><button class="btn xs" type="button" data-act="sync"${ACC.syncing?' disabled':''}>${ACC.syncing?'Syncing…':'Sync now'}</button><button class="btn xs ghost" type="button" data-act="signout">Sign out</button></span></div>`;
   }else if(ONLINE_AVAILABLE){
-    h+=`<div class="pf-cta"><div><b>Keep your all-time stats on every device</b><p>Your finished games are counted on this device already. Sign in with Google to save them to your account, so they follow you to your phone, tablet or a new browser. Only game stats are stored, never shown to other players.</p></div><button class="btn gbtn" type="button" data-act="signin">${GLOGO}<span>Continue with Google</span></button></div>`;
+    h+=`<div class="pf-cta"><div><b>Keep your all-time stats on every device</b><p>Your finished games are counted on this device already. Sign in with Google to save them to your account, so they follow you to your phone, tablet or a new browser. Only game stats are stored. Signed-in players appear on the shared leaderboard under a made-up name (you can use your own name or hide in your Profile).</p></div><button class="btn gbtn" type="button" data-act="signin">${GLOGO}<span>Continue with Google</span></button></div>`;
   }else h+=`<p class="fine">Your finished games are counted on this device.</p>`;
+  if(u&&ONLINE_AVAILABLE){const md=lbMode(),opt=(v,t)=>`<label class="pf-lbo"><input type="radio" name="lbMode" value="${v}"${md===v?' checked':''}><span>${t}</span></label>`;
+    h+=`<fieldset class="pf-lb"><legend><b>Your name on the leaderboard</b></legend><p class="fine" style="margin:0 0 6px">Everyone who signs in is listed on the shared leaderboard with their all-time totals. Pick how you appear.</p>`+
+      opt('alias',`A made-up name: <b>${esc(lbAlias(u.uid))}</b>`)+opt('name',`My name: <b>${esc(lbRealName())}</b> <small>(first name and last initial)</small>`)+opt('hide','Hide me from the leaderboard')+`</fieldset>`;}
   h+=`<p class="fine pf-msg${ACC.err?' err':''}" id="pfMsg" aria-live="polite">${esc(ACC.msg||'')}</p>`;
   if(!T.games){h+=`<p class="pf-empty">No finished games yet. Finish a game and it shows up here.</p>`;}
   else{
@@ -3435,7 +3496,8 @@ $('btnProfile').onclick=openProfile;
 $('profileClose').onclick=()=>{$('profileModal').hidden=true;};
 function acctClick(e){const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
   if(a==='signin')signInGoogle();else if(a==='signout')signOutGoogle();else if(a==='sync')syncGames(true);else if(a==='open')openProfile();}
-$('profileBody').addEventListener('click',acctClick);$('winSaved').addEventListener('click',acctClick);
+$('profileBody').addEventListener('click',acctClick);
+$('profileBody').addEventListener('change',e=>{if(e.target&&e.target.name==='lbMode')setLbMode(e.target.value);});$('winSaved').addEventListener('click',acctClick);
 
 // ----- Google sign-in (Firebase Auth) -----
 let FBL=null;
@@ -3513,11 +3575,106 @@ async function syncGames(manual){
     a.forEach(g=>{if(!g.u||g.u===u.uid){mineIds.add(g.id);if(g.u!==u.uid){g.u=u.uid;claimed++;}if(!cloud[g.id])push.push(g);}});
     Object.keys(cloud).forEach(id=>{if(!mineIds.has(id)&&cloud[id]&&typeof cloud[id].t==='number'){a.push(Object.assign({},cloud[id],{id,u:u.uid}));pulled++;}});
     if(pulled||claimed)saveGames(a);
-    await pushGames(push);
+    await pushGames(push);pushBoard();
     ACC.last=Date.now();acctMsg(manual||pulled||push.length?`Synced. ${pulled?pulled+' game'+(pulled===1?'':'s')+' added from your account. ':''}${push.length?push.length+' game'+(push.length===1?'':'s')+' saved to your account.':''}`.trim()||'Everything is up to date.':'',false);
   }catch(e){const c=(e&&e.code)||'';acctMsg(c==='PERMISSION_DENIED'||/permission/i.test(e&&e.message||'')?"Couldn't sync: the database rules for stats haven't been published yet (see the README).":"Couldn't sync right now. Your games are safe on this device and will sync next time.",true);}
   ACC.syncing=false;if(!$('profileModal').hidden)renderProfile();
 }
+
+// ================= LEADERBOARD (everyone's all-time totals) =================
+// Opt-in: a signed-in player who ticks "Show me on the leaderboard" publishes ONE small totals record at leaderboard/<uid>
+// (name, games, wins, kills, ...). Anyone using the game can read the list; only the owner can write their own record.
+const LB={rows:null,sort:'w',loading:false,err:'',at:0};
+// Everyone who is signed in is listed. By default under a made-up name (stable for the account), or under their own
+// first name and last initial if they choose, or not at all.
+const LB_MODES=['alias','name','hide'];
+const lbMode=()=>{const m=safeGet('ra-lbmode');return LB_MODES.includes(m)?m:'alias';};
+const LB_ADJ=['Sneaky','Grumpy','Wobbly','Spicy','Lucky','Dizzy','Cranky','Jolly','Sassy','Salty','Bouncy','Clumsy','Fancy','Mighty','Sleepy','Zesty','Rowdy','Cheeky','Crafty','Dapper','Feisty','Goofy','Plucky','Quirky','Rascal','Snazzy','Soggy','Speedy','Stubborn','Sly','Rusty','Fluffy','Gritty','Hasty','Jazzy','Loud','Nifty','Perky','Peppy','Shady','Silly','Slick','Smug','Snappy','Tipsy','Wacky','Witty','Zippy'];
+const LB_ANI=['Walrus','Badger','Llama','Otter','Moose','Pelican','Possum','Gopher','Narwhal','Platypus','Wombat','Ferret','Yak','Pigeon','Raccoon','Armadillo','Flamingo','Hedgehog','Iguana','Koala','Lemur','Mongoose','Ostrich','Penguin','Quokka','Sloth','Toucan','Walleye','Beaver','Buffalo','Chipmunk','Dingo','Gecko','Goose','Hamster','Jackal','Kiwi','Lobster','Marmot','Newt','Octopus','Pangolin','Porcupine','Skunk','Squirrel','Tortoise','Weasel','Anteater'];
+function lbAlias(uid){let h=2166136261;const t=String(uid||'x');for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
+  return LB_ADJ[h%LB_ADJ.length]+' '+LB_ANI[Math.floor(h/LB_ADJ.length)%LB_ANI.length];}
+function lbRealName(){const u=ACC.user;if(!u)return '';const p=(u.name||u.first||'Player').trim().split(/\s+/),f=p[0]||'Player',li=p.length>1?p[p.length-1][0].toUpperCase()+'.':'';return (f+(li?' '+li:'')).slice(0,30);}
+function lbName(){const u=ACC.user;if(!u)return '';return lbMode()==='name'?lbRealName():lbAlias(u.uid);}
+function lbRecord(){
+  const T=careerOf(myGames());if(!T.games)return null;
+  return {n:lbName(),g:T.games,w:T.wins,k:T.kills,l:T.lost,p:T.place,x:T.secs,bs:T.bestStreak,bk:T.bestKills,og:T.onG,ow:T.onW,tg:T.tmG,tw:T.tmW,t:Date.now()};
+}
+async function lbWrite(rec){
+  const u=ACC.user;if(!u)return;
+  if(ONLINE_LOCAL){const net=await getNet();if(rec)await net.set('leaderboard/'+u.uid,rec);else await net.remove('leaderboard/'+u.uid);return;}
+  const fb=await fbLoad(),r=fb.database().ref('leaderboard/'+u.uid);if(rec)await r.set(rec);else await r.remove();
+}
+async function pushBoard(){
+  if(!ACC.user||!ONLINE_AVAILABLE)return;
+  try{if(lbMode()==='hide'){return;}const rec=lbRecord();if(rec)await lbWrite(rec);}catch(e){console.warn('leaderboard',e);}
+}
+async function setLbMode(m){
+  if(!LB_MODES.includes(m))return;
+  safeSet('ra-lbmode',m);
+  try{if(m==='hide'){await lbWrite(null);acctMsg('You are hidden from the leaderboard.');}
+    else{acctMsg('Updating the leaderboard…');const rec=lbRecord();if(rec)await lbWrite(rec);acctMsg(rec?`You appear on the leaderboard as ${lbName()}.`:'You will appear after your first finished game.');}}
+  catch(e){const c=(e&&e.code)||'';acctMsg(c==='PERMISSION_DENIED'||/permission/i.test(e&&e.message||'')?"Couldn't update the leaderboard: its database rules haven't been published yet (see the README).":"Couldn't update the leaderboard right now. Try again in a moment.",true);}
+  if(!$('profileModal').hidden)renderProfile();
+  if(!$('boardModal').hidden)loadBoard();
+}
+const LB_COLS=[{k:'w',l:'Wins'},{k:'g',l:'Games'},{k:'r',l:'Win %'},{k:'k',l:'Kills'},{k:'l',l:'Aggravated'},{k:'f',l:'Avg finish',asc:true},{k:'x',l:'Time played'}];
+const LB_MIN=3; // win % and average finish only rank players with a few games
+function lbVal(r,k){return k==='r'?r.w/r.g:k==='f'?r.p/r.g:r[k];}
+function lbSorted(){
+  const col=LB_COLS.find(c=>c.k===LB.sort)||LB_COLS[0],dir=col.asc?1:-1,rated=col.k==='r'||col.k==='f';
+  return (LB.rows||[]).slice().sort((a,b)=>{
+    if(rated){const qa=a.g>=LB_MIN,qb=b.g>=LB_MIN;if(qa!==qb)return qa?-1:1;}
+    const d=(lbVal(a,col.k)-lbVal(b,col.k))*dir;if(d)return d;
+    return (b.w-a.w)||((b.w/b.g)-(a.w/a.g))||(b.g-a.g)||a.n.localeCompare(b.n);});
+}
+function renderBoard(){
+  const box=$('boardBody');if(!box)return;
+  if(!ONLINE_AVAILABLE){box.innerHTML='<p class="pf-empty">The leaderboard needs the online version of the game.</p>';return;}
+  let h='';
+  const me=ACC.user;
+  if(!me)h+=`<div class="lb-join"><p><b>Want to be on the board?</b> Sign in with Google and your finished games count automatically, under a made-up name like <b>${esc(LB_ADJ[3]+' '+LB_ANI[2])}</b> (you can switch to your own name, or hide, in your Profile).</p><button class="btn gbtn" type="button" data-act="signin">${GLOGO}<span>Continue with Google</span></button></div>`;
+  else if(lbMode()==='hide')h+=`<div class="lb-join"><p><b>You're hidden.</b> Your games still count on your account, but you're not listed here.</p><button class="btn" type="button" data-act="lbshow">Show me</button></div>`;
+  if(LB.loading&&!LB.rows){h+='<p class="pf-empty">Loading…</p>';box.innerHTML=h;return;}
+  if(LB.err&&!LB.rows){h+=`<p class="fine err">${esc(LB.err)}</p><button class="btn xs" type="button" data-act="lbreload">Try again</button>`;box.innerHTML=h;return;}
+  const rows=lbSorted();
+  if(!rows.length){h+='<p class="pf-empty">Nobody is on the leaderboard yet. Be the first!</p>';box.innerHTML=h;return;}
+  const sumG=rows.reduce((a,r)=>a+r.g,0),sumK=rows.reduce((a,r)=>a+r.k,0),sumX=rows.reduce((a,r)=>a+r.x,0);
+  h+=`<p class="lb-sum"><b>${rows.length}</b> player${rows.length===1?'':'s'} · <b>${sumG}</b> games played · <b>${sumK}</b> kills · <b>${fmtSecs(sumX)}</b> on the board. Tap a heading to re-sort. Win % and average finish rank players with ${LB_MIN}+ games.${LB.loading?' Refreshing…':''}</p>`;
+  const col=LB_COLS.find(c=>c.k===LB.sort)||LB_COLS[0];
+  h+=`<div class="table-scroll"><table class="stats lb"><thead><tr><th>#</th><th>Player</th>`+LB_COLS.map(c=>`<th class="num"><button type="button" data-sort="${c.k}" aria-pressed="${c.k===LB.sort}">${c.l}</button></th>`).join('')+`</tr></thead><tbody>`;
+  let rk=0,prev=null;
+  rows.forEach((r,i)=>{
+    const v=lbVal(r,col.k),ok=!((col.k==='r'||col.k==='f')&&r.g<LB_MIN),key=ok?String(Math.round(v*1000)):'x'+i;
+    if(key!==prev){rk=i+1;prev=key;}
+    const cell=(k,txt)=>`<td class="num${k===LB.sort&&ok?' top':''}">${txt}</td>`;
+    h+=`<tr class="${me&&r.uid===me.uid?'me':''}"><td class="rk">${ok?rk:'–'}</td><th scope="row">${esc(r.n)}${me&&r.uid===me.uid?' <small>(you)</small>':''}</th>`+
+      cell('w',r.w)+cell('g',r.g)+cell('r',r.g>=LB_MIN?Math.round(100*r.w/r.g)+'%':'–')+cell('k',r.k)+cell('l',r.l)+cell('f',r.g>=LB_MIN?(r.p/r.g).toFixed(1):'–')+cell('x',fmtSecs(r.x))+'</tr>';});
+  h+='</tbody></table></div>';
+  h+=`<p class="fine">Players who sign in with Google are listed under made-up names unless they pick their own name; totals come from each player's own account. Updated ${new Date(LB.at||Date.now()).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}.</p>`;
+  box.innerHTML=h;
+}
+async function loadBoard(){
+  if(!ONLINE_AVAILABLE){renderBoard();return;}
+  LB.loading=true;LB.err='';renderBoard();
+  try{
+    if(ACC.user)await pushBoard(); // make sure your own line is current
+    const net=await getNet();
+    const v=await Promise.race([net.get('leaderboard'),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),12000))]);
+    const num=x=>typeof x==='number'&&isFinite(x)?x:0;
+    LB.rows=Object.keys(v||{}).map(uid=>{const r=v[uid]||{};return {uid,n:String(r.n||'Player').slice(0,30),g:num(r.g),w:num(r.w),k:num(r.k),l:num(r.l),p:num(r.p),x:num(r.x),bs:num(r.bs),bk:num(r.bk),og:num(r.og),ow:num(r.ow),tg:num(r.tg),tw:num(r.tw)};}).filter(r=>r.g>0);
+    {const seen={};LB.rows.slice().sort((a,b)=>a.uid<b.uid?-1:1).forEach(r=>{const k=r.n;seen[k]=(seen[k]||0)+1;if(seen[k]>1)r.n=k+' '+seen[k];});}
+    LB.at=Date.now();
+  }catch(e){const c=(e&&e.code)||'';LB.err=c==='PERMISSION_DENIED'||/permission/i.test(e&&e.message||'')?"The leaderboard isn't switched on yet: its database rules haven't been published (see the README).":"Couldn't load the leaderboard right now.";if(!LB.rows)LB.rows=null;}
+  LB.loading=false;renderBoard();
+}
+function openBoard(){$('boardModal').hidden=false;renderBoard();$('boardClose').focus();loadBoard();}
+$('btnBoard').onclick=openBoard;
+$('boardClose').onclick=()=>{$('boardModal').hidden=true;};
+$('boardModal').addEventListener('click',e=>{
+  if(e.target.id==='boardModal'){$('boardModal').hidden=true;return;}
+  const b=e.target.closest('[data-sort]');if(b){LB.sort=b.dataset.sort;renderBoard();return;}
+  const a=e.target.closest('[data-act]');if(!a)return;
+  if(a.dataset.act==='signin')signInGoogle();else if(a.dataset.act==='lbshow')setLbMode('alias');else if(a.dataset.act==='lbreload')loadBoard();});
 
 // ================= FEEDBACK (bug / idea notes) =================
 // Saved to Firebase at feedback/<id> with the player's anonymous sign-in (no account needed). The database rules
