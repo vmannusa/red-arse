@@ -241,6 +241,10 @@ button,input,select{font:inherit;color:inherit}
 .partners-rules b:first-child{display:block;font-family:var(--font-display);text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:var(--accent);margin-bottom:2px}
 .team-tag{position:absolute;top:-9px;right:14px;font:700 10.5px/1 var(--font-body);padding:3px 8px;border-radius:999px;color:#fff;letter-spacing:.02em;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.25)}
 .slot{position:relative}
+.ttag{display:inline-block;font:800 10px/1 var(--font-body);padding:3px 6px;border-radius:999px;color:#fff;margin-left:6px;vertical-align:1px;letter-spacing:.02em;white-space:nowrap}
+.who-team{margin-top:5px;font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.who-team .ttag{margin:0}
+.who-team[hidden]{display:none}
 .mode-note.err{color:var(--danger);font-weight:600}
 .rule-count{font-weight:600;letter-spacing:.06em;opacity:.85}
 .rule-cell{display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -600,7 +604,7 @@ table.pf-rec td,table.pf-rec th{text-align:left}table.pf-rec td:nth-child(n+4),t
       <section class="card" aria-live="polite">
         <div class="turn-who">
           <span class="chip" id="whoChip"></span>
-          <div><div class="who-name" id="whoName"></div><div class="who-sub" id="whoSub"></div></div>
+          <div><div class="who-name" id="whoName"></div><div class="who-sub" id="whoSub"></div><div class="who-team" id="whoTeam" hidden></div></div>
           <span class="clock" id="gameClock" title="Game time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg><span id="gameClockT">0:00</span></span>
         </div>
         <div class="dice-row">
@@ -999,6 +1003,7 @@ const hasWon=p=>homeCount(p)===4;
 // ---- Partners mode: seats pair up across the table (seat i with seat i + n/2, in turn order).
 const isTeams=S=>!!(S&&S.rules&&S.rules.partners)&&S.players.length>=4&&S.players.length%2===0;
 function partnerOf(S,pi){return isTeams(S)?(pi+S.players.length/2)%S.players.length:-1;}
+const teamOf=(S,pi)=>isTeams(S)?pi%(S.players.length/2):-1; // seats are in clockwise order, so team = seat % half
 function sameTeam(S,a,b){return a===b||(isTeams(S)&&partnerOf(S,a)===b);}
 // a team wins when both partners have all 4 home; in free-for-all it's just you
 function teamWon(S,pi){if(!hasWon(S.players[pi]))return false;const q=partnerOf(S,pi);return q<0||hasWon(S.players[q]);}
@@ -1576,10 +1581,30 @@ function buildBoard(svg,prefix,bd,opts={}){
 
 // ================= SOUND =================
 const SND={ctx:null,on:true};
-function ac(){if(!SND.on)return null;if(!SND.ctx){try{SND.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}}if(SND.ctx.state==='suspended')SND.ctx.resume();return SND.ctx;}
-function tone(fq,dur,type,vol,when=0,to){const c=ac();if(!c)return;const t=c.currentTime+when,o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.setValueAtTime(fq,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);
+// Phones suspend or "interrupt" the audio engine (app switch, lock screen, call, Bluetooth change) and only let it
+// restart from a tap, so: every tap/key tries to wake it, coming back to the page tries too, a closed engine is
+// rebuilt, and sounds aren't queued up while it is asleep (they would all burst out together when it woke).
+SND.gest=0;
+function ac(){
+  if(!SND.on)return null;
+  let c=SND.ctx;
+  if(c&&c.state==='closed')c=SND.ctx=null;
+  if(!c){try{c=SND.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}}
+  if(c.state!=='running'){try{const p=c.resume();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
+  return c;
+}
+function audioReady(c){return c.state==='running'||Date.now()-SND.gest<900;} // just tapped: the wake-up is on its way
+function unlockAudio(){
+  SND.gest=Date.now();
+  const c=ac();if(!c)return;
+  try{const bf=c.createBuffer(1,1,22050),sr=c.createBufferSource();sr.buffer=bf;sr.connect(c.destination);sr.start(0);}catch(e){}
+}
+['pointerdown','touchend','keydown','click'].forEach(ev=>addEventListener(ev,()=>{if(SND.on)unlockAudio();},true));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&SND.on&&SND.ctx&&SND.ctx.state!=='running')ac();});
+addEventListener('pageshow',()=>{if(SND.on&&SND.ctx&&SND.ctx.state!=='running')ac();});
+function tone(fq,dur,type,vol,when=0,to){const c=ac();if(!c||!audioReady(c))return;const t=c.currentTime+when,o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.setValueAtTime(fq,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);
   g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.02);}
-function noise(dur,vol,fq,q,when=0){const c=ac();if(!c)return;const t=c.currentTime+when,len=Math.max(1,Math.floor(c.sampleRate*dur)),b=c.createBuffer(1,len,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
+function noise(dur,vol,fq,q,when=0){const c=ac();if(!c||!audioReady(c))return;const t=c.currentTime+when,len=Math.max(1,Math.floor(c.sampleRate*dur)),b=c.createBuffer(1,len,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
   const s=c.createBufferSource();s.buffer=b;const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=fq;bp.Q.value=q;const g=c.createGain();g.gain.value=vol;s.connect(bp).connect(g).connect(c.destination);s.start(t);}
 // ---- little diagrams for the trickier rules (setup screen and How to play)
 const RULE_DIAG={stars:1,center:1,backShortcut:1,homeRaid:1};let RD_N=0;
@@ -2147,6 +2172,7 @@ function buildLive(){
   const look=curLook();ballDefs(defs);
   MARBLE_NODES=G.players.map((P,pi)=>P.marbles.map((m,mi)=>{
     const g=el('g',{class:'marble','data-pi':pi,'data-mi':mi},LAYERS.marbles);
+    if(isTeams(G)){const ti=teamOf(G,pi);el('circle',{class:'tring',r:.5,fill:'none',stroke:TEAM_COLS[ti%3],'stroke-width':.11,'stroke-dasharray':ti===1?'.2 .1':ti===2?'.06 .1':'none','pointer-events':'none'},g);}
     el('circle',{class:'pulse',r:.5,fill:'none',stroke:'#FFFFFF','stroke-width':.12,visibility:'hidden','pointer-events':'none'},g);
     el('circle',{class:'selring',r:.56,fill:'none',stroke:'#FFFFFF','stroke-width':.12,opacity:0},g);
     el('circle',{class:'dring',r:.6,fill:'rgba(229,38,46,.26)',stroke:'#FF4A50','stroke-width':.12,visibility:'hidden','pointer-events':'none'},g);
@@ -2314,6 +2340,10 @@ function renderPanel(){
   const dz=$('die');dz.style.setProperty('--die-bg',C.hex);dz.style.setProperty('--die-edge',C.dark);
   dz.style.setProperty('--die-pip',C.ink);dz.style.setProperty('--die-pip1',C.ink);
   $('whoName').textContent=P.name;
+  const wt=$('whoTeam');
+  if(isTeams(G)){const ti=teamOf(G,G.turn),mate=G.players[partnerOf(G,G.turn)];
+    wt.innerHTML=`<span class="ttag" style="background:${TEAM_COLS[ti%3]}">TEAM ${ti+1}</span><span>with ${dotHtml(mate.c,mate.ball)} ${esc(mate.name)}</span>`;wt.hidden=false;}
+  else wt.hidden=true;
   $('whoSub').textContent=(isHuman(P)?'Human':TYPE_LABEL[P.type])+' · '+C.name+' · '+homeCount(P)+'/4 home';
   const rb=$('rollBtn');const canRoll=G.phase==='roll'&&canAct();
   rb.disabled=!canRoll;
@@ -2335,7 +2365,8 @@ function statsTable(cols,withRecords){
   const hi=c=>!c.review||c.k==='acc';
   G.players.forEach((Q,qi)=>{const tr=document.createElement('tr');if(qi===G.turn&&G.winner===null)tr.className='active';
     const tag=!withRecords&&G.online?onlineTag(Q).replace(/^ · /,''):'';
-    let h=`<th scope="row">${dotHtml(Q.c,Q.ball)}<span class="sn">${esc(Q.name)}</span>${tag?`<span class="stag">${esc(tag)}</span>`:''}</th>`;
+    const tmx=isTeams(G)?`<span class="ttag" style="background:${TEAM_COLS[teamOf(G,qi)%3]}" title="Team ${teamOf(G,qi)+1}">T${teamOf(G,qi)+1}</span>`:'';
+    let h=`<th scope="row">${dotHtml(Q.c,Q.ball)}<span class="sn">${esc(Q.name)}</span>${tmx}${tag?`<span class="stag">${esc(tag)}</span>`:''}</th>`;
     if(!withRecords){const hc=homeCount(Q);h+=`<td class="hm" title="${hc} of 4 home">${`<b class="on" style="background:${COLORS[Q.c].hex};border-color:${COLORS[Q.c].dark}"></b>`.repeat(hc)}${'<b></b>'.repeat(4-hc)}</td>`;}
     cols.forEach(c=>{const x=val(c,qi),v=x.v;h+=`<td${hi(c)&&v!==null&&v>0&&v===best[c.k]&&c.k!=='lost'&&c.k!=='passes'&&G.players.length>1?' class="top"':''}>${x.text}</td>`;});
     if(withRecords){const r=rec[Q.name];h+=`<td>${r?r.wins+'/'+r.games:'–'}</td>`;}
@@ -2400,7 +2431,7 @@ function boardOdds(){
     const bc=B.BASECENTER[Q.s],len=Math.hypot(bc.x,bc.y),k=(len-1.86)/len,x=bc.x*k,y=bc.y*k,C=COLORS[Q.c];
     const g=el('g',{transform:`translate(${f(x)} ${f(y)})`},L);
     const w=.42+txt.length*.37;
-    el('rect',{x:f(-w/2),y:-.42,width:f(w),height:.84,rx:.42,fill:C.hex,stroke:'#FFFFFF','stroke-width':.06,opacity:qi===G.turn?1:.88},g);
+    el('rect',{x:f(-w/2),y:-.42,width:f(w),height:.84,rx:.42,fill:C.hex,stroke:isTeams(G)?TEAM_COLS[teamOf(G,qi)%3]:'#FFFFFF','stroke-width':isTeams(G)?.16:.06,opacity:qi===G.turn?1:.88},g);
     el('text',{y:.03,'font-size':.6,'font-weight':800,'font-family':'Archivo, sans-serif',fill:C.ink,'text-anchor':'middle','dominant-baseline':'central'},g).textContent=txt;
   });
 }
@@ -2417,6 +2448,9 @@ function boardNames(){
     el('text',{transform:`translate(${f(p.x)} ${f(p.y)}) rotate(${f(a)})`,'font-family':'Archivo, Arial Black, sans-serif','font-weight':800,'font-size':f(fs),
       'letter-spacing':.03,fill:on?(TT.light?COLORS[Q.c].hex:COLORS[Q.c].light):TT.label,opacity:on?1:.85,'text-anchor':'middle','dominant-baseline':'central',
       stroke:TT.light?'rgba(255,255,255,.8)':'rgba(20,10,4,.55)','stroke-width':.05,'paint-order':'stroke'},L).textContent=nm;
+    if(isTeams(G)){const ti=teamOf(G,qi),tg=el('g',{transform:`translate(${f(p.x)} ${f(p.y)}) rotate(${f(a)}) translate(0 .66)`},L);
+      el('rect',{x:-.92,y:-.24,width:1.84,height:.48,rx:.24,fill:TEAM_COLS[ti%3],stroke:'#FFFFFF','stroke-width':.04},tg);
+      el('text',{'font-family':'Archivo, Arial Black, sans-serif','font-weight':800,'font-size':.32,'letter-spacing':.04,fill:'#FFFFFF','text-anchor':'middle','dominant-baseline':'central'},tg).textContent='TEAM '+(ti+1);}
   });
 }
 function scheduleOdds(){
@@ -2840,7 +2874,7 @@ $('statsClose').onclick=()=>{$('statsModal').hidden=true;};
 $('statsModal').addEventListener('click',e=>{if(e.target.id==='statsModal')$('statsModal').hidden=true;});
 document.querySelectorAll('#speedSeg button').forEach(b=>b.onclick=()=>setBotSpeed(b.dataset.s));
 function setSound(on){SND.on=on;safeSet('aggravation-sound',on?'1':'0');const b=$('btnSound');b.setAttribute('aria-pressed',on);b.querySelector('span').textContent=on?'Sound on':'Sound off';$('sndWave').style.display=on?'':'none';}
-$('btnSound').onclick=()=>setSound(!SND.on);
+$('btnSound').onclick=()=>{setSound(!SND.on);if(SND.on)unlockAudio();};
 $('btnPopups').onclick=()=>setPopups(!POP.on);
 function armButton(btn,label,fn){
   if(btn.classList.contains('armed')){btn.classList.remove('armed');btn.querySelector('span').textContent=btn.dataset.label;fn();return;}
@@ -2848,10 +2882,11 @@ function armButton(btn,label,fn){
   setTimeout(()=>{if(btn.classList.contains('armed')){btn.classList.remove('armed');btn.querySelector('span').textContent=btn.dataset.label;}},3000);
 }
 function doReload(){ // fetch a fresh copy of the page (installed web apps on iPhone have no browser refresh button)
+  // A local game is saved first and picked up again after the reload; an online room is rejoined from the link.
+  try{if(G&&!G.online&&G.winner===null&&!$('game').hidden)safeSet('ra-resume',JSON.stringify({t:Date.now(),data:snapshot()}));}catch(e){}
   try{const u=new URL(location.href);u.searchParams.set('_r',Date.now().toString(36));location.replace(u.toString());}catch(e){location.reload();}
 }
-$('btnReload').onclick=()=>{const live=(G&&G.winner===null&&G.log.length>1&&!$('game').hidden)||(typeof ON!=='undefined'&&ON&&ON.code);
-  if(live)armButton($('btnReload'),'Tap again: you will leave this game',doReload);else doReload();};
+$('btnReload').onclick=doReload;
 $('btnRestart').onclick=()=>{if(G&&G.winner===null&&G.log.length>1)armButton($('btnRestart'),'Tap again to restart',startGame);else startGame();};
 $('btnLobby').onclick=()=>{
   if(G&&G.online){if(G.winner===null)armButton($('btnLobby'),'Tap again to leave',leaveRoom);else leaveRoom();return;}
@@ -3535,6 +3570,11 @@ document.querySelectorAll('#feedbackModal .fb-types button').forEach(b=>b.onclic
 function snapshot(){return {setup,game:G&&!G.online?{board:G.board,rules:G.rules,players:G.players,stats:G.stats,turn:G.turn,log:G.log,winner:G.winner,started:G.started}:null};}
 function start(data){
   data=data||{};
+  let resumed=false;
+  if(!data.game){ // coming back from the Refresh button: pick the saved local game up again
+    try{const rs=JSON.parse(safeGet('ra-resume')||'null');try{localStorage.removeItem('ra-resume');}catch(e){}
+      if(rs&&rs.data&&rs.data.game&&Date.now()-rs.t<10*60000){data=rs.data;resumed=true;}}catch(e){}
+  }
   setup=data.setup||loadSetup();
   setSound(safeGet('aggravation-sound')!=='0');setPopups(safeGet('ra-popups')!=='0');renderSpeed();
   applyThemeUI(setup.theme);
@@ -3543,6 +3583,7 @@ function start(data){
     G=Object.assign(newGameState(),{board:g.board,rules:g.rules,players:g.players,stats:g.stats,turn:g.turn,log:g.log||[],started:g.started||Date.now()});resetCoach(G.players.length);
     setBoard(g.board);applySeatColors(G.players);buildBoard($('boardStatic'),'S',B);
     $('lobby').hidden=true;$('game').hidden=false;$('tools').hidden=false;buildLive();renderLog();beginTurn();
+    if(resumed)setTimeout(()=>flashMsg('<span class="kf-big" style="font-size:.85em">Refreshed. Game restored</span>','nice1'),350);
   }else showLobby();
   initOnlineCard();
   accountInit();
