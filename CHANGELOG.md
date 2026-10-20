@@ -1,6 +1,9 @@
 # Red Arse – Change log
 
 ## 2026-10-19
+- **Marble photo.** Use your own picture on your marbles: in **Profile**, tap **Choose a photo**, drag and zoom it inside the circle, and save. Then pick **My photo** in the marble list next to your name on the setup screen. The picture is shrunk to a tiny image (about 5 KB) and kept on your device. In an online room it's shared with the players in that room, so they see it on your marbles; anyone can switch on **Hide other players' photo marbles** in their Profile to see plain glass marbles instead. Bots can't use a photo. (Idea from a player's note.)
+- **Fixed the "Back-past-start" picture in the rules.** The diagram now matches the real board: your start hole on the left, the home column coming off the 3rd hole, five holes in the row, and the 4-back landing past the home turn-off. It also had a stray extra hole before.
+- **Game settings spacing on phones.** Turn timer, Bot speed, Board theme and Game mode now sit in an even two-column grid instead of running into each other; the host's room settings use the same layout.
 - **Everyone is on the leaderboard, no sign-in needed.** Finish a game and your all-time totals are listed automatically under a made-up name like **Sly Pelican**, even if you never signed in (the name is tied to the device, so clearing the browser's data starts a fresh one). Signing in with Google moves your games to your account, keeps your stats on every device, and lets you show your own name instead; your old device line is removed so you're never listed twice. Anyone can pick **Hide me from the leaderboard** in their Profile. **Needs the updated `leaderboard` rules from `database.rules.json` published in Firebase** (anyone signed in, including guests, can write only their own line, and wins can't exceed games).
 
 ## 2026-10-18
