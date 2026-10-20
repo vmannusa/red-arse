@@ -274,6 +274,7 @@ button,input,select{font:inherit;color:inherit}
 .bp svg{width:58px;height:58px;flex:none}
 .bp b{display:block;font-family:var(--font-display);font-weight:800;font-size:15px}
 .bp small{display:block;color:var(--muted);font-size:12.5px}
+.newtag{font-style:normal;font:800 10px/1 var(--font-body);letter-spacing:.03em;color:var(--warn);border:1px solid currentColor;border-radius:4px;padding:2px 5px;white-space:nowrap;display:block;width:max-content;margin:4px 0 2px}
 .bp.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset;background:var(--surface)}
 .bp:disabled{opacity:.5;cursor:not-allowed}
 /* stats */
@@ -538,7 +539,7 @@ table.pf-rec td,table.pf-rec th{text-align:left}table.pf-rec td:nth-child(n+4),t
         <svg id="heroBoard" viewBox="-11 -11 22 22" aria-hidden="true"></svg>
         <div>
           <h1>Red Arse</h1>
-          <p class="lede">The classic wooden marble game on the 6-player or 4-player hex board. Add people playing on this device, fill the other seats with bots, then start.</p>
+          <p class="lede">The classic wooden marble game on the 6-player or 4-player hex board, or the new 5-player pentagon and 3-player Y (both still untested). Add people playing on this device, fill the other seats with bots, then start.</p>
           <div class="howto-row"><button class="btn howto" id="lobbyRules" type="button">How to play</button><a class="btn howto" id="lobbyChangelog" href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">What's new</a><button class="btn howto" id="installBtn" type="button" hidden>Add to Home Screen</button></div>
         </div>
       </div>
@@ -739,9 +740,18 @@ table.pf-rec td,table.pf-rec th{text-align:left}table.pf-rec td:nth-child(n+4),t
         <div class="rdiag-slot" data-diag="stars"></div><div class="rdiag-slot" data-diag="center"></div>
       </section>
       <section>
+        <h3>Marble photo</h3>
+        <ul>
+          <li>Open <b>Profile</b> and tap <b>Choose a photo</b>. Pick a picture, drag and zoom it inside the circle, then tap <b>Use this photo</b>.</li>
+          <li>On the setup screen, pick <b>My photo</b> in the marble list next to your name. Your marbles show the picture on glass, with a ring in your color so everyone can still tell whose they are.</li>
+          <li>The picture is shrunk to a tiny image and kept on this device. In an online room, the other players see it on your marbles.</li>
+          <li>Don't want to see other people's photos? Tick <b>Hide other players' photo marbles</b> in your Profile. <b>Remove</b> there deletes your own.</li>
+        </ul>
+      </section>
+      <section>
         <h3>Partners mode</h3>
         <ul>
-          <li>Pick <b>Partners</b> under Game mode (4 or 6 players). Partners sit <b>opposite</b> each other: seats 1 &amp; 3 vs 2 &amp; 4 on the 4-player board; 1 &amp; 4, 2 &amp; 5, 3 &amp; 6 on the 6-player board.</li>
+          <li>Pick <b>Partners</b> under Game mode (4 or 6 players, on the 6- or 4-player board: the new 5-player and 3-player boards have no "across"). Partners sit <b>opposite</b> each other: seats 1 &amp; 3 vs 2 &amp; 4 on the 4-player board; 1 &amp; 4, 2 &amp; 5, 3 &amp; 6 on the 6-player board.</li>
           <li>A team wins together when <b>both</b> homes are full (all 8 marbles).</li>
           <li>Once all 4 of your marbles are locked in home, your rolls move your <b>partner's</b> marbles.</li>
           <li>Even before that, any roll that gives your own marbles <b>no legal move</b> moves your partner's marbles instead, if they have one. Forced moves still auto-play.</li>
@@ -761,7 +771,7 @@ table.pf-rec td,table.pf-rec th{text-align:left}table.pf-rec td:nth-child(n+4),t
         <div class="rdiag-slot" data-diag="backShortcut"></div>
       </section>
     </div>
-    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). House rules can be switched off on the setup screen. <b>Turn timer:</b> human players have 30 seconds (change it or turn it off on the setup screen) to roll and to move, then the game plays for them. <b>Bot speed</b> (under the die) only changes how fast bots play. <b>Chance to win</b> (the pill next to each base on the board) comes from playing the rest of the game out 300 times with medium-strength bots after every move. <b>Move review:</b> whenever a human player has a real choice, each option is played out hundreds of times on the same dice and compared with the best one. A move that gives up under 3 points of chance to win is <b>Good</b>, 3 to 10 is a <b>Misstep</b>, and 10 or more is a <b>Blunder</b>. Close calls get extra playouts, and moves are graded on the cautious end of the estimate, so a move is only flagged when it clearly cost something. Accuracy is the share of Good moves. The end-of-game review lists every misstep and blunder with the better play and what you missed (a kill, a re-roll corner, the back-past-start shortcut, getting home, a marble left in danger…). See <a href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">what's new</a> for every change.</p>
+    <p class="fine">Boards: the 6-player and 4-player hex boards play the same; the 4-player track is shorter (56 holes instead of 84). The <b>5-player pentagon</b> (70 holes) and <b>3-player Y</b> (42 holes) use the same rules and are <b>new and untested</b>; the backward inside-corner hop and Partners aren't available on them. House rules can be switched off on the setup screen. <b>Turn timer:</b> human players have 30 seconds (change it or turn it off on the setup screen) to roll and to move, then the game plays for them. <b>Bot speed</b> (under the die) only changes how fast bots play. <b>Chance to win</b> (the pill next to each base on the board) comes from playing the rest of the game out 300 times with medium-strength bots after every move. <b>Move review:</b> whenever a human player has a real choice, each option is played out hundreds of times on the same dice and compared with the best one. A move that gives up under 3 points of chance to win is <b>Good</b>, 3 to 10 is a <b>Misstep</b>, and 10 or more is a <b>Blunder</b>. Close calls get extra playouts, and moves are graded on the cautious end of the estimate, so a move is only flagged when it clearly cost something. Accuracy is the share of Good moves. The end-of-game review lists every misstep and blunder with the better play and what you missed (a kill, a re-roll corner, the back-past-start shortcut, getting home, a marble left in danger…). See <a href="https://github.com/vmannusa/red-arse/blob/main/CHANGELOG.md" target="_blank" rel="noopener">what's new</a> for every change.</p>
     <div class="actions"><button class="btn primary" id="rulesClose" type="button">Got it</button></div>
   </div>
 </div>
@@ -866,14 +876,21 @@ function assignSectors(bd,colors){
 function applySeatColors(players){if(!B)return;const nat=B.nativeColors||B.sectorColors;B.sectorColors=nat.map((c,s)=>{const q=players.find(p=>p.s===s);return q?q.c:c;});}
 const mod = (a,n)=>((a%n)+n)%n;
 function rot(p,deg){const a=deg*Math.PI/180,c=Math.cos(a),s=Math.sin(a);return {x:p.x*c-p.y*s,y:p.x*s+p.y*c};}
-// Both boards use the same 14-hole sector: inner-corner star, an arm out, 5 holes along the edge
+// Every board uses the same 14-hole sector: inner-corner star, an arm out, 5 holes along the edge
 // (the middle one is the home entry, the right corner is the start hole), and an arm back in.
-// The 6-player hex rotates it 6 times by 60 deg; the 4-player hex 4 times by 90 deg.
+// The 6-player hex rotates it 6 times by 60 deg; the 4-player hex 4 times by 90 deg; the 5-player pentagon
+// 5 times by 72 deg and the 3-player Y 3 times by 120 deg (the sector only joins up with its neighbour
+// when the inner star sits at A = 2/tan(180/N) from the centre). fs = sides of the wooden frame, oy = how far
+// the view is shifted down so the frame sits in the middle of the square, cr = rounded-corner radius.
 // (The 4-player board keeps the internal id 'square' so saved setups and open rooms keep working.)
 const BOARDS={
-  hex:{kind:'hex',N:6,step:60,A:2*Math.sqrt(3),base:{x:4.15,y:-7.19},sectorColors:[0,1,2,3,4,5],label:'6-player hex',vb:11,ap:9.3},
-  square:{kind:'square',N:4,step:90,A:2,base:{x:5.05,y:-5.05},sectorColors:[2,5,3,4],label:'4-player hex',vb:10.55,ap:8.9},
+  hex:{kind:'hex',N:6,step:60,A:2*Math.sqrt(3),base:{x:4.15,y:-7.19},sectorColors:[0,1,2,3,4,5],label:'6-player hex',vb:11,ap:9.3,fs:6,note:'2 to 6 players'},
+  square:{kind:'square',N:4,step:90,A:2,base:{x:5.05,y:-5.05},sectorColors:[2,5,3,4],label:'4-player hex',vb:10.55,ap:8.9,fs:6,note:'2 to 4 players · faster games'},
+  pent:{kind:'pent',N:5,step:72,A:2/Math.tan(Math.PI/5),base:{x:7.5*Math.sin(Math.PI/5),y:-7.5*Math.cos(Math.PI/5)},sectorColors:[2,5,3,4,1],label:'5-player pentagon',vb:10.5,oy:.4,ap:8.6,fs:5,note:'2 to 5 players',isNew:true},
+  tri:{kind:'tri',N:3,step:120,A:2/Math.tan(Math.PI/3),base:{x:7*Math.sin(Math.PI/3),y:-7*Math.cos(Math.PI/3)},sectorColors:[2,3,5],label:'3-player Y',vb:9.25,oy:.5,ap:7.2,fs:3,cr:5,note:'2 to 3 players · shortest games',isNew:true},
 };
+const NEW_TAG='<em class="newtag">New - untested</em>';
+const boardBlurb=bd=>`<b>${bd.label}${bd.isNew?NEW_TAG:''}</b>`;
 let B=null;
 const BASE_OFF=[{x:0,y:-.62},{x:.62,y:0},{x:0,y:.62},{x:-.62,y:0}];
 const CENTER={x:0,y:0};
@@ -1031,9 +1048,9 @@ function legalMoves(S,pi,n){
     // Backward 4: track marbles, and home marbles that aren't locked in (they back out of home).
     if(n===4&&R.back&&(onTrack(d0)||inHome(d0)))backWalk(d0,4,[],false);
     // Backward inside-corner hop: from an inside corner, a 4 can hop exactly 4 inside corners
-    // counter-clockwise, and may pass your own home corner going that way. (On the 4-player board,
-    // 4 corners back is a full circle, so there is no such move.)
-    if(n===4&&R.back&&R.stars&&onTrack(d0)&&isStar(gOf(c,d0))&&(14*4)%B.L!==0){
+    // counter-clockwise, and may pass your own home corner going that way. (Only on the 6-player board: on the
+    // smaller boards 4 corners back wraps most or all of the way round, and just repeats a forward hop.)
+    if(n===4&&R.back&&R.stars&&onTrack(d0)&&isStar(gOf(c,d0))&&B.N>=6){
       const p=[];for(let h=1;h<=4;h++)p.push({k:'t',g:gOf(c,d0-14*h),hop:true});
       const nd0=d0-56,g=gOf(c,nd0);
       if(!ownAt(g)){let to=nd0;if(R.backShortcut&&to<0){to=mod(to,B.L);if(to===B.L-1)to=-1;}
@@ -1410,10 +1427,22 @@ function polyPath(v,rr){
     d+=(i?'L':'M')+f(p1.x)+' '+f(p1.y)+' Q'+f(p.x)+' '+f(p.y)+' '+f(p2.x)+' '+f(p2.y)+' ';}
   return d+'Z';
 }
-// board outline: a flat-top hexagon for both boards (6-player apothem 9.3, 4-player apothem 8.9)
+// board outline: a regular polygon with a flat top edge. The 6- and 4-player boards are hexagons (apothem 9.3 / 8.9),
+// the 5-player board a pentagon and the 3-player Y a triangle with big rounded corners (bd.cr) that hold the bases.
+function boardVerts(bd,inset=0){
+  const n=bd.fs||6,R=((bd.ap||9.3)-inset)/Math.cos(Math.PI/n),v=[];
+  for(let i=0;i<n;i++){const a=(-90+360/n*(i+1.5))*Math.PI/180;v.push({x:R*Math.cos(a),y:R*Math.sin(a)});}
+  return v;
+}
+function cornerGeo(bd,inset){ // rounded corner i: tangent points p1/p2, arc centre c and radius
+  const v=boardVerts(bd,inset),n=v.length,cr=bd.cr-inset,half=(Math.PI-2*Math.PI/n)/2,t=cr/Math.tan(half),k=cr/Math.sin(half);
+  return v.map((p,i)=>{const a=v[(i+n-1)%n],b=v[(i+1)%n],da=Math.hypot(a.x-p.x,a.y-p.y),db=Math.hypot(b.x-p.x,b.y-p.y),r=Math.hypot(p.x,p.y);
+    return {p1:{x:p.x+(a.x-p.x)*t/da,y:p.y+(a.y-p.y)*t/da},p2:{x:p.x+(b.x-p.x)*t/db,y:p.y+(b.y-p.y)*t/db},c:{x:p.x*(1-k/r),y:p.y*(1-k/r)},cr};});
+}
 function outline(bd,inset=0,rr=.55){
-  const R=((bd.ap||9.3)-inset)/Math.cos(Math.PI/6),v=[];for(let i=0;i<6;i++){const a=i*Math.PI/3;v.push({x:R*Math.cos(a),y:R*Math.sin(a)});}
-  return polyPath(v,rr);
+  if(!bd.cr)return polyPath(boardVerts(bd,inset),rr);
+  let d='';cornerGeo(bd,inset).forEach((q,i)=>{d+=(i?'L':'M')+f(q.p1.x)+' '+f(q.p1.y)+' A'+f(q.cr)+' '+f(q.cr)+' 0 0 1 '+f(q.p2.x)+' '+f(q.p2.y)+' ';});
+  return d+'Z';
 }
 function starPts(cx,cy,ro,ri){let s='';for(let i=0;i<10;i++){const r=i%2?ri:ro,a=-Math.PI/2+i*Math.PI/5;s+=f(cx+r*Math.cos(a))+','+f(cy+r*Math.sin(a))+' ';}return s;}
 function defsCommon(svg,prefix,bd){
@@ -1465,8 +1494,8 @@ const BAT='M0 .12 C.06 .02 .1 -.02 .14 0 C.2 -.16 .34 -.22 .5 -.14 C.44 -.06 .44
 function bat(par,x,y,w,rot,fill,op,edge){el('path',{d:BAT,fill,opacity:op,stroke:edge||'none','stroke-width':edge?f(.05/w):0,transform:`translate(${f(x)} ${f(y)}) rotate(${rot}) scale(${f(w)})`},par);}
 // cobwebs stretched across the board's six points, under everything else
 function cobwebs(svg,prefix,bd){
-  const R=bd.ap/Math.cos(Math.PI/6),g=el('g',{'clip-path':`url(#${prefix}clip)`,fill:'none',stroke:'rgba(235,228,240,.3)','stroke-width':.028,'stroke-linecap':'round'},svg);
-  for(let i=0;i<6;i++){const a=i*Math.PI/3,vx=R*Math.cos(a),vy=R*Math.sin(a),inA=a+Math.PI,L=3.1;
+  const V=boardPoints(bd),g=el('g',{'clip-path':`url(#${prefix}clip)`,fill:'none',stroke:'rgba(235,228,240,.3)','stroke-width':.028,'stroke-linecap':'round'},svg);
+  for(let i=0;i<V.length;i++){const vx=V[i].x,vy=V[i].y,a=Math.atan2(vy,vx),inA=a+Math.PI,L=3.1;
     const sp=[-48,-24,0,24,48].map(dg=>{const t=inA+dg*Math.PI/180;return {c:Math.cos(t),s:Math.sin(t)};});
     sp.forEach(q=>el('line',{x1:f(vx),y1:f(vy),x2:f(vx+q.c*L),y2:f(vy+q.s*L)},g));
     [.55,1.05,1.6,2.15,2.7].forEach(d=>{let path='';
@@ -1481,7 +1510,7 @@ function cobwebs(svg,prefix,bd){
 }
 // moon, bats and a gravestone in the empty corners around the board
 function spookyCorners(svg,bd){
-  const v=bd.vb,g=el('g',{'pointer-events':'none'},svg),mx=-v+1.3,my=-v+1.25;
+  const v=bd.vb,g=el('g',{'pointer-events':'none',transform:`translate(0 ${bd.oy||0})`},svg),mx=-v+1.3,my=-v+1.25;
   el('circle',{cx:f(mx),cy:f(my),r:1.05,fill:'rgba(255,214,120,.12)'},g);
   const d=f(.78),cr=`M ${f(mx)} ${f(my-.78)} A ${d} ${d} 0 1 0 ${f(mx+.62)} ${f(my+.47)} A .7 .7 0 1 1 ${f(mx)} ${f(my-.78)} Z`;
   el('path',{d:cr,fill:'#F4E3B0'},g); // crescent moon
@@ -1532,20 +1561,41 @@ function teamBadge(par,cx,cy,C){
   el('circle',{cx,cy,r:1.32,fill:C,opacity:.95},par);
   el('circle',{cx,cy,r:1.2,fill:'none',stroke:'#FFFFFF','stroke-width':.09,opacity:.9},par);
 }
-function boardPoints(bd){const R=bd.ap/Math.cos(Math.PI/6);return [0,1,2,3,4,5].map(i=>({x:R*Math.cos(i*Math.PI/3),y:R*Math.sin(i*Math.PI/3)}));}
+// the frame's corner points (for the Y board: the tips of its rounded corners)
+function boardPoints(bd){
+  const v=boardVerts(bd);if(!bd.cr)return v;
+  const R=Math.hypot(v[0].x,v[0].y),ext=R-bd.cr*(1/Math.sin((Math.PI-2*Math.PI/v.length)/2)-1);
+  return v.map(p=>({x:p.x*ext/R,y:p.y*ext/R}));
+}
+// points spread evenly along the whole frame, round the corner arcs too (for the Y board's string lights)
+function frameWalk(bd,gap){
+  const pts=[];cornerGeo(bd,0).forEach(q=>{const a0=Math.atan2(q.p1.y-q.c.y,q.p1.x-q.c.x),sw=2*Math.PI/boardVerts(bd).length;
+    for(let j=0;j<=10;j++){const a=a0+sw*j/10;pts.push({x:q.c.x+q.cr*Math.cos(a),y:q.c.y+q.cr*Math.sin(a)});}});
+  pts.push(pts[0]);const cum=[0];for(let i=1;i<pts.length;i++)cum.push(cum[i-1]+Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y));
+  const tot=cum[cum.length-1],n=Math.round(tot/gap),out=[];let k=1;
+  for(let j=0;j<=n;j++){const s=tot*j/n;while(k<cum.length-1&&cum[k]<s)k++;const u=(s-cum[k-1])/((cum[k]-cum[k-1])||1);out.push({x:pts[k-1].x+(pts[k].x-pts[k-1].x)*u,y:pts[k-1].y+(pts[k].y-pts[k-1].y)*u});}
+  return out;
+}
 // string lights along the board edge
 function stringLights(svg,bd){
   const V=boardPoints(bd),g=el('g',{'pointer-events':'none'},svg),cols=['#FF4040','#3FD06A','#FFD24A','#4FA3FF','#FF8A2A'];let k=0;
-  for(let i=0;i<6;i++){const a=V[i],b=V[(i+1)%6],L=Math.hypot(b.x-a.x,b.y-a.y),n=Math.round(L/.9);
+  const bulb=(px,py,c)=>{el('circle',{cx:f(px),cy:f(py),r:.26,fill:c,opacity:.22},g);el('ellipse',{cx:f(px),cy:f(py),rx:.11,ry:.15,fill:c,transform:`rotate(${f(Math.atan2(py,px)*180/Math.PI+90)} ${f(px)} ${f(py)})`},g);};
+  if(bd.cr){ // Y board: one wire round the whole frame, corners included
+    const P=frameWalk(bd,.9),n=P.length-1;
+    let d=`M${f(P[0].x)} ${f(P[0].y)}`;for(let j=1;j<=n;j++){const a=P[j-1],b=P[j];d+=` Q${f((a.x+b.x)/2*1.012)} ${f((a.y+b.y)/2*1.012)} ${f(b.x)} ${f(b.y)}`;}
+    el('path',{d,fill:'none',stroke:'#1E2A1E','stroke-width':.05},g);
+    for(let j=0;j<n;j++)bulb((P[j].x+P[j+1].x)/2*1.016,(P[j].y+P[j+1].y)/2*1.016,cols[k++%cols.length]);
+    return;
+  }
+  for(let i=0;i<V.length;i++){const a=V[i],b=V[(i+1)%V.length],L=Math.hypot(b.x-a.x,b.y-a.y),n=Math.round(L/.9);
     let d=`M${f(a.x)} ${f(a.y)}`;for(let j=1;j<=n;j++){const t=j/n,px=a.x+(b.x-a.x)*t,py=a.y+(b.y-a.y)*t,mt=(j-.5)/n,mx=a.x+(b.x-a.x)*mt,my=a.y+(b.y-a.y)*mt;
       d+=` Q${f(mx*1.012)} ${f(my*1.012)} ${f(px)} ${f(py)}`;}
     el('path',{d,fill:'none',stroke:'#1E2A1E','stroke-width':.05},g);
-    for(let j=0;j<n;j++){const t=(j+.5)/n,px=(a.x+(b.x-a.x)*t)*1.016,py=(a.y+(b.y-a.y)*t)*1.016,c=cols[k++%cols.length];
-      el('circle',{cx:f(px),cy:f(py),r:.26,fill:c,opacity:.22},g);el('ellipse',{cx:f(px),cy:f(py),rx:.11,ry:.15,fill:c,transform:`rotate(${f(Math.atan2(py,px)*180/Math.PI+90)} ${f(px)} ${f(py)})`},g);}}
+    for(let j=0;j<n;j++){const t=(j+.5)/n;bulb((a.x+(b.x-a.x)*t)*1.016,(a.y+(b.y-a.y)*t)*1.016,cols[k++%cols.length]);}}
 }
-// snow along the top edge, holly on the six points
+// snow along the top edge, holly on the corners
 function christmasBoard(svg,prefix,bd){
-  const V=boardPoints(bd),g=el('g',{'clip-path':`url(#${prefix}clip)`},svg),y=-bd.ap,x0=V[4].x,x1=V[5].x;
+  const V=boardPoints(bd),g=el('g',{'clip-path':`url(#${prefix}clip)`},svg),y=-bd.ap,x0=V[V.length-2].x,x1=V[V.length-1].x;
   let d=`M${f(x0-1)} ${f(y-1)} L${f(x1+1)} ${f(y-1)} L${f(x1+1)} ${f(y)}`;const n=14;
   for(let j=n;j>=0;j--){const xx=x0+(x1-x0)*j/n,dy=.18+.12*Math.sin(j*1.7);d+=` Q${f(xx+(x1-x0)/n/2)} ${f(y+dy+.12)} ${f(xx)} ${f(y+.12)}`;}
   el('path',{d:d+' Z',fill:'#F7FAFF',opacity:.95},g);
@@ -1558,7 +1608,7 @@ function cougarBoard(svg,prefix,bd){
 }
 // art in the empty corners around the board
 function themeCorners(svg,bd,theme){
-  const v=bd.vb,g=el('g',{'pointer-events':'none'},svg);
+  const oy=bd.oy||0,v=bd.vb,g=el('g',{'pointer-events':'none',transform:`translate(0 ${oy})`},svg);
   if(theme==='christmas'){
     [[-v+1.2,-v+1.1,.55],[-v+3,-v+.7,.3],[v-1.3,-v+1.2,.5],[v-2.8,-v+.6,.32],[v-.7,-v+2.6,.28],[-v+.7,-v+2.8,.3],[-v+2.6,v-.6,.26],[v-3.6,v-.5,.24]].forEach(([x,y,r])=>snowflake(g,x,y,r,'#8DB6DE',.95));
     const tx=-v+1.25,ty=v-.35,tr=el('g',{transform:`translate(${f(tx)} ${f(ty)})`},g);
@@ -1578,15 +1628,18 @@ function themeCorners(svg,bd,theme){
     [-.3,-.15,0,.15,.3].forEach(x=>el('path',{d:`M${x} -.1 L${x} .1`,stroke:'#FFFFFF','stroke-width':.05},fb));
     el('path',{d:'M-.7 -.32 Q-.62 0 -.7 .32 M.7 -.32 Q.62 0 .7 .32',stroke:'#FFFFFF','stroke-width':.05,fill:'none'},fb);
     [[-v+.9,v-1.6,-20],[-v+1.7,v-.9,-35],[-v+2.8,v-.6,-55],[v-1,-v+3,170]].forEach(([x,y,r])=>paw(g,x,y,.55,r,'#C8102E',.85));
-    const hy=(bd.ap+v)/2+.05,ht=el('text',{x:0,y:f(hy),'font-family':'Archivo, Arial Black, sans-serif','font-weight':900,'font-size':1.02,fill:'#C8102E','text-anchor':'middle','dominant-baseline':'central','letter-spacing':.22,stroke:'#FFFFFF','stroke-width':.06,'paint-order':'stroke'},g);ht.textContent='HOUSTON';
+    const hy=(bd.fs||6)%2?-(bd.ap+.75)-oy:(bd.ap+v)/2+.05,ht=el('text',{x:0,y:f(hy),'font-family':'Archivo, Arial Black, sans-serif','font-weight':900,'font-size':1.02,fill:'#C8102E','text-anchor':'middle','dominant-baseline':'central','letter-spacing':.22,stroke:'#FFFFFF','stroke-width':.06,'paint-order':'stroke'},g);ht.textContent='HOUSTON';
   }
 }
 function drawLogo(svg,prefix,bd,hw,theme){
-  const small=bd.N===4,defs=svg.querySelector('defs');
+  if(bd.N===3){ // the Y board's centre is too tight for the full logo: just a ring round the centre hole
+    const ink=(TH[theme]||TH.classic).ink;el('circle',{r:.56,fill:'none',stroke:ink,'stroke-width':.05,opacity:.75},el('g',{'aria-hidden':'true'},svg));return;
+  }
+  const small=bd.N===4,defs=svg.querySelector('defs'),sc=bd.N===5?.76:1;
   const R=small?1.42:2.78,figH=small?1.0:2.15,figW=figH*ETCH_AR,feet=-.47;
   const tr=small?1.1:1.98,fs=small?.3:.56,ink=(TH[theme]||TH.classic).ink,font='Archivo, Arial Black, sans-serif';
   el('path',{id:prefix+'logoArc',d:`M ${-tr} 0 A ${tr} ${tr} 0 0 0 ${tr} 0`},defs);
-  const g=el('g',{'aria-hidden':'true'},svg);
+  const g=el('g',Object.assign({'aria-hidden':'true'},sc!==1?{transform:`scale(${sc})`}:{}),svg);
   el('circle',{r:R,fill:'none',stroke:ink,'stroke-width':small?.05:.07,opacity:.8},g);
   el('circle',{r:f(R-(small?.09:.14)),fill:'none',stroke:ink,'stroke-width':small?.025:.035,opacity:.7},g);
   el('image',{href:ETCH,x:f(-figW/2),y:f(feet-figH),width:f(figW),height:f(figH),preserveAspectRatio:'xMidYMax meet',opacity:.9,filter:`url(#${prefix}${(TH[theme]||{}).light?'redf':'cream'})`},g);
@@ -1597,7 +1650,7 @@ function drawLogo(svg,prefix,bd,hw,theme){
     const tp=el('textPath',{href:'#'+prefix+'logoArc',startOffset:'50%','text-anchor':'middle'},t);tp.textContent='RED ARSE';
   });
 }
-function setViewBox(svg,bd){const v=bd.vb;svg.setAttribute('viewBox',`${-v} ${-v} ${2*v} ${2*v}`);}
+function setViewBox(svg,bd){const v=bd.vb;svg.setAttribute('viewBox',`${-v} ${f(-v+(bd.oy||0))} ${2*v} ${2*v}`);}
 function buildBoard(svg,prefix,bd,opts={}){
   svg.innerHTML='';setViewBox(svg,bd);
   const theme=opts.theme||(prefix==='S'?curLook().theme:'classic'),hw=theme==='halloween',T=TH[theme]||TH.classic;
@@ -1816,9 +1869,11 @@ function fitSetupToBoard(st){
   const al=allowedColors(st);
   st.players.forEach(p=>{if(!al.includes(p.c)){p.prevC=p.c;const nc=colorOrder(st.board).find(c=>al.includes(c)&&!st.players.some(q=>q.c===c));const wasBot=p.type!=='human'&&p.name===botName(p.c);p.c=nc;if(wasBot)p.name=botName(nc);}});
 }
-// going back to the 6-player board gives players back the colors they had before the 4-player board swapped them
+// going back to a board that has their old color gives players back the colors a smaller board swapped away
 function restoreColors(st){
-  st.players.forEach(p=>{if(typeof p.prevC==='number'&&!st.players.some(q=>q!==p&&q.c===p.prevC)){const wasBot=p.type!=='human'&&p.name===botName(p.c);p.c=p.prevC;if(wasBot)p.name=botName(p.c);}delete p.prevC;});
+  const al=allowedColors(st);
+  st.players.forEach(p=>{if(typeof p.prevC!=='number')return;
+    if(al.includes(p.prevC)){if(!st.players.some(q=>q!==p&&q.c===p.prevC)){const wasBot=p.type!=='human'&&p.name===botName(p.c);p.c=p.prevC;if(wasBot)p.name=botName(p.c);}delete p.prevC;}});
 }
 function renderBoardPick(){
   const box=$('boardPick');box.innerHTML='';
@@ -1827,9 +1882,9 @@ function renderBoardPick(){
     btn.setAttribute('aria-pressed',setup.board===bd.kind);
     const tooMany=setup.players.length>bd.sectorColors.length;btn.disabled=tooMany;
     const sv=document.createElementNS(NS,'svg');sv.setAttribute('aria-hidden','true');buildBoard(sv,'P'+bd.kind,makeBoard(bd.kind),{mini:true,theme:setup.theme});
-    const tx=document.createElement('span');tx.innerHTML=`<b>${bd.label}</b><small>${tooMany?'Remove players to use this board':bd.N===6?'2 to 6 players':'2 to 4 players · faster games'}</small>`;
+    const tx=document.createElement('span');tx.innerHTML=`${boardBlurb(bd)}<small>${tooMany?'Remove players to use this board':bd.note}</small>`;
     btn.append(sv,tx);
-    btn.onclick=()=>{if(tooMany)return;setup.board=bd.kind;if(bd.kind==='hex')restoreColors(setup);fitSetupToBoard(setup);saveSetup();renderLobby();};
+    btn.onclick=()=>{if(tooMany)return;setup.board=bd.kind;restoreColors(setup);fitSetupToBoard(setup);saveSetup();renderLobby();};
     box.appendChild(btn);
   });
 }
@@ -1842,12 +1897,13 @@ function teamLayout(board,players){
 }
 function teamTag(row,lay,i,players){if(!lay)return;const t=lay[i],tg=document.createElement('span');tg.className='team-tag';tg.style.background=TEAM_COLS[t.team%3];
   tg.textContent=`Team ${t.team+1} · with ${players[t.mate].name||COLORS[players[t.mate].c].name}`;row.appendChild(tg);}
-const partnersOK=n=>n===4||n===6;
+const partnersOK=(n,kind)=>(n===4||n===6)&&(!kind||!BOARDS[kind]||BOARDS[kind].N%2===0);
+const partnersMsg=(n,kind)=>BOARDS[kind]&&BOARDS[kind].N%2?'Partners needs the 4- or 6-player board: teammates have to sit across from each other.':`Partners needs 4 or 6 players (you have ${n}).`;
 function renderMode(){
   const on=!!setup.rules.partners,n=setup.players.length;$('setMode').value=on?'partners':'ffa';$('partnersRules').hidden=!on;
-  const note=$('modeNote');note.hidden=!on;note.classList.toggle('err',on&&!partnersOK(n));
-  note.textContent=!on?'':partnersOK(n)?'Partners: teammates sit across the board from each other (team tags on the players below).':`Partners needs 4 or 6 players (you have ${n}).`;
-  $('startBtn').disabled=$('startBtnTop').disabled=on&&!partnersOK(n);
+  const note=$('modeNote');note.hidden=!on;note.classList.toggle('err',on&&!partnersOK(n,setup.board));
+  note.textContent=!on?'':partnersOK(n,setup.board)?'Partners: teammates sit across the board from each other (team tags on the players below).':partnersMsg(n,setup.board);
+  $('startBtn').disabled=$('startBtnTop').disabled=on&&!partnersOK(n,setup.board);
 }
 function renderLobby(){
   applyThemeUI(setup.theme);renderBoardPick();
@@ -1873,7 +1929,7 @@ function renderLobby(){
     rm.addEventListener('click',()=>{setup.players.splice(i,1);saveSetup();renderLobby();});row.appendChild(rm);
     box.appendChild(row);
   });
-  if(setup.rules.partners&&partnersOK(setup.players.length)){const lay=teamLayout(setup.board,setup.players);[...box.children].forEach((row,i)=>teamTag(row,lay,i,setup.players));}
+  if(setup.rules.partners&&partnersOK(setup.players.length,setup.board)){const lay=teamLayout(setup.board,setup.players);[...box.children].forEach((row,i)=>teamTag(row,lay,i,setup.players));}
   renderMode();
   const mx=maxPlayers();
   $('slotCount').textContent=setup.players.length+' of '+mx;
@@ -1969,7 +2025,7 @@ function newGameState(){
 }
 function resetHeader(){$('btnRestart').hidden=false;$('roomChip').hidden=true;$('btnLobby').querySelector('span').textContent='Players';$('turnTimer').textContent='';$('backBtn').hidden=true;}
 function startGame(){
-  if(setup.rules.partners&&!partnersOK(setup.players.length)){renderMode();$('modeNote').scrollIntoView({block:'center'});return;}
+  if(setup.rules.partners&&!partnersOK(setup.players.length,setup.board)){renderMode();$('modeNote').scrollIntoView({block:'center'});return;}
   safeSet('ra-played','1');RULES_OPEN=false;saveSetup();G=newGameState();applyThemeUI(G.look.theme);resetCoach(G.players.length);resetHeader();$('room').hidden=true;
   $('lobby').hidden=true;$('game').hidden=false;$('tools').hidden=false;$('winModal').hidden=true;
   buildBoard($('boardStatic'),'S',B);
@@ -2924,7 +2980,7 @@ function renderEmoteBar(){
 function emotePop(pi,id){
   const x=EMOTES.find(e=>e.id===id),wrap=$('boardWrap');if(!x||!G||!G.players[pi]||!wrap||!B)return;
   const P=G.players[pi],bp=B.BASEPOS[P.s],cx=bp.reduce((t,p)=>t+p.x,0)/bp.length,cy=bp.reduce((t,p)=>t+p.y,0)/bp.length,v=B.vb;
-  const d=document.createElement('div');d.className='emote-pop';d.style.left=(100*(cx+v)/(2*v)).toFixed(2)+'%';d.style.top=(100*(cy+v)/(2*v)).toFixed(2)+'%';
+  const d=document.createElement('div');d.className='emote-pop';d.style.left=(100*(cx+v)/(2*v)).toFixed(2)+'%';d.style.top=(100*(cy+v-(B.oy||0))/(2*v)).toFixed(2)+'%';
   d.innerHTML=`<span style="position:relative;display:inline-block">${x.e}${x.badge?`<span class="oof">${x.badge}</span>`:''}</span><span class="who">${esc(P.name)}</span>`;
   wrap.appendChild(d);setTimeout(()=>d.remove(),1800);
   tone(520,.06,'sine',.07,0,900);tone(1320,.08,'sine',.03,.05);
@@ -3251,7 +3307,7 @@ function renderRoom(){
     const on=L.board===bd.kind,tooMany=L.seats.length>bd.sectorColors.length;
     const btn=document.createElement('button');btn.type='button';btn.className='bp'+(on?' on':'');btn.id='rboard-'+bd.kind;btn.disabled=!host||tooMany;btn.setAttribute('aria-pressed',on);
     const sv=document.createElementNS(NS,'svg');sv.setAttribute('aria-hidden','true');buildBoard(sv,'R'+bd.kind,makeBoard(bd.kind),{mini:true});
-    const tx=document.createElement('span');tx.innerHTML=`<b>${bd.label}</b><small>${tooMany?'Too many seats for this board':host?(bd.N===6?'2 to 6 players':'2 to 4 players'):on?'Picked by the host':''}</small>`;
+    const tx=document.createElement('span');tx.innerHTML=`${boardBlurb(bd)}<small>${tooMany?'Too many seats for this board':host?bd.note.replace(' · faster games','').replace(' · shortest games',''):on?'Picked by the host':''}</small>`;
     btn.append(sv,tx);btn.onclick=()=>lobbyEdit(L2=>{L2.board=bd.kind;fitSetupToBoard({board:bd.kind,players:L2.seats});});
     bp.appendChild(btn);
   });
@@ -3281,7 +3337,7 @@ function renderRoom(){
     row.appendChild(rm);box.appendChild(row);
   });
   const rp=!!(L.rules&&L.rules.partners);$('roomMode').value=rp?'partners':'ffa';$('roomMode').disabled=!host;
-  if(rp&&partnersOK(L.seats.length)){const lay=teamLayout(L.board,L.seats);[...box.children].forEach((row,i)=>teamTag(row,lay,i,L.seats));}
+  if(rp&&partnersOK(L.seats.length,L.board)){const lay=teamLayout(L.board,L.seats);[...box.children].forEach((row,i)=>teamTag(row,lay,i,L.seats));}
   const mx=al.length;
   $('roomCount').textContent=L.seats.length+' of '+mx;
   $('roomAddBot').hidden=!host;$('roomAddBot').disabled=L.seats.length>=mx;
@@ -3302,7 +3358,7 @@ async function startOnlineGame(){
   if(!ON.isHost||!ON.lobby)return;safeSet('ra-played','1');
   const L=ON.lobby,bd=makeBoard(L.board);
   if(L.seats.length<2){setRoomNote('Add at least one more player or bot.',true);return;}
-  if(L.rules&&L.rules.partners&&!partnersOK(L.seats.length)){setRoomNote('Partners needs 4 or 6 players. Add or remove a seat, or switch to Free-for-All.',true);return;}
+  if(L.rules&&L.rules.partners&&!partnersOK(L.seats.length,L.board)){setRoomNote(partnersMsg(L.seats.length,L.board).replace(/ \(you have \d+\)\.$/,'.')+' Change the board or seats, or switch to Free-for-All.',true);return;}
   const seatS=assignSectors(bd,L.seats.map(x=>x.c)),s0=seatS[0];
   const players=L.seats.map((x,i)=>({uid:x.uid||null,name:x.name,c:x.c,s:seatS[i],type:x.type,ball:(BALLS[x.ball]&&!(x.ball==='photo'&&x.type!=='human'))?x.ball:'glass',away:false,missed:0,marbles:[0,1,2,3].map(()=>({d:null}))}))
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
@@ -3518,11 +3574,11 @@ function renderWinSaved(){
 
 // ----- totals -----
 function careerOf(games){
-  const T={games:0,wins:0,kills:0,lost:0,rolls:0,sixes:0,ones:0,fours:0,corners:0,shortcuts:0,dist:0,secs:0,place:0,onG:0,onW:0,tmG:0,tmW:0,hex:[0,0],square:[0,0],bestKills:0,fastest:null,bestStreak:0,streak:0};
+  const T={games:0,wins:0,kills:0,lost:0,rolls:0,sixes:0,ones:0,fours:0,corners:0,shortcuts:0,dist:0,secs:0,place:0,onG:0,onW:0,tmG:0,tmW:0,hex:[0,0],square:[0,0],pent:[0,0],tri:[0,0],bestKills:0,fastest:null,bestStreak:0,streak:0};
   games.slice().sort((a,b)=>a.t-b.t).forEach(g=>{
     T.games++;T.wins+=g.w?1:0;T.place+=g.pl||0;['kills','lost','rolls','sixes','ones','fours','corners','shortcuts','dist'].forEach(k=>T[k]+=g[k]||0);T.secs+=g.dur||0;
     if(g.on){T.onG++;T.onW+=g.w?1:0;}if(g.tm){T.tmG++;T.tmW+=g.w?1:0;}
-    const bk=g.b==='square'?T.square:T.hex;bk[0]++;bk[1]+=g.w?1:0;
+    const bk=T[g.b]||T.hex;bk[0]++;bk[1]+=g.w?1:0;
     if((g.kills||0)>T.bestKills)T.bestKills=g.kills||0;
     if(g.w&&g.dur&&(T.fastest===null||g.dur<T.fastest))T.fastest=g.dur;
     if(g.w){T.streak++;if(T.streak>T.bestStreak)T.bestStreak=T.streak;}else T.streak=0;
@@ -3561,12 +3617,12 @@ function renderProfile(){
     const row=(l,v)=>`<div><dt>${l}</dt><dd>${v}</dd></div>`;
     h+=`<dl class="pf-dl">${row('Time played',fmtSecs(T.secs))}${row('Best win streak',T.bestStreak)}${row('Fastest win',T.fastest===null?'–':fmtSecs(T.fastest))}${row('Most kills in a game',T.bestKills)}
       ${row('Online games',`${T.onG} <small>(${T.onW} won)</small>`)}${row('Partners games',`${T.tmG} <small>(${T.tmW} won)</small>`)}
-      ${row('6-player board',`${T.hex[0]} <small>(${T.hex[1]} won)</small>`)}${row('4-player board',`${T.square[0]} <small>(${T.square[1]} won)</small>`)}
+      ${row('6-player board',`${T.hex[0]} <small>(${T.hex[1]} won)</small>`)}${row('4-player board',`${T.square[0]} <small>(${T.square[1]} won)</small>`)}${T.pent[0]?row('5-player board',`${T.pent[0]} <small>(${T.pent[1]} won)</small>`):''}${T.tri[0]?row('3-player board',`${T.tri[0]} <small>(${T.tri[1]} won)</small>`):''}
       ${row('Rolls · 6s · 1s',`${T.rolls} · ${T.sixes} · ${T.ones}`)}${row('Corners · shortcuts',`${T.corners} · ${T.shortcuts}`)}</dl>`;
     const rec=games.slice().sort((a,b)=>b.t-a.t).slice(0,10);
     h+=`<h3 class="pf-h">Recent games</h3><div class="table-scroll"><table class="stats pf-rec"><thead><tr><th>Date</th><th>Result</th><th>Game</th><th>Kills</th><th>Time</th></tr></thead><tbody>`+
       rec.map(g=>{const d=new Date(g.t),res=g.w?'<b class="pf-win">Won</b>':`${ordinal(g.pl||g.n)} of ${g.n}`;
-        const tag=[g.b==='square'?'4-player':'6-player',g.on?'online':'',g.tm?'partners':''].filter(Boolean).join(' · ');
+        const tag=[({square:'4-player',pent:'5-player',tri:'3-player'})[g.b]||'6-player',g.on?'online':'',g.tm?'partners':''].filter(Boolean).join(' · ');
         return `<tr><th><span class="dot" style="background:${COLORS[g.c]?COLORS[g.c].hex:'#888'}"></span>${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}</th><td>${res}</td><td>${tag}</td><td>${g.kills||0}</td><td>${fmtSecs(g.dur||0)}</td></tr>`;}).join('')+`</tbody></table></div>`;
   }
   h+=`<p class="fine">${u?'':'Stats on this device are only visible here until you sign in. '}On a shared device, stats go to the human named like your Google first name, or the first human in the player list. Online, they go to your own seat.</p>`;
