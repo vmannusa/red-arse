@@ -379,6 +379,21 @@ table.stats td.hm b.on{background:var(--muted);border-color:var(--muted)}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
 .set-row{display:flex;flex-wrap:wrap;gap:12px 24px}
+#photoModal{z-index:30}
+.ph-stage{display:flex;justify-content:center;margin:12px 0 6px}
+#phCv{width:240px;max-width:100%;height:auto;aspect-ratio:1;border-radius:14px;background:#2a2f2b;touch-action:none;cursor:grab}
+#phCv:active{cursor:grabbing}
+.ph-zoom input{padding:0}
+.pf-photo{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 12px;font-size:13px}
+.pf-photo .pf-phimg,.pf-photo .pf-phnone{flex:none;width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--line)}
+.pf-photo .pf-phnone{display:grid;place-items:center;font-size:11px;color:var(--muted);text-align:center;line-height:1.1}
+.pf-photo p{margin:2px 0 8px}
+.pf-photo .pf-chk{display:flex;gap:8px;align-items:flex-start;margin-top:8px;cursor:pointer}
+.pf-photo .pf-chk input{margin-top:3px}
+.set-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 14px;align-items:end}
+.set-grid .fld.inline{flex-direction:column;align-items:stretch;gap:5px}
+.set-grid .fld.inline select{width:100%;text-overflow:ellipsis;font-size:15px;padding:0 8px}
+@media(max-width:300px){.set-grid{grid-template-columns:1fr}}
 .linkbtn{background:none;border:0;padding:0;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline}
 .win-saved{margin:12px 0 0;text-align:center}
 .hide-sm{display:inline}
@@ -551,13 +566,11 @@ table.pf-rec td,table.pf-rec th{text-align:left}table.pf-rec td:nth-child(n+4),t
       </section>
       <section class="card">
         <h2 class="sec-title"><span>Game settings</span><button class="btn xs ghost" id="resetSetup" type="button" title="Forget the saved setup and go back to the defaults">Reset defaults</button></h2>
-        <div class="set-row">
-          <label class="fld inline"><span>Turn timer (human players)</span>
+        <div class="set-grid">
+          <label class="fld inline"><span>Turn timer</span>
             <select id="setTimer"><option value="0">Off</option><option value="15">15 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option></select></label>
           <label class="fld inline"><span>Bot speed</span>
             <select id="setSpeed"><option value="normal">Normal</option><option value="fast">Fast</option><option value="turbo">Turbo</option></select></label>
-        </div>
-        <div class="set-row">
           <label class="fld inline"><span>Board theme</span><select id="setTheme"></select></label>
           <label class="fld inline"><span>Game mode</span><select id="setMode"><option value="ffa">Free-for-All</option><option value="partners">Partners</option></select></label>
         </div>
@@ -600,10 +613,12 @@ table.pf-rec td,table.pf-rec th{text-align:left}table.pf-rec td:nth-child(n+4),t
         <div class="slots" id="roomSeats"></div>
         <div class="add-row">
           <button class="btn" id="roomAddBot" type="button">+ Add bot</button>
+        </div>
+        <div class="set-grid" style="margin-top:12px">
           <label class="fld inline"><span>Turn timer</span>
             <select id="roomTimer"><option value="20">20 seconds</option><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option></select></label>
-          <label class="fld inline"><span>Board theme</span><select id="roomTheme"></select></label>
           <label class="fld inline"><span>Game mode</span><select id="roomMode"><option value="ffa">Free-for-All</option><option value="partners">Partners</option></select></label>
+          <label class="fld inline" style="grid-column:1/-1"><span>Board theme</span><select id="roomTheme"></select></label>
         </div>
         <p class="fine">If the timer runs out, that turn is auto-played. Miss two turns in a row and you're auto-played until you tap "I'm back". The game uses the host's rule settings.</p>
       </section>
@@ -794,6 +809,17 @@ table.pf-rec td,table.pf-rec th{text-align:left}table.pf-rec td:nth-child(n+4),t
     <h2 id="boardTitle">Leaderboard</h2>
     <div id="boardBody"></div>
     <div class="actions"><button class="btn primary" id="boardClose" type="button">Close</button></div>
+  </div>
+</div>
+<div class="modal" id="photoModal" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="phTitle">
+    <h2 id="phTitle">Marble photo</h2>
+    <label class="fld"><span>Pick a picture</span><input id="phFile" type="file" accept="image/*"></label>
+    <div class="ph-stage"><canvas id="phCv" width="240" height="240" aria-label="Photo preview. Drag to move it."></canvas></div>
+    <label class="fld ph-zoom"><span>Zoom</span><input id="phZoom" type="range" min="100" max="400" value="100"></label>
+    <p class="fine">Drag the picture into place inside the circle. It's shrunk to a tiny image and kept on this device. Players in your online room see it on your marbles; they can hide photos in their own Profile.</p>
+    <p class="fine pf-msg" id="phMsg" aria-live="polite"></p>
+    <div class="actions"><button class="btn" id="phCancel" type="button">Cancel</button><button class="btn primary" id="phSave" type="button" disabled>Use this photo</button></div>
   </div>
 </div>
 <div class="modal" id="profileModal" hidden>
@@ -1313,12 +1339,29 @@ const TH={
   christmas:{fill:'#173F25',rim:'rgba(255,255,255,.8)',candy:true,hole:'rgba(255,226,170,.38)',label:'#FFF3DC',ink:'#E9C46A',deco:.86,glow:'rgba(255,210,120,.3)',
     tex:{seed:1225,base:'#1B4A2C',dark:'6,26,12',mid:'40,96,56',lite:'150,200,140',glow:'255,220,150',center:.12,edge:.38}}
 };
-const BALLS={glass:'Glass',golf:'Golf',basket:'Basketball',tennis:'Tennis',baseball:'Baseball',pumpkin:'Pumpkin',ornament:'Ornament',paw:'Cougar paw',bund:'BUND'};
+const BALLS={glass:'Glass',golf:'Golf',basket:'Basketball',tennis:'Tennis',baseball:'Baseball',pumpkin:'Pumpkin',ornament:'Ornament',paw:'Cougar paw',bund:'BUND',photo:'My photo'};
 // picking a board theme sets everyone to its marble; players can still change their own afterwards
 const THEME_BALL={classic:'glass',halloween:'pumpkin',coogs:'paw',christmas:'ornament'};
 const themeBall=t=>THEME_BALL[t]||'glass';
-function ballSelect(id,val,onch,disabled){const bs=document.createElement('select');bs.className='bl';bs.id=id;bs.setAttribute('aria-label','Marble');bs.disabled=!!disabled;
-  Object.entries(BALLS).forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;o.selected=v===(val||'glass');bs.appendChild(o);});bs.onchange=()=>onch(bs.value);return bs;}
+function ballSelect(id,val,onch,disabled,noPhoto){const bs=document.createElement('select');bs.className='bl';bs.id=id;bs.setAttribute('aria-label','Marble');bs.disabled=!!disabled;
+  Object.entries(BALLS).forEach(([v,l])=>{if(v==='photo'&&noPhoto&&val!=='photo')return;const o=document.createElement('option');o.value=v;o.textContent=l;o.selected=v===(val||'glass');bs.appendChild(o);});
+  bs.onchange=()=>{const v=bs.value;if(v==='photo'&&!myPhoto()){openPhotoEditor(ok=>{if(ok)onch('photo');else bs.value=val||'glass';});return;}onch(v);};return bs;}
+// ---- photo marble: one small picture per device (made in the photo editor), shared with an online room at rooms/<code>/photos/<uid>
+const PHOTO_KEY='ra-photo',PHOTOS_OFF_KEY='ra-photos-off';
+const validPhoto=v=>typeof v==='string'&&v.length<40000&&/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(v);
+const myPhoto=()=>{const v=safeGet(PHOTO_KEY)||'';return validPhoto(v)?v:'';};
+const photosOff=()=>safeGet(PHOTOS_OFF_KEY)==='1';
+// the picture for a player: on this device every photo marble is yours; in a room it comes from that player's own upload
+function photoSrc(who){
+  const mine=myPhoto();
+  if(ON.code){
+    if(!who||!who.uid)return '';
+    if(ON.net&&who.uid===ON.net.uid)return mine||(validPhoto(ON.photos[who.uid])?ON.photos[who.uid]:'');
+    if(photosOff())return '';
+    const v=ON.photos[who.uid];return validPhoto(v)?v:'';
+  }
+  return mine;
+}
 function curLook(){const l=(typeof G!=='undefined'&&G&&G.look)||{};return {theme:THEMES[l.theme]?l.theme:'classic',balls:BALLS[l.balls]?l.balls:'glass'};}
 // stained woods for the themed boards (Halloween: ebonised oak with ember grain; Cougar Red: scarlet-stained oak)
 function stainTexture(key){
@@ -1665,13 +1708,14 @@ function ruleDiagram(k){const u=k+'-'+(++RD_N); // each copy gets its own arrowh
     g+=arrow(`M${tx+5} ${ty-4} Q${sx+14} ${sy+2} ${cx-8} ${cy+2}`,'#E08A10','B');
     return open('Center hole')+g+txt(112,30,'In: a roll that passes a star','start',700)+txt(112,43,'with 1 step left ends in')+txt(112,56,'the center.')+txt(112,76,'Out: roll a 1 or 6 and go to','start',700)+txt(112,89,'any inside corner.')+'</svg>';
   }
-  if(k==='backShortcut'){
-    const xs=[18,40,62,84,106,128],y=88;let g='';xs.forEach(x=>g+=hole(x,y));
+  if(k==='backShortcut'){ // one side of your board, as you see it: start at the left, the home column above the 3rd hole
+    const xs=[18,40,62,84,106],y=88;let g='';xs.forEach(x=>g+=hole(x,y));
     [0,1,2,3].forEach(j=>g+=`<circle cx="62" cy="${66-j*15}" r="5.5" fill="none" stroke="#C9A100" stroke-width="2"/>`);
-    g+=`<circle cx="106" cy="${y}" r="8.5" fill="none" stroke="#C9A100" stroke-width="2"/>`+marble(106,y);
-    g+=arrow(`M102 ${y+7} Q62 ${y+24} 21 ${y+7}`,'#E08A10','B');
-    g+=arrow(`M18 ${y-7} Q24 ${y-28} 56 ${y-18} L60 ${y-26}`);
-    return open('Back-past-start shortcut')+g+txt(70,14,'HOME','start',800)+txt(106,y-13,'start','middle')+txt(62,108,'back 4','middle',800)+txt(146,34,'Back 4 from your','start',700)+txt(146,47,'start, then turn')+txt(146,60,'into home next roll:')+txt(146,73,'skips almost a')+txt(146,86,'whole lap.')+'</svg>';
+    g+=`<circle cx="18" cy="${y}" r="8.5" fill="none" stroke="#C9A100" stroke-width="2"/>`+marble(18,y);
+    g+=`<circle cx="106" cy="${y}" r="6" fill="none" stroke="#E08A10" stroke-width="1.8" stroke-dasharray="3 2.5"/>`;
+    g+=arrow(`M22 ${y+7} Q62 ${y+24} 102 ${y+7}`,'#E08A10','B');
+    g+=arrow(`M106 ${y-8} Q98 ${y-30} 70 ${y-20}`);
+    return open('Back-past-start shortcut').replace('0 0 270 110','0 0 270 122')+g+txt(70,14,'HOME','start',800)+txt(18,y-14,'start','middle')+txt(62,119,'back 4','middle',800)+txt(146,34,'Back 4 from your','start',700)+txt(146,47,'start, past the home')+txt(146,60,'turn-off. Next, a 3')+txt(146,73,'or more turns you in:')+txt(146,86,'skips almost a lap.')+'</svg>';
   }
   if(k==='homeRaid'){
     const xs=[18,40,62,84,106],y=92;let g='';xs.forEach(x=>g+=hole(x,y));
@@ -1819,7 +1863,7 @@ function renderLobby(){
       if(other){other.c=p.c;syncBotName(other);} // the color was taken: the two seats swap
       p.c=nc;syncBotName(p);saveSetup();renderLobby();});
     row.appendChild(cs);
-    row.appendChild(ballSelect('pball-'+i,p.ball,v=>{p.ball=v;saveSetup();paintBall(sw,p.c,v);}));
+    row.appendChild(ballSelect('pball-'+i,p.ball,v=>{p.ball=v;saveSetup();paintBall(sw,p.c,v);},false,p.type!=='human'));
     const ts=document.createElement('select');ts.className='ty';ts.id='ptype-'+i;ts.setAttribute('aria-label','Player type');
     Object.entries(TYPE_LABEL).forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;o.selected=v===p.type;ts.appendChild(o);});
     ts.addEventListener('change',()=>{const was=p.type;p.type=ts.value;if(was==='human'&&p.type!=='human'&&/^(You|Player \d+)$/.test(p.name))p.name=botName(p.c);
@@ -1915,7 +1959,7 @@ function saveRecords(winnerPi){
 function newGameState(){
   const bd=setBoard(setup.board);fitSetupToBoard(setup);
   const secs=assignSectors(bd,setup.players.map(p=>p.c)),s0=secs[0];
-  const players=setup.players.map((p,i)=>({si:i,name:(p.name||'').trim()||COLORS[p.c].name,c:p.c,s:secs[i],type:p.type,ball:BALLS[p.ball]?p.ball:'glass',marbles:[0,1,2,3].map(()=>({d:null}))}))
+  const players=setup.players.map((p,i)=>({si:i,name:(p.name||'').trim()||COLORS[p.c].name,c:p.c,s:secs[i],type:p.type,ball:(BALLS[p.ball]&&!(p.ball==='photo'&&p.type!=='human'))?p.ball:'glass',marbles:[0,1,2,3].map(()=>({d:null}))}))
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
   applySeatColors(players);
   const r=setup.rules;
@@ -2129,6 +2173,20 @@ function drawBall(g,P,pi,mi,style,pf='L'){
     el('ellipse',{cx:-.16,cy:-.2,rx:.08,ry:.04,fill:'#fff',opacity:.35,transform:'rotate(-30 -.16 -.2)'},g);
     return;
   }
+  if(style==='photo'){ // the player's own picture on glass, same build as BUND
+    const src=photoSrc(P);if(!src)return drawBall(g,P,pi,mi,'glass',pf);
+    el('ellipse',{cx:.1,cy:.17,rx:.5,ry:.42,fill:`url(#${pf}msh)`},g);
+    el('circle',{r:.42,fill:`url(#${pf}m${P.c})`},g);
+    const im=el('image',{x:-.42,y:-.42,width:.84,height:.84,preserveAspectRatio:'xMidYMid slice','clip-path':`url(#${pf}mclip)`},g);
+    im.setAttribute('href',src);im.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href',src);
+    el('circle',{r:.39,fill:'none',stroke:C.hex,'stroke-width':.06,opacity:.95},g);
+    el('circle',{r:.42,fill:`url(#${pf}mfr)`,opacity:.7},g);
+    el('circle',{r:.415,fill:'none',stroke:'rgba(0,0,0,.5)','stroke-width':.024},g);
+    el('ellipse',{cx:-.14,cy:-.24,rx:.2,ry:.09,fill:`url(#${pf}spec)`,transform:'rotate(-30 -.14 -.24)'},g);
+    el('circle',{cx:-.24,cy:-.2,r:.035,fill:'#FFFFFF',opacity:.85},g);
+    el('path',{d:'M .17 .29 A .34 .34 0 0 0 .33 .06',fill:'none',stroke:'rgba(255,255,255,.4)','stroke-width':.03,'stroke-linecap':'round'},g);
+    return;
+  }
   if(style==='bund'){ // BUND: a photo marble (cut-out head on the player's color, with a glass sheen over it)
     el('ellipse',{cx:.1,cy:.17,rx:.5,ry:.42,fill:`url(#${pf}msh)`},g);
     el('circle',{r:.42,fill:`url(#${pf}m${P.c})`},g);
@@ -2188,14 +2246,14 @@ function drawBall(g,P,pi,mi,style,pf='L'){
 }
 // the same ball art as a small stand-alone picture, for the turn panel, player lists and setup rows
 const BALL_URI={};
-function ballURI(c,ball){const k=c+'|'+ball;if(BALL_URI[k])return BALL_URI[k];
+function ballURI(c,ball,who){const ps=ball==='photo'?photoSrc(who):'',k=c+'|'+ball+(ps?'|'+ps.length+':'+ps.slice(-30):'');if(BALL_URI[k])return BALL_URI[k];
   const svg=document.createElementNS(NS,'svg');svg.setAttribute('xmlns',NS);svg.setAttribute('viewBox','-.56 -.6 1.14 1.16');
-  const defs=defsCommon(svg,'I',makeBoard('hex'));ballDefs(defs,'I');drawBall(el('g',null,svg),{c},0,0,ball,'I');
+  const defs=defsCommon(svg,'I',makeBoard('hex'));ballDefs(defs,'I');drawBall(el('g',null,svg),{c,uid:who&&who.uid},0,0,ball,'I');
   return BALL_URI[k]='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(svg)).replace(/'/g,'%27');}
-const plainBall=b=>!b||b==='glass'||!BALLS[b];
-function ballCss(c,ball){return plainBall(ball)?marbleBg(c):`url('${ballURI(c,ball)}') center/contain no-repeat`;}
-function paintBall(node,c,ball){node.style.background=ballCss(c,ball);node.classList.toggle('ballimg',!plainBall(ball));}
-const dotHtml=(c,ball)=>`<span class="dot${plainBall(ball)?'':' ballimg'}" style="background:${ballCss(c,ball)}"></span>`;
+const plainBall=(b,who)=>!b||b==='glass'||!BALLS[b]||(b==='photo'&&!photoSrc(who));
+function ballCss(c,ball,who){return plainBall(ball,who)?marbleBg(c):`url('${ballURI(c,ball,who)}') center/contain no-repeat`;}
+function paintBall(node,c,ball,who){node.style.background=ballCss(c,ball,who);node.classList.toggle('ballimg',!plainBall(ball,who));}
+const dotHtml=(c,ball,who)=>`<span class="dot${plainBall(ball,who)?'':' ballimg'}" style="background:${ballCss(c,ball,who)}"></span>`;
 function buildLive(){
   const svg=$('boardLive');svg.innerHTML='';setViewBox(svg,B);defsCommon(svg,'L',B);
   LAYERS.glow=el('g',null,svg);LAYERS.ghostLines=el('g',{'pointer-events':'none'},svg);LAYERS.marbles=el('g',null,svg);LAYERS.ghostDest=el('g',null,svg);LAYERS.targets=el('g',null,svg);LAYERS.names=el('g',{'pointer-events':'none'},svg);LAYERS.odds=el('g',{'pointer-events':'none'},svg);LAYERS.fx=el('g',{'pointer-events':'none'},svg);
@@ -2370,14 +2428,14 @@ $('boardLive').addEventListener('click',e=>{
 function renderPanel(){
   renderEmoteBar();
   if(!G)return;const P=cur(),C=COLORS[P.c];
-  paintBall($('whoChip'),P.c,P.ball);
+  paintBall($('whoChip'),P.c,P.ball,P);
   // the die takes the colour of whoever is rolling
   const dz=$('die');dz.style.setProperty('--die-bg',C.hex);dz.style.setProperty('--die-edge',C.dark);
   dz.style.setProperty('--die-pip',C.ink);dz.style.setProperty('--die-pip1',C.ink);
   $('whoName').textContent=P.name;
   const wt=$('whoTeam');
   if(isTeams(G)){const ti=teamOf(G,G.turn),mate=G.players[partnerOf(G,G.turn)];
-    wt.innerHTML=`<span class="ttag" style="background:${TEAM_COLS[ti%3]}">TEAM ${ti+1}</span><span>with ${dotHtml(mate.c,mate.ball)} ${esc(mate.name)}</span>`;wt.hidden=false;}
+    wt.innerHTML=`<span class="ttag" style="background:${TEAM_COLS[ti%3]}">TEAM ${ti+1}</span><span>with ${dotHtml(mate.c,mate.ball,mate)} ${esc(mate.name)}</span>`;wt.hidden=false;}
   else wt.hidden=true;
   $('whoSub').textContent=(isHuman(P)?'Human':TYPE_LABEL[P.type])+' · '+C.name+' · '+homeCount(P)+'/4 home';
   const rb=$('rollBtn');const canRoll=G.phase==='roll'&&canAct();
@@ -2401,7 +2459,7 @@ function statsTable(cols,withRecords){
   G.players.forEach((Q,qi)=>{const tr=document.createElement('tr');if(qi===G.turn&&G.winner===null)tr.className='active';
     const tag=!withRecords&&G.online?onlineTag(Q).replace(/^ · /,''):'';
     const tmx=isTeams(G)?`<span class="ttag" style="background:${TEAM_COLS[teamOf(G,qi)%3]}" title="Team ${teamOf(G,qi)+1}">T${teamOf(G,qi)+1}</span>`:'';
-    let h=`<th scope="row">${dotHtml(Q.c,Q.ball)}<span class="sn">${esc(Q.name)}</span>${tmx}${tag?`<span class="stag">${esc(tag)}</span>`:''}</th>`;
+    let h=`<th scope="row">${dotHtml(Q.c,Q.ball,Q)}<span class="sn">${esc(Q.name)}</span>${tmx}${tag?`<span class="stag">${esc(tag)}</span>`:''}</th>`;
     if(!withRecords){const hc=homeCount(Q);h+=`<td class="hm" title="${hc} of 4 home">${`<b class="on" style="background:${COLORS[Q.c].hex};border-color:${COLORS[Q.c].dark}"></b>`.repeat(hc)}${'<b></b>'.repeat(4-hc)}</td>`;}
     cols.forEach(c=>{const x=val(c,qi),v=x.v;h+=`<td${hi(c)&&v!==null&&v>0&&v===best[c.k]&&c.k!=='lost'&&c.k!=='passes'&&G.players.length>1?' class="top"':''}>${x.text}</td>`;});
     if(withRecords){const r=rec[Q.name];h+=`<td>${r?r.wins+'/'+r.games:'–'}</td>`;}
@@ -2424,7 +2482,7 @@ function rivalries(){
   const rows=[];G.stats.forEach((st,a)=>Object.entries(st.kv||{}).forEach(([b,n])=>{b=+b;if(G.players[b])rows.push({a,b,n,back:((G.stats[b].kv||{})[a])||0});}));
   if(!rows.length)return null;
   rows.sort((x,y)=>y.n-x.n||y.back-x.back);
-  const dot=q=>dotHtml(G.players[q].c,G.players[q].ball);
+  const dot=q=>dotHtml(G.players[q].c,G.players[q].ball,G.players[q]);
   const box=document.createElement('div');box.className='rivals';
   box.innerHTML='<h3 class="rv-title">Rivalries</h3><ul>'+rows.slice(0,6).map(r=>`<li>${dot(r.a)}<b>${esc(G.players[r.a].name)}</b> <span class="rv-arrow">aggravated</span> ${dot(r.b)}<b>${esc(G.players[r.b].name)}</b> <span class="rv-x">×${r.n}</span>${r.back?`<span class="rv-grudge">grudge match: ${r.back} back</span>`:''}</li>`).join('')+'</ul>';
   return box;
@@ -2770,7 +2828,7 @@ function renderReview(){
   humans.forEach(qi=>{
     const Q=G.players[qi],s=coachSummary(qi),card=document.createElement('div');card.className='rv-card';
     const vd=verdict(qi,s);
-    let html=`<div class="rv-head">${dotHtml(Q.c,Q.ball)}<b>${esc(Q.name)}</b>`+
+    let html=`<div class="rv-head">${dotHtml(Q.c,Q.ball,Q)}<b>${esc(Q.name)}</b>`+
       (s.acc!==null?`<span class="rv-acc">${s.acc}% accurate</span>`:'')+`</div>`;
     if(!s.graded&&!s.pending)html+=`<p class="rv-v">No real choices to grade this game. Every move was forced.</p>`;
     else{
@@ -3003,7 +3061,7 @@ function confetti(){
 const FB_VER='10.12.2';
 const ONLINE_LOCAL=/[?&]net=local\b/.test(location.search); // test mode: tabs in one browser share a fake database
 const ONLINE_AVAILABLE=ONLINE_LOCAL||!!(window.RED_ARSE_FIREBASE&&window.RED_ARSE_FIREBASE.apiKey);
-const ON={net:null,code:null,lobby:null,meta:null,presence:{},onlineSet:'',seq:0,gid:null,queue:[],processing:false,committing:false,timers:[],unsubs:[],stopPresence:null,presIv:null,isHost:false,hostUid:null,winShown:false};
+const ON={net:null,code:null,photos:{},photoSent:'',lobby:null,meta:null,presence:{},onlineSet:'',seq:0,gid:null,queue:[],processing:false,committing:false,timers:[],unsubs:[],stopPresence:null,presIv:null,isHost:false,hostUid:null,winShown:false};
 
 const SCRIPTS={};
 function loadScript(src){return SCRIPTS[src]||(SCRIPTS[src]=new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=()=>rej(new Error('Could not reach the game server. Check your connection.'));document.head.appendChild(sc);}).catch(e=>{delete SCRIPTS[src];throw e;}));}
@@ -3118,7 +3176,9 @@ async function enterRoom(code){
   try{history.replaceState(null,'',location.pathname+'?room='+code+(ONLINE_LOCAL?'&net=local':''));}catch(e){}
   ON.stopPresence=net.presence(`rooms/${code}/presence/${net.uid}`);
   ON.unsubs.push(net.on(`rooms/${code}/meta`,v=>{ON.meta=v;routeRoom();if(G&&G.online)drive();}));
+  ON.photos={};ON.photoSent='';
   ON.unsubs.push(net.on(`rooms/${code}/lobby`,v=>{ON.lobby=parseLobby(v);electHost();if(!$('room').hidden)renderRoom();}));
+  ON.unsubs.push(net.on(`rooms/${code}/photos`,v=>{ON.photos=(v&&typeof v==='object')?v:{};photosChanged();}));
   ON.unsubs.push(net.on(`rooms/${code}/presence`,v=>{ON.presence=v||{};presenceChanged();}));
   ON.unsubs.push(net.on(`rooms/${code}/game`,v=>{if(v&&typeof v.seq==='number'){ON.queue.push(v);processQueue();}}));
   resetChat();ON.unsubs.push(net.onLast(`rooms/${code}/chat`,60,chatIncoming));
@@ -3129,7 +3189,7 @@ async function enterRoom(code){
 async function leaveRoom(){
   const net=ON.net;
   if(ON.code&&ON.meta&&ON.meta.status==='lobby'){try{await lobbyEdit(L=>{const k=L.seats.findIndex(x=>x.uid===net.uid);if(k<0)return false;L.seats.splice(k,1);});}catch(e){}}
-  leaveListeners();ON.code=null;ON.isHost=false;
+  leaveListeners();ON.code=null;ON.isHost=false;ON.photos={};ON.photoSent='';
   try{history.replaceState(null,'',location.pathname+(ONLINE_LOCAL?'?net=local':''));}catch(e){}
   $('winModal').hidden=true;$('room').hidden=true;showLobby();setOnMsg('You left the room.');
 }
@@ -3164,7 +3224,25 @@ function showGameScreen(){
   $('btnRestart').hidden=true;$('roomChip').hidden=false;$('roomChip').textContent='Room '+ON.code;$('btnLobby').querySelector('span').textContent='Leave room';
 }
 function setRoomNote(t,err){const n=$('roomNote');n.textContent=t;n.classList.toggle('err',!!err);}
+// send my picture to the room once, when I'm using it
+function syncMyPhoto(){
+  if(!ON.code||!ON.net||!ON.lobby)return;
+  const me=ON.net.uid,st=(ON.lobby.seats||[]).find(x=>x.uid===me),ph=myPhoto();
+  if(!st||st.ball!=='photo'||!ph)return;
+  const key=ph.length+':'+ph.slice(-30);if(ON.photoSent===key)return;ON.photoSent=key;
+  ON.net.set(`rooms/${ON.code}/photos/${me}`,ph).catch(e=>{ON.photoSent='';console.warn('photo',e);});
+}
+// marbles are drawn once per game, so a changed photo means drawing them again
+function repaintMarbles(){
+  if(!G||$('game').hidden||!G.players.some(p=>p.ball==='photo'))return;
+  buildLive();renderLive();renderPanel();renderStats();
+}
+function photosChanged(){
+  if(!$('room').hidden)renderRoom();
+  repaintMarbles();
+}
 function renderRoom(){
+  syncMyPhoto();
   const L=ON.lobby;if(!L||!ON.net)return;const me=ON.net.uid,host=ON.isHost;applyThemeUI(L.theme);
   $('roomCode').textContent=ON.code;
   $('roomLink').value=location.origin+location.pathname+'?room='+ON.code+(ONLINE_LOCAL?'&net=local':'');
@@ -3180,7 +3258,7 @@ function renderRoom(){
   const box=$('roomSeats');box.innerHTML='';const al=allowedFor(L.board);
   L.seats.forEach((st,i)=>{
     const row=document.createElement('div');row.className='slot';const mine=st.uid===me,isBot=st.type!=='human';
-    const sw=document.createElement('span');sw.className='sw';paintBall(sw,st.c,st.ball);row.appendChild(sw);
+    const sw=document.createElement('span');sw.className='sw';paintBall(sw,st.c,st.ball,st);row.appendChild(sw);
     if(mine){const nm=document.createElement('input');nm.className='nm';nm.id='rname';nm.value=st.name;nm.maxLength=18;nm.setAttribute('aria-label','Your name');
       nm.addEventListener('change',()=>{const v=nm.value.trim();if(v){safeSet('ra-online-name',v);lobbyEdit(L2=>{const s2=L2.seats.find(x=>x.uid===me);if(!s2)return false;s2.name=v;});}});row.appendChild(nm);}
     else{const d=document.createElement('div');d.className='nm seat-name';
@@ -3191,7 +3269,7 @@ function renderRoom(){
       if(other){other.c=s2.c;syncBotName(other);}
       s2.c=nc;syncBotName(s2);});
     row.appendChild(cs);
-    row.appendChild(ballSelect('rball-'+i,st.ball,v=>lobbyEdit(L2=>{const s2=L2.seats[i];if(!s2||s2.uid!==st.uid||s2.c!==st.c)return false;s2.ball=v;}),!(mine||(host&&isBot))));
+    row.appendChild(ballSelect('rball-'+i,st.ball,v=>lobbyEdit(L2=>{const s2=L2.seats[i];if(!s2||s2.uid!==st.uid||s2.c!==st.c)return false;s2.ball=v;}),!(mine||(host&&isBot)),isBot));
     const ts=document.createElement('select');ts.className='ty';ts.id='rtype-'+i;ts.setAttribute('aria-label','Seat type');
     if(isBot){['easy','medium','hard'].forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=TYPE_LABEL[v];o.selected=v===st.type;ts.appendChild(o);});
       ts.disabled=!host;ts.onchange=()=>lobbyEdit(L2=>{const s2=L2.seats[i];if(!s2||s2.type==='human'||s2.c!==st.c)return false;s2.type=ts.value;});}
@@ -3226,7 +3304,7 @@ async function startOnlineGame(){
   if(L.seats.length<2){setRoomNote('Add at least one more player or bot.',true);return;}
   if(L.rules&&L.rules.partners&&!partnersOK(L.seats.length)){setRoomNote('Partners needs 4 or 6 players. Add or remove a seat, or switch to Free-for-All.',true);return;}
   const seatS=assignSectors(bd,L.seats.map(x=>x.c)),s0=seatS[0];
-  const players=L.seats.map((x,i)=>({uid:x.uid||null,name:x.name,c:x.c,s:seatS[i],type:x.type,ball:BALLS[x.ball]?x.ball:'glass',away:false,missed:0,marbles:[0,1,2,3].map(()=>({d:null}))}))
+  const players=L.seats.map((x,i)=>({uid:x.uid||null,name:x.name,c:x.c,s:seatS[i],type:x.type,ball:(BALLS[x.ball]&&!(x.ball==='photo'&&x.type!=='human'))?x.ball:'glass',away:false,missed:0,marbles:[0,1,2,3].map(()=>({d:null}))}))
     .sort((a,b)=>mod(a.s-s0,bd.N)-mod(b.s-s0,bd.N));
   const r=L.rules,secs=L.turnSecs||30;
   const ro=r.rollOff!==false?rollOff(players.map(p=>p.name)):null;
@@ -3470,6 +3548,10 @@ function renderProfile(){
   if(ONLINE_AVAILABLE){let md=lbMode();if(!u&&md==='name')md='alias';const opt=(v,t)=>`<label class="pf-lbo"><input type="radio" name="lbMode" value="${v}"${md===v?' checked':''}><span>${t}</span></label>`,kn=lbKnownUid();
     h+=`<fieldset class="pf-lb"><legend><b>Your name on the leaderboard</b></legend><p class="fine" style="margin:0 0 6px">Everyone who finishes a game is on the shared leaderboard with their all-time totals${u?'':', even without signing in'}. Pick how you appear.</p>`+
       opt('alias',`A made-up name${kn?`: <b>${esc(lbAlias(kn))}</b>`:' <small>(shown after your first finished game)</small>'}`)+(u?opt('name',`My name: <b>${esc(lbRealName())}</b> <small>(first name and last initial)</small>`):'')+opt('hide','Hide me from the leaderboard')+`</fieldset>`;}
+  {const ph=myPhoto();
+    h+=`<div class="pf-photo">${ph?`<img class="pf-phimg" src="${ph}" alt="Your marble photo">`:'<span class="pf-phnone">No photo</span>'}<div><b>Marble photo</b><p class="fine">Use your own picture on your marbles: pick <b>My photo</b> in the marble list next to your name when you set up a game.</p>`+
+      `<div class="pf-btns"><button class="btn xs" type="button" data-act="photo">${ph?'Change photo':'Choose a photo'}</button>${ph?'<button class="btn xs ghost" type="button" data-act="photoRm">Remove</button>':''}</div>`+
+      `<label class="pf-chk"><input type="checkbox" name="photosOff"${photosOff()?' checked':''}><span>Hide other players' photo marbles <small>(you see ordinary glass marbles instead)</small></span></label></div></div>`;}
   h+=`<p class="fine pf-msg${ACC.err?' err':''}" id="pfMsg" aria-live="polite">${esc(ACC.msg||'')}</p>`;
   if(!T.games){h+=`<p class="pf-empty">No finished games yet. Finish a game and it shows up here.</p>`;}
   else{
@@ -3496,9 +3578,9 @@ function openProfile(){ACC.msg='';ACC.err=false;renderProfile();$('profileModal'
 $('btnProfile').onclick=openProfile;
 $('profileClose').onclick=()=>{$('profileModal').hidden=true;};
 function acctClick(e){const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
-  if(a==='signin')signInGoogle();else if(a==='signout')signOutGoogle();else if(a==='sync')syncGames(true);else if(a==='open')openProfile();}
+  if(a==='signin')signInGoogle();else if(a==='signout')signOutGoogle();else if(a==='sync')syncGames(true);else if(a==='open')openProfile();else if(a==='photo')openPhotoEditor();else if(a==='photoRm')removeMyPhoto();}
 $('profileBody').addEventListener('click',acctClick);
-$('profileBody').addEventListener('change',e=>{if(e.target&&e.target.name==='lbMode')setLbMode(e.target.value);});$('winSaved').addEventListener('click',acctClick);
+$('profileBody').addEventListener('change',e=>{if(e.target&&e.target.name==='lbMode')setLbMode(e.target.value);if(e.target&&e.target.name==='photosOff'){safeSet(PHOTOS_OFF_KEY,e.target.checked?'1':'0');afterPhotoChange();}});$('winSaved').addEventListener('click',acctClick);
 
 // ----- Google sign-in (Firebase Auth) -----
 let FBL=null;
@@ -3699,6 +3781,62 @@ $('boardModal').addEventListener('click',e=>{
   const b=e.target.closest('[data-sort]');if(b){LB.sort=b.dataset.sort;renderBoard();return;}
   const a=e.target.closest('[data-act]');if(!a)return;
   if(a.dataset.act==='signin')signInGoogle();else if(a.dataset.act==='lbshow')setLbMode('alias');else if(a.dataset.act==='lbreload')loadBoard();});
+
+// ================= MARBLE PHOTO EDITOR =================
+// Pick a picture, drag and zoom it inside a circle, and it is saved as a 128px JPEG (about 5 KB) on this device.
+const PH={img:null,x:0,y:0,z:1,cb:null,drag:null,R:110,C:120};
+function phScale(){return Math.max(2*PH.R/PH.img.width,2*PH.R/PH.img.height)*PH.z;}
+function phClamp(){if(!PH.img)return;const s=phScale(),mx=Math.max(0,PH.img.width*s/2-PH.R),my=Math.max(0,PH.img.height*s/2-PH.R);PH.x=Math.max(-mx,Math.min(mx,PH.x));PH.y=Math.max(-my,Math.min(my,PH.y));}
+function phDraw(){
+  const cv=$('phCv'),x=cv.getContext('2d'),W=cv.width;x.clearRect(0,0,W,W);x.fillStyle='#2a2f2b';x.fillRect(0,0,W,W);
+  if(PH.img){const s=phScale(),w=PH.img.width*s,h=PH.img.height*s;x.drawImage(PH.img,PH.C+PH.x-w/2,PH.C+PH.y-h/2,w,h);}
+  x.save();x.fillStyle='rgba(10,15,12,.62)';x.beginPath();x.rect(0,0,W,W);x.arc(PH.C,PH.C,PH.R,0,Math.PI*2,true);x.fill('evenodd');x.restore();
+  x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=2;x.beginPath();x.arc(PH.C,PH.C,PH.R,0,Math.PI*2);x.stroke();
+  if(!PH.img){x.fillStyle='rgba(255,255,255,.75)';x.font='600 14px system-ui,sans-serif';x.textAlign='center';x.fillText('Choose a picture above',PH.C,PH.C+5);}
+}
+function openPhotoEditor(cb){
+  PH.cb=cb||null;PH.img=null;PH.x=PH.y=0;PH.z=1;$('phZoom').value=100;$('phSave').disabled=true;$('phMsg').textContent='';$('phMsg').classList.remove('err');$('phFile').value='';
+  phDraw();$('photoModal').hidden=false;try{$('phFile').focus();}catch(e){}
+}
+function closePhotoEditor(ok){$('photoModal').hidden=true;const cb=PH.cb;PH.cb=null;PH.img=null;if(cb)cb(!!ok);}
+$('phFile').onchange=()=>{
+  const f=$('phFile').files&&$('phFile').files[0];if(!f)return;
+  const url=URL.createObjectURL(f),im=new Image();
+  im.onload=()=>{URL.revokeObjectURL(url);PH.img=im;PH.x=PH.y=0;PH.z=1;$('phZoom').value=100;$('phSave').disabled=false;$('phMsg').textContent='';phDraw();};
+  im.onerror=()=>{URL.revokeObjectURL(url);$('phMsg').textContent="That file couldn't be read as a picture. Try a JPEG or PNG.";$('phMsg').classList.add('err');};
+  im.src=url;
+};
+$('phZoom').oninput=()=>{PH.z=$('phZoom').value/100;phClamp();phDraw();};
+(function(){const cv=$('phCv');
+  const pos=e=>{const r=cv.getBoundingClientRect(),k=cv.width/r.width;return [(e.clientX-r.left)*k,(e.clientY-r.top)*k];};
+  cv.addEventListener('pointerdown',e=>{if(!PH.img)return;PH.drag=pos(e);try{cv.setPointerCapture(e.pointerId);}catch(er){}});
+  cv.addEventListener('pointermove',e=>{if(!PH.drag)return;const p=pos(e);PH.x+=p[0]-PH.drag[0];PH.y+=p[1]-PH.drag[1];PH.drag=p;phClamp();phDraw();});
+  const end=()=>{PH.drag=null;};cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+})();
+$('phCancel').onclick=()=>closePhotoEditor(false);
+$('photoModal').addEventListener('click',e=>{if(e.target.id==='photoModal')closePhotoEditor(false);});
+$('phSave').onclick=()=>{
+  if(!PH.img)return;
+  const out=document.createElement('canvas');out.width=out.height=128;const x=out.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,128,128);x.save();x.scale(128/(2*PH.R),128/(2*PH.R));x.translate(-(PH.C-PH.R),-(PH.C-PH.R));
+  const s=phScale(),w=PH.img.width*s,h=PH.img.height*s;x.imageSmoothingQuality='high';x.drawImage(PH.img,PH.C+PH.x-w/2,PH.C+PH.y-h/2,w,h);x.restore();
+  let url='',q=.85;for(let i=0;i<4;i++){url=out.toDataURL('image/jpeg',q);if(url.length<30000)break;q-=.15;}
+  if(!validPhoto(url)){$('phMsg').textContent="Couldn't make a small enough picture from that one. Try another.";$('phMsg').classList.add('err');return;}
+  safeSet(PHOTO_KEY,url);closePhotoEditor(true);afterPhotoChange();
+};
+function removeMyPhoto(){
+  safeSet(PHOTO_KEY,'');
+  if(ON.code&&ON.net){ON.photoSent='';try{ON.net.remove(`rooms/${ON.code}/photos/${ON.net.uid}`);}catch(e){}}
+  afterPhotoChange();
+}
+// repaint everything that might show the picture
+function afterPhotoChange(){
+  try{syncMyPhoto();}catch(e){}
+  if(typeof renderLobby==='function'&&!$('lobby').hidden)renderLobby();
+  if(!$('room').hidden)renderRoom();
+  if(!$('profileModal').hidden)renderProfile();
+  repaintMarbles();
+}
 
 // ================= FEEDBACK (bug / idea notes) =================
 // Saved to Firebase at feedback/<id> with the player's anonymous sign-in (no account needed). The database rules
