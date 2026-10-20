@@ -7,7 +7,10 @@ Every rule can be switched on or off on the setup screen. Rules marked *(house r
 ## Boards
 - **6-player hex:** 6 sections, 84-hole track, 2–6 players.
 - **4-player hex:** 4 sections, 56-hole track, 2–4 players. Same rules, shorter race.
-- **Black and White** can be picked as player colors on either board. They take an open seat (the bottom seat first), and that seat's base, home ring, arrow and star are drawn in black or white for the game. Your die and marbles take your color.
+- **5-player pentagon** *(new, untested)*: 5 sections, 70-hole track, 2–5 players. Same rules, in between the 4- and 6-player boards. Yellow sits at the bottom, and the colors are Red, Blue, Yellow, Green and Purple.
+- **3-player Y** *(new, untested)*: 3 sections, 42-hole track, 2–3 players. Same rules and the shortest race: the sections are close together, so the center is tight and the home columns point at one small hole in the middle. Its colors are Red, Yellow and Blue.
+- The new boards are marked **New - untested** on the setup screen and in online rooms. The backward inside-corner hop and Partners mode aren't available on them (the 4-player board never had the hop either, and Partners needs teammates sitting across from each other).
+- **Black and White** can be picked as player colors on any board. They take an open seat (the bottom seat first), and that seat's base, home ring, arrow and star are drawn in black or white for the game. Your die and marbles take your color.
 
 ## Who goes first
 - Everyone rolls at the start; the highest roll goes first, and tied players roll again. Play then goes clockwise. (Switch off "Highest roll goes first" to let the first seat start.)
@@ -109,7 +112,7 @@ After every move the game plays the rest of the match out 300 times with medium-
 - **Rematch:** same players, colors and seats; the roll for first decides who starts. Online, the host starts it and anyone else can ask for one (it posts "Rematch?" in the chat).
 
 ## Partners mode
-- Choose **Game mode: Partners** under Game settings (or in an online room, the host picks it). It needs 4 or 6 players.
+- Choose **Game mode: Partners** under Game settings (or in an online room, the host picks it). It needs 4 or 6 players on the 6- or 4-player board.
 - Partners sit **opposite** each other: seats 1 & 3 vs 2 & 4 on the 4-player board; 1 & 4, 2 & 5 and 3 & 6 on the 6-player board. Team tags on the player list show who's with whom.
 - A team wins together when **both** homes are full (all 8 marbles). The winner screen celebrates both partners.
 - Once all 4 of your marbles are locked in home, your rolls move your **partner's** marbles.
@@ -136,10 +139,11 @@ After every move the game plays the rest of the match out 300 times with medium-
 - **Board theme** (setup screen under Game settings; in an online room the host picks it, so everyone sees the same board):
   - **Classic walnut.**
   - **Halloween:** black board with glowing orange grain and an orange rim, pumpkin bases in each player's color, cobwebs and spiders, bats in the logo, and a moon, bats and a gravestone around the board.
-  - **Cougar Red:** white board with scarlet lettering and trim, white-ringed bases, paw prints, HOUSTON along the bottom, a GO COOGS pennant and a football.
+  - **Cougar Red:** white board with scarlet lettering and trim, white-ringed bases, paw prints, HOUSTON along the bottom (along the top on the pentagon and Y boards), a GO COOGS pennant and a football.
   - **Christmas:** evergreen board with a candy-cane rim, string lights, snow along the top, a Christmas tree for each base, holly, snowflakes in the logo, and a little tree and snowflakes around the board.
   - Each theme has its own **sounds** for the dice, moves, kills, getting home, coming out and winning: bones and a ghostly wail for Halloween; drumline, whistles, crowd and a charge for Cougar Red; sleigh bells, chimes and Jingle Bells for Christmas.
 - **Marbles:** Glass, Golf, Basketball, Tennis, Baseball, Pumpkin, Ornament, Cougar paw or BUND (a photo marble) (the solid hand sign: index, middle and pinky up, thumb and ring finger touching), drawn in the player's color. Picking a theme sets everyone to its marble (Halloween: pumpkins, Cougar Red: Cougar paws, Christmas: ornaments, Classic: glass); after that each player can change their own next to their color (online, everyone picks their own and the host picks for bots). The turn panel, player list and review show each player's marble.
+- **Marble photo (My photo):** in **Profile**, tap **Choose a photo**, drag and zoom the picture inside the circle, and save. Then pick **My photo** in the marble list next to your name on the setup screen. Your marbles show the picture on glass with a ring in your color. The picture is shrunk to a tiny image and kept on this device; in an online room the other players see it on your marbles, and anyone can tick **Hide other players' photo marbles** in their own Profile. **Remove** in Profile deletes yours.
 
 ## On your phone
 - **Add to Home Screen** (setup screen, next to How to play) puts Red Arse on your home screen with its own icon, and it opens full screen like an app. On Android and desktop Chrome it installs straight from the button; on iPhone it shows the steps (Share, then Add to Home Screen), since iPhones only allow that from the Share menu.
