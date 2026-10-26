@@ -3151,7 +3151,7 @@ function trackEnd(){if(!G||G.winner===null)return;const W=G.players[G.winner];
 // It records script errors, failed leaderboard updates, Google sign-in attempts and every finished game (which board,
 // whether it reached the leaderboard), with the page version and device type. No names, chat or room codes.
 // Each page load writes at most 15 entries and never the same one twice.
-const BUILD='2026-10-25b';
+const BUILD='2026-10-25c';
 const DIAG={n:0,seen:new Set(),recent:[],lb:null};
 try{DIAG.lb=JSON.parse(safeGet('ra-lbstat')||'null');}catch(e){}
 function diagNote(k,m,w){DIAG.recent.push({t:Date.now(),k,m:String(m).slice(0,140),w:w||''});if(DIAG.recent.length>8)DIAG.recent.shift();}
@@ -3195,10 +3195,15 @@ async function checkUpdate(force){
   const now=Date.now();if(!force&&now-UPD.last<600000)return;UPD.last=now;
   try{const r=await fetch(location.pathname+'?_v='+now.toString(36),{cache:'no-store'});if(!r.ok)return;
     const m=(await r.text()).match(new RegExp("BUILD='([0-9a-z.\\-]+)'"));
-    if(m&&m[1]!==BUILD){UPD.shown=true;const b=$('updBar');if(b)b.hidden=false;remoteLog('update','old copy running: '+BUILD+' < '+m[1],{w:'banner'});}}catch(e){}
+    if(m&&m[1]!==BUILD){
+      remoteLog('update','old copy running: '+BUILD+' < '+m[1],{w:'banner'});
+      // On the menu screen (nothing in progress) just load the new version; once per version so it can't loop. Mid-game: ask.
+      let tried='';try{tried=sessionStorage.getItem('ra-autoupd')||'';}catch(e){}
+      if(!$('lobby').hidden&&!ON.code&&tried!==m[1]){try{sessionStorage.setItem('ra-autoupd',m[1]);}catch(e){}doReload();return;}
+      UPD.shown=true;const b=$('updBar');if(b)b.hidden=false;}}catch(e){}
 }
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate();});
-setInterval(()=>checkUpdate(),1800000);setTimeout(()=>checkUpdate(),20000);
+setInterval(()=>checkUpdate(),1800000);setTimeout(()=>checkUpdate(true),800);
 async function firebaseNet(cfg){
   const base=`https://www.gstatic.com/firebasejs/${FB_VER}/`;
   await fbLoad();
