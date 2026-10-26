@@ -3151,7 +3151,7 @@ function trackEnd(){if(!G||G.winner===null)return;const W=G.players[G.winner];
 // It records script errors, failed leaderboard updates, Google sign-in attempts and every finished game (which board,
 // whether it reached the leaderboard), with the page version and device type. No names, chat or room codes.
 // Each page load writes at most 15 entries and never the same one twice.
-const BUILD='2026-10-25a';
+const BUILD='2026-10-25b';
 const DIAG={n:0,seen:new Set(),recent:[],lb:null};
 try{DIAG.lb=JSON.parse(safeGet('ra-lbstat')||'null');}catch(e){}
 function diagNote(k,m,w){DIAG.recent.push({t:Date.now(),k,m:String(m).slice(0,140),w:w||''});if(DIAG.recent.length>8)DIAG.recent.shift();}
@@ -4038,6 +4038,7 @@ function start(data){
   }else showLobby();
   initOnlineCard();
   accountInit();
+  setTimeout(()=>{if(ONLINE_AVAILABLE&&!ACC.user&&careerOf(myGames()).games)pushBoard();},4000); // people who played before get listed just by opening the page (Google accounts do this when they sync)
   setTimeout(initAnalytics,1500);
 }
 window.claude?.hot?.snapshot?.(snapshot);
