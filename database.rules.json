@@ -57,6 +57,48 @@
         }
       }
     },
+    "logs": {
+      "$id": {
+        ".write": "auth != null && !data.exists()",
+        ".validate": "newData.hasChildren(['t', 'k', 'm'])",
+        "t": {
+          ".validate": "newData.isNumber()"
+        },
+        "k": {
+          ".validate": "newData.isString() && newData.val().length <= 12"
+        },
+        "m": {
+          ".validate": "newData.isString() && newData.val().length <= 400"
+        },
+        "w": {
+          ".validate": "newData.isString() && newData.val().length <= 60"
+        },
+        "x": {
+          ".validate": "newData.isString() && newData.val().length <= 600"
+        },
+        "v": {
+          ".validate": "newData.isString() && newData.val().length <= 16"
+        },
+        "ua": {
+          ".validate": "newData.isString() && newData.val().length <= 200"
+        },
+        "u": {
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "scr": {
+          ".validate": "newData.isString() && newData.val().length <= 20"
+        },
+        "sa": {
+          ".validate": "newData.isNumber()"
+        },
+        "a": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
     "leaderboard": {
       ".read": "auth != null",
       "$uid": {
